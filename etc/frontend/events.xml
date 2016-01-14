@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © 2015 Magento. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="checkout_onepage_controller_success_action">
+        <observer name="rejoiner_acr" instance="\Rejoiner\Acr\Observer\CheckoutOnepageControllerSuccessAction"/>
+    </event>
+
+    <event name="controller_action_predispatch">
+        <observer name="rejoiner_acr" instance="\Rejoiner\Acr\Observer\ControllerActionPredispatch"/>
+    </event>
+
+    <event name="sales_quote_remove_item">
+        <observer name="rejoiner_acr" instance="\Rejoiner\Acr\Observer\SalesQuoteRemoveItem"/>
+    </event>
+</config>

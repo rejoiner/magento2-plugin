@@ -1,0 +1,91 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="checkout" translate="label" type="text" sortOrder="305" showInDefault="1" showInWebsite="1" showInStore="1">
+            <tab>sales</tab>
+            <resource>Magento_Checkout::checkout</resource>
+            <group id="rejoiner_acr" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>eCommerce Email Marketing by Rejoiner</label>
+                <field id="enabled" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="site_id" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Rejoiner Site ID</label>
+                    <validate>required-entry</validate>
+                </field>
+
+                <field id="api_key" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Rejoiner API key</label>
+                    <validate>required-entry</validate>
+                </field>
+
+                <field id="api_secret" translate="label" type="text" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Rejoiner API secret</label>
+                    <validate>required-entry</validate>
+                </field>
+
+                <field id="domain" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Store Domain</label>
+                    <validate>required-entry</validate>
+                </field>
+
+
+                <field id="process_by_cron" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Scheduled Conversion API Calls</label>
+                    <comment>If disabled calls to the external API will be performed inline during order placement. Under specific circumstances could lead to slower page rendering.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+
+                </field>
+
+                <field id="track_numbers" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Track Phone Numbers</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="persist_forms" translate="label" type="select" sortOrder="35" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Persist Forms</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="coupon_code" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Generate Coupon Code</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="salesrule_model" translate="label" type="select" sortOrder="45" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Select Shopping Cart Price Rule</label>
+                    <depends>
+                        <field id="coupon_code">1</field>
+                    </depends>
+                    <source_model>Rejoiner\Acr\Model\System\Config\Source\Salesrule</source_model>
+                </field>
+
+                <field id="thumbnail_size_width" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Thumbnail Width</label>
+                </field>
+
+                <field id="thumbnail_size_height" translate="label" type="text" sortOrder="55" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Thumbnail Height</label>
+                </field>
+
+                <field id="google_attributes" translate="label" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Google Analytics data</label>
+                    <frontend_model>Rejoiner\Acr\Block\Adminhtml\Form\Field\Google</frontend_model>
+                    <backend_model>Rejoiner\Acr\Model\System\Config\Backend\Attributes</backend_model>
+                </field>
+
+                <field id="custom_attributes" translate="label" sortOrder="65" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Custom parameters</label>
+                    <frontend_model>Rejoiner\Acr\Block\Adminhtml\Form\Field\Custom</frontend_model>
+                    <backend_model>Rejoiner\Acr\Model\System\Config\Backend\Attributes</backend_model>
+                </field>
+
+                <field id="debug_enabled" translate="label" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable debug mode</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

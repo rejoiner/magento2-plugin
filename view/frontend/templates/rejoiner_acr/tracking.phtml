@@ -1,0 +1,19 @@
+<?php $rejoinerHelper = $this->getRejoinerHelper() ?>
+<?php if ($rejoinerHelper->getRejoinerSiteId() && $rejoinerHelper->getDomain() && $block->getCartItems()):?>
+    <script type="text/x-magento-init">
+        {
+            "*": {
+                "RejoinerAcrTracking": {
+                    "rejoinerSiteId"      : "<?php echo $rejoinerHelper->getRejoinerSiteId() ?>",
+                    "rejoinerDomain"      : "<?php echo $rejoinerHelper->getDomain() ?>",
+                    "trackNumberEnabled"  : "<?php echo $rejoinerHelper->getTrackNumberEnabled()?>",
+                    "persistFormsEnabled" : "<?php echo $rejoinerHelper->getPersistFormsEnabled()?>",
+                    "cartData"            : <?php echo $block->getCartData() ?>,
+                    "cartItems"           : <?php echo $this->helper('\Magento\Framework\Json\Helper\Data')->jsonEncode($block->getCartItems())?>,
+                    "removedItems"        : <?php echo $this->helper('\Magento\Framework\Json\Helper\Data')->jsonEncode($rejoinerHelper->checkRemovedItem())?>
+                }
+            }
+        }
+    </script>
+<?php endif ?>
+

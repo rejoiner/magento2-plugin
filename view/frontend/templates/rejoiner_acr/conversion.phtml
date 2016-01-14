@@ -1,0 +1,11 @@
+<?php $rejoinerHelper = $this->getRejoinerHelper() ?>
+<script type="text/x-magento-init">
+    {
+        "*": {
+            "RejoinerAcrConversion": {
+                "rejoinerSiteId"      : "<?php echo $rejoinerHelper->getRejoinerSiteId() ?>",
+                "rejoinerDomain"      : "<?php echo $rejoinerHelper->getDomain() ?>"
+            }
+        }
+    }
+</script>
