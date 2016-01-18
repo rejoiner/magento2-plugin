@@ -28,19 +28,30 @@ class Snippets extends \Magento\Framework\View\Element\Template
     public function getCartItems()
     {
         $items = array();
+        $displayPriceWithTax = $this->_rejoinerHelper->getTrackPriceWithTax();
+
         if ($quote = $this->_checkoutSession->getQuote()) {
             $imageWidth  = $this->_rejoinerHelper->getImageWidth();
             $imageHeight = $this->_rejoinerHelper->getImageHeight();
             foreach ($quote->getAllVisibleItems() as $item) {
-                $product = $item->getProduct();
+                $product  = $item->getProduct();
                 $imageUrl = $this->_imageHelper->init($product, 'category_page_grid')->resize($imageWidth, $imageHeight)->getUrl();
+
+                if ($displayPriceWithTax) {
+                    $productPrice = $item->getPriceInclTax();
+                    $rowTotal     = $item->getRowTotalInclTax();
+                } else {
+                    $productPrice = $item->getPrice();
+                    $rowTotal     = $item->getRowTotal();
+                }
+
                 $newItem = array(
                     'name'       => $item->getName(),
                     'image_url'  => $imageUrl,
-                    'price'      => (string) $this->_rejoinerHelper->convertPriceToCents($item->getPriceInclTax()),
+                    'price'      => (string) $this->_rejoinerHelper->convertPriceToCents($productPrice),
                     'product_id' => (string) $item->getSku(),
                     'item_qty'   => (string) $item->getQty(),
-                    'qty_price'  => (string) $this->_rejoinerHelper->convertPriceToCents($item->getRowTotalInclTax())
+                    'qty_price'  => (string) $this->_rejoinerHelper->convertPriceToCents($rowTotal)
                 );
                 $items[] = $newItem;
             }
@@ -51,10 +62,12 @@ class Snippets extends \Magento\Framework\View\Element\Template
     public function getCartData()
     {
         $result = '';
+        $displayPriceWithTax = $this->_rejoinerHelper->getTrackPriceWithTax();
         if ($quote = $this->_checkoutSession->getQuote()) {
+            $total = $displayPriceWithTax? $quote->getGrandTotal() : $quote->getSubtotal();
             $result = array(
                 'totalItems'   => (string) $quote->getItemsQty(),
-                'value'        => (string) $this->_rejoinerHelper->convertPriceToCents($quote->getGrandTotal()),
+                'value'        => (string) $this->_rejoinerHelper->convertPriceToCents($total),
                 'returnUrl'    => (string) $this->_rejoinerHelper->getRestoreUrl()
             );
             if ($this->_rejoinerHelper->getIsEnabledCouponCodeGeneration()) {
@@ -83,6 +96,4 @@ class Snippets extends \Magento\Framework\View\Element\Template
     {
         return $this->_customerSession->getCustomerData();
     }
-
-
 }

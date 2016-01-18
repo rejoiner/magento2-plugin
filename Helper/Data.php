@@ -3,19 +3,21 @@ namespace Rejoiner\Acr\Helper;
 
 class Data extends \Magento\Framework\App\Helper\AbstractHelper
 {
-    const XML_PATH_REJOINER_SITE_ID           = 'checkout/rejoiner_acr/site_id';
-    const XML_PATH_REJOINER_DOMAIN            = 'checkout/rejoiner_acr/domain';
-    const XML_PATH_REJOINER_TRACK_NUMBERS     = 'checkout/rejoiner_acr/track_numbers';
-    const XML_PATH_REJOINER_PERSIST_FORMS     = 'checkout/rejoiner_acr/persist_forms';
-    const XML_PATH_REJOINER_DEBUGGER          = 'checkout/rejoiner_acr/debug_enabled';
-    const XML_PATH_REJOINER_API_KEY           = 'checkout/rejoiner_acr/api_key';
-    const XML_PATH_REJOINER_API_SECRET        = 'checkout/rejoiner_acr/api_secret';
-    const XML_PATH_REJOINER_API_SITE_ID       = 'checkout/rejoiner_acr/site_id';
-    const XML_PATH_REJOINER_PROCESS_BY_CRON   = 'checkout/rejoiner_acr/process_by_cron';
-    const XML_PATH_REJOINER_COUPON_GENERATION = 'checkout/rejoiner_acr/coupon_code';
-    const XML_PATH_REJOINER_COUPON_RULE       = 'checkout/rejoiner_acr/salesrule_model';
-    const XML_PATH_REJOINER_THUMBNAIL_WIDTH   = 'checkout/rejoiner_acr/thumbnail_size_width';
-    const XML_PATH_REJOINER_THUMBNAIL_HEIGHT  = 'checkout/rejoiner_acr/thumbnail_size_height';
+    const XML_PATH_REJOINER_SITE_ID              = 'checkout/rejoiner_acr/site_id';
+    const XML_PATH_REJOINER_DOMAIN               = 'checkout/rejoiner_acr/domain';
+    const XML_PATH_REJOINER_TRACK_NUMBERS        = 'checkout/rejoiner_acr/track_numbers';
+    const XML_PATH_REJOINER_TRACK_PRICE_WITH_TAX = 'checkout/rejoiner_acr/track_price_with_tax';
+    const XML_PATH_REJOINER_PERSIST_FORMS        = 'checkout/rejoiner_acr/persist_forms';
+    const XML_PATH_REJOINER_DEBUGGER             = 'checkout/rejoiner_acr/debug_enabled';
+    const XML_PATH_REJOINER_API_KEY              = 'checkout/rejoiner_acr/api_key';
+    const XML_PATH_REJOINER_API_SECRET           = 'checkout/rejoiner_acr/api_secret';
+    const XML_PATH_REJOINER_API_SITE_ID          = 'checkout/rejoiner_acr/site_id';
+    const XML_PATH_REJOINER_PROCESS_BY_CRON      = 'checkout/rejoiner_acr/process_by_cron';
+    const XML_PATH_REJOINER_COUPON_GENERATION    = 'checkout/rejoiner_acr/coupon_code';
+    const XML_PATH_REJOINER_COUPON_RULE          = 'checkout/rejoiner_acr/salesrule_model';
+    const XML_PATH_REJOINER_THUMBNAIL_WIDTH      = 'checkout/rejoiner_acr/thumbnail_size_width';
+    const XML_PATH_REJOINER_THUMBNAIL_HEIGHT     = 'checkout/rejoiner_acr/thumbnail_size_height';
+
 
 
     const REJOINER_API_URL                    = 'https://app.rejoiner.com';
@@ -159,6 +161,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         return $this->_scopeConfig->getValue(self::XML_PATH_REJOINER_TRACK_NUMBERS, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
     }
+
+    public function getTrackPriceWithTax()
+    {
+        return $this->_scopeConfig->getValue(self::XML_PATH_REJOINER_TRACK_PRICE_WITH_TAX, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+    }
+
 
     public function getPersistFormsEnabled()
     {
