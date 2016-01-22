@@ -76,7 +76,7 @@ class Index extends \Magento\Framework\App\Action\Action
                 }
             }
             if (isset($params['coupon_code'])) {
-                $cartModel->getQuote()->setCouponCode($params['coupon_code'])->collectTotals();
+                $cartModel->getQuote()->setCouponCode($params['coupon_code']);
             }
             $cartModel->save();
             $this->_session->create()->setCartWasUpdated(true);
