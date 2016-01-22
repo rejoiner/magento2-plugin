@@ -1,6 +1,17 @@
 <?php
 namespace Rejoiner\Acr\Controller\Addbysku;
 
+
+use \Magento\Framework\App\Action\Context;
+use \Magento\Checkout\Model\CartFactory;
+use \Magento\Framework\ObjectManagerInterface;
+use \Magento\Checkout\Model\Session;
+use \Rejoiner\Acr\Helper\Data;
+use \Magento\CatalogInventory\Model\ResourceModel\Stock\ItemFactory;
+use \Magento\CatalogInventory\Api\Data\StockItemInterfaceFactory;
+use \Magento\Store\Model\StoreManagerInterface;
+use \Magento\Catalog\Model\ProductFactory;
+
 class Index extends \Magento\Framework\App\Action\Action
 {
 
@@ -16,16 +27,27 @@ class Index extends \Magento\Framework\App\Action\Action
     protected $_storeManagerInterface;
     protected $_product;
 
+    /**
+     * @param Context $context
+     * @param CartFactory $cartModel
+     * @param ObjectManagerInterface $objectInterface
+     * @param Session $checkoutSession
+     * @param Data $rejoinerHelper
+     * @param ItemFactory $stockItem
+     * @param StockItemInterfaceFactory $stockItemFactory
+     * @param StoreManagerInterface $storeManagerInterface
+     * @param ProductFactory $product
+     */
     public function __construct(
-        \Magento\Framework\App\Action\Context $context,
-        \Magento\Checkout\Model\CartFactory $cartModel,
-        \Magento\Framework\ObjectManagerInterface $objectInterface,
-        \Magento\Checkout\Model\Session $checkoutSession,
-        \Rejoiner\Acr\Helper\Data $rejoinerHelper,
-        \Magento\CatalogInventory\Model\ResourceModel\Stock\ItemFactory $stockItem,
-        \Magento\CatalogInventory\Api\Data\StockItemInterfaceFactory $stockItemFactory,
-        \Magento\Store\Model\StoreManagerInterface $storeManagerInterface,
-        \Magento\Catalog\Model\ProductFactory $product
+        Context $context,
+        CartFactory $cartModel,
+        ObjectManagerInterface $objectInterface,
+        Session $checkoutSession,
+        Data $rejoinerHelper,
+        ItemFactory $stockItem,
+        StockItemInterfaceFactory $stockItemFactory,
+        StoreManagerInterface $storeManagerInterface,
+        ProductFactory $product
     )
     {
         $this->_checkoutSession       = $checkoutSession;
@@ -43,11 +65,6 @@ class Index extends \Magento\Framework\App\Action\Action
 
     public function execute()
     {
-
-        $a = $this->_objectManager->get('\Rejoiner\Acr\Observer\TrackOrderSuccessConversion');
-
-        $a->trackOrder();
-
         $params = $this->getRequest()->getParams();
         $cart = $this->_cartModel->create();
         $successMessage = '';
@@ -56,6 +73,9 @@ class Index extends \Magento\Framework\App\Action\Action
             if ($product && is_array($product)) {
                 $productModel = $this->_product->create();
                 $productBySKU = $productModel->loadByAttribute('sku', $product['sku']);
+                if (!$productBySKU->getId()) {
+                    continue;
+                }
                 $productId = $productBySKU->getId();
                 if ($productId) {
                     $stockItem = $this->_stockItemFactory->create();

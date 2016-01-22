@@ -1,6 +1,13 @@
 <?php
 namespace Rejoiner\Acr\Block;
 
+use \Magento\Framework\View\Element\Template\Context;
+use \Rejoiner\Acr\Helper\Data;
+use \Magento\Catalog\Helper\Image;
+use \Magento\Customer\Model\Session;
+use \Magento\Checkout\Model\Session as CheckoutSession;
+
+
 class Snippets extends \Magento\Framework\View\Element\Template
 {
     private $_checkoutSession;
@@ -8,15 +15,22 @@ class Snippets extends \Magento\Framework\View\Element\Template
     private $_imageHelper;
     private $_customerSession;
 
+    /**
+     * @param Context $context
+     * @param Data $rejoinerHelper
+     * @param Image $imageHelper
+     * @param Session $customerSession
+     * @param CheckoutSession $checkoutSession
+     * @param array $data
+     */
     public function __construct(
-        \Magento\Framework\View\Element\Template\Context $context,
-        \Rejoiner\Acr\Helper\Data $rejoinerHelper,
-        \Magento\Catalog\Helper\Image $imageHelper,
-        \Magento\Customer\Model\Session $customerSession,
-        \Magento\Checkout\Model\Session $checkoutSession,
+        Context $context,
+        Data $rejoinerHelper,
+        Image $imageHelper,
+        Session $customerSession,
+        CheckoutSession $checkoutSession,
         array $data = []
-    )
-    {
+    ) {
         $this->_checkoutSession = $checkoutSession;
         $this->_imageHelper     = $imageHelper;
         $this->_rejoinerHelper  = $rejoinerHelper;
@@ -24,7 +38,9 @@ class Snippets extends \Magento\Framework\View\Element\Template
         parent::__construct($context, $data);
     }
 
-
+    /**
+     * @return array
+     */
     public function getCartItems()
     {
         $items = array();
@@ -59,6 +75,9 @@ class Snippets extends \Magento\Framework\View\Element\Template
         return $items;
     }
 
+    /**
+     * @return string
+     */
     public function getCartData()
     {
         $result = '';
@@ -82,16 +101,25 @@ class Snippets extends \Magento\Framework\View\Element\Template
         return json_encode($result, JSON_UNESCAPED_SLASHES);
     }
 
+    /**
+     * @return \Rejoiner\Acr\Helper\Data
+     */
     public function getRejoinerHelper()
     {
         return $this->_rejoinerHelper;
     }
 
+    /**
+     * @return bool
+     */
     public function isCustomerLoggedIn()
     {
         return $this->_customerSession->isLoggedIn();
     }
 
+    /**
+     * @return \Magento\Customer\Api\Data\CustomerInterface
+     */
     public function getCustomer()
     {
         return $this->_customerSession->getCustomerData();

@@ -1,6 +1,12 @@
 <?php
 namespace Rejoiner\Acr\Observer;
 
+use \Magento\Framework\HTTP\ZendClientFactory;
+use \Rejoiner\Acr\Model\AcrFactory;
+use \Magento\Sales\Model\OrderFactory;
+use \Magento\Framework\Stdlib\DateTime\TimezoneInterface;
+use \Rejoiner\Acr\Helper\Data;
+
 class TrackOrderSuccessConversion
 {
     protected $_rejoinerHelper;
@@ -10,11 +16,11 @@ class TrackOrderSuccessConversion
 
 
     public function __construct(
-        \Magento\Framework\HTTP\ZendClientFactory $httpClient,
-        \Rejoiner\Acr\Model\AcrFactory $rejoinerFactory,
-        \Magento\Sales\Model\OrderFactory $orderFactory,
-        \Magento\Framework\Stdlib\DateTime\TimezoneInterface $timezone,
-        \Rejoiner\Acr\Helper\Data $rejoinerHelper
+        ZendClientFactory $httpClient,
+        AcrFactory $rejoinerFactory,
+        OrderFactory $orderFactory,
+        TimezoneInterface $timezone,
+        Data $rejoinerHelper
     ) {
         $this->_rejoinerHelper  = $rejoinerHelper;
         $this->_rejoinerFactory = $rejoinerFactory;
@@ -28,8 +34,8 @@ class TrackOrderSuccessConversion
         $collection = $this->_rejoinerFactory->create()->getResourceCollection();
         $collection->addFieldToFilter('sent_at', ['null' => true]);
         if ($collection->count()
-            && $this->_rejoinerHelper->getStoreConfig(\Rejoiner\Acr\Helper\Data::XML_PATH_REJOINER_API_KEY)
-            && $this->_rejoinerHelper->getStoreConfig(\Rejoiner\Acr\Helper\Data::XML_PATH_REJOINER_API_SECRET)
+            && $this->_rejoinerHelper->getRejoinerApiKey()
+            && $this->_rejoinerHelper->getRejoinerApiSecret()
         ) {
             foreach ($collection as $successOrder) {
                 $orderModel = $this->_orderFactory->create();

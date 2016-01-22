@@ -1,6 +1,14 @@
 <?php
 namespace Rejoiner\Acr\Controller\Addtocart;
 
+use \Rejoiner\Acr\Helper\Data;
+use \Magento\Checkout\Model\Session;
+use \Magento\Framework\App\Action\Context;
+use \Magento\Framework\View\Result\PageFactory;
+use \Magento\Framework\ObjectManagerInterface;
+use \Magento\Checkout\Model\SessionFactory;
+use \Magento\Checkout\Model\CartFactory;
+use \Magento\Catalog\Model\ProductFactory;
 
 class Index extends \Magento\Framework\App\Action\Action
 {
@@ -17,22 +25,25 @@ class Index extends \Magento\Framework\App\Action\Action
     protected $_session;
 
     /**
+     * @param \Rejoiner\Acr\Helper\Data $rejoinerHelper
+     * @param \Magento\Checkout\Model\Session $checkoutSession
      * @param \Magento\Framework\App\Action\Context $context
-     * @param \Magento\Framework\View\Result\PageFactory resultPageFactory
+     * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
+     * @param \Magento\Framework\ObjectManagerInterface $objectInterface
+     * @param \Magento\Checkout\Model\SessionFactory $session
+     * @param \Magento\Checkout\Model\CartFactory $cart
+     * @param \Magento\Catalog\Model\ProductFactory $product
      */
     public function __construct(
-        \Rejoiner\Acr\Helper\Data $rejoinerHelper,
-        \Magento\Checkout\Model\Session $checkoutSession,
-        \Magento\Framework\App\Action\Context $context,
-        \Magento\Framework\View\Result\PageFactory $resultPageFactory,
-        \Magento\Framework\ObjectManagerInterface $objectInterface,
-
-        \Magento\Checkout\Model\SessionFactory $session,
-        \Magento\Checkout\Model\CartFactory $cart,
-        \Magento\Catalog\Model\ProductFactory $product
-
-    )
-    {
+        Data $rejoinerHelper,
+        Session $checkoutSession,
+        Context $context,
+        PageFactory $resultPageFactory,
+        ObjectManagerInterface $objectInterface,
+        SessionFactory $session,
+        CartFactory $cart,
+        ProductFactory $product
+    ) {
         $this->_rejoinerHelper    = $rejoinerHelper;
         $this->_resultPageFactory = $resultPageFactory;
         $this->_objectInterface   = $objectInterface;
@@ -43,7 +54,9 @@ class Index extends \Magento\Framework\App\Action\Action
         parent::__construct($context);
     }
 
-
+    /**
+     * @return \Magento\Framework\App\ResponseInterface
+     */
     public function execute()
     {
         if ($params = $this->getRequest()->getParams()) {
@@ -61,6 +74,9 @@ class Index extends \Magento\Framework\App\Action\Action
                         $this->_rejoinerHelper->log($e->getMessage());
                     }
                 }
+            }
+            if (isset($params['coupon_code'])) {
+                $cartModel->getQuote()->setCouponCode($params['coupon_code'])->collectTotals();
             }
             $cartModel->save();
             $this->_session->create()->setCartWasUpdated(true);

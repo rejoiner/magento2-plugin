@@ -3,6 +3,10 @@
 namespace Rejoiner\Acr\Observer;
 
 use \Magento\Framework\Event\Observer;
+use \Rejoiner\Acr\Helper\Data;
+use \Rejoiner\Acr\Model\AcrFactory;
+use \Magento\Sales\Model\OrderFactory;
+use \Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 
 class CheckoutOnepageControllerSuccessAction implements \Magento\Framework\Event\ObserverInterface
 {
@@ -13,10 +17,10 @@ class CheckoutOnepageControllerSuccessAction implements \Magento\Framework\Event
     private $_orderFactory;
 
     public function __construct(
-        \Rejoiner\Acr\Helper\Data $rejoinerHelper,
-        \Rejoiner\Acr\Model\AcrFactory $acrFactory,
-        \Magento\Sales\Model\OrderFactory $orderFactory,
-        \Magento\Framework\Stdlib\DateTime\TimezoneInterface $timezone
+        Data $rejoinerHelper,
+        AcrFactory $acrFactory,
+        OrderFactory $orderFactory,
+        TimezoneInterface $timezone
     ) {
         $this->_rejoinerHelper  = $rejoinerHelper;
         $this->_timezone        = $timezone;

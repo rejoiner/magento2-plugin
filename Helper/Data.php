@@ -34,7 +34,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     protected $_sessionManager;
     protected $_httpClient;
 
-
+    /**
+     * @param \Magento\Checkout\Model\Session $checkoutSession
+     * @param \Magento\Framework\Session\SessionManager $sessionManager
+     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
+     * @param \Magento\Framework\UrlInterface $urlInterface
+     * @param \Magento\Framework\HTTP\ZendClientFactory $httpClient
+     * @param \Magento\Framework\ObjectManagerInterface $objectInterface
+     */
     public function __construct(
         \Magento\Checkout\Model\Session $checkoutSession,
         \Magento\Framework\Session\SessionManager $sessionManager,
@@ -53,10 +60,17 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_httpClient      = $httpClient;
     }
 
+    /**
+     * @param $price
+     * @return float
+     */
     public function convertPriceToCents($price) {
         return round($price*100);
     }
 
+    /**
+     * @return string
+     */
     public function getRestoreUrl()
     {
         $product = array();
@@ -74,7 +88,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return substr($url, 0, strlen($url)-1);
     }
 
-
+    /**
+     * @return array
+     */
     public function returnGoogleAttributes() {
         $result = array();
         if ($googleAnalitics = $this->_scopeConfig->getValue('checkout/rejoiner_acr/google_attributes', \Magento\Store\Model\ScopeInterface::SCOPE_STORE)) {
@@ -87,6 +103,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $result;
     }
 
+    /**
+     * @return array
+     */
     public function returnCustomAttributes() {
         $result = array();
         if ($customAttr = $this->_scopeConfig->getValue('checkout/rejoiner_acr/custom_attributes', \Magento\Store\Model\ScopeInterface::SCOPE_STORE)) {
@@ -99,7 +118,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $result;
     }
 
-
+    /**
+     * @return bool|null
+     */
     public function checkHttps()
     {
         if (empty($this->_currentProtocolSecurity)) {
@@ -120,7 +141,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $secure;
     }
 
-
+    /**
+     * @return string
+     */
     public function generateCouponCode()
     {
         $couponCode = $this->_checkoutSession->getQuote()->getPromo();
@@ -141,7 +164,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $couponCode;
     }
 
-
+    /**
+     * @return string
+     */
     public function getDomain()
     {
         $domain = trim($this->_scopeConfig->getValue(self::XML_PATH_REJOINER_DOMAIN, \Magento\Store\Model\ScopeInterface::SCOPE_STORE));
@@ -152,47 +177,89 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
     }
 
+    /**
+     * @return string
+     */
     public function getRejoinerSiteId()
     {
         return $this->_scopeConfig->getValue(self::XML_PATH_REJOINER_SITE_ID, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
     }
 
+    /**
+     * @return string
+     */
     public function getTrackNumberEnabled()
     {
         return $this->_scopeConfig->getValue(self::XML_PATH_REJOINER_TRACK_NUMBERS, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
     }
 
+    /**
+     * @return string
+     */
     public function getTrackPriceWithTax()
     {
         return $this->_scopeConfig->getValue(self::XML_PATH_REJOINER_TRACK_PRICE_WITH_TAX, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
     }
 
-
+    /**
+     * @return string
+     */
     public function getPersistFormsEnabled()
     {
         return $this->_scopeConfig->getValue(self::XML_PATH_REJOINER_PERSIST_FORMS, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
     }
 
+    /**
+     * @return string
+     */
     public function getIsEnabledCouponCodeGeneration()
     {
         return $this->_scopeConfig->getValue(self::XML_PATH_REJOINER_COUPON_GENERATION, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
     }
 
+    /**
+     * @return string
+     */
     public function getImageWidth()
     {
         return $this->_scopeConfig->getValue(self::XML_PATH_REJOINER_THUMBNAIL_WIDTH);
     }
 
+    /**
+     * @return string
+     */
     public function getImageHeight()
     {
         return $this->_scopeConfig->getValue(self::XML_PATH_REJOINER_THUMBNAIL_HEIGHT);
     }
 
+    /**
+     * @return string
+     */
     public function getShouldBeProcessedByCron()
     {
         return $this->_scopeConfig->getValue(self::XML_PATH_REJOINER_PROCESS_BY_CRON);
     }
 
+    /**
+     * @return string
+     */
+    public function getRejoinerApiSecret()
+    {
+        return $this->_scopeConfig->getValue(self::XML_PATH_REJOINER_API_SECRET);
+    }
+
+    /**
+     * @return string
+     */
+    public function getRejoinerApiKey()
+    {
+        return $this->_scopeConfig->getValue(self::XML_PATH_REJOINER_API_KEY);
+    }
+
+    /**
+     * @param $message
+     */
     public function log($message)
     {
         if ($this->_scopeConfig->getValue(self::XML_PATH_REJOINER_DEBUGGER)) {
@@ -203,6 +270,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
     }
 
+    /**
+     * @return bool|mixed
+     */
     public function checkRemovedItem()
     {
         $session = $this->_sessionManager;
@@ -214,7 +284,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return false;
     }
 
-
+    /**
+     * @param $orderModel
+     * @return int
+     * @throws \Zend_Http_Client_Exception
+     */
     public function sendInfoToRejoiner($orderModel)
     {
         $apiKey = $this->_scopeConfig->getValue(self::XML_PATH_REJOINER_API_KEY);
@@ -255,8 +329,5 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         return $responseCode;
     }
-
-
-
 
 }
