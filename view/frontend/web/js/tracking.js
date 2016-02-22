@@ -1,3 +1,7 @@
+/**
+ * Copyright © 2016 Rejoiner. All rights reserved.
+ * See COPYING.txt for license details.
+ */
 define([
     'jquery'
 ], function($) {
@@ -15,10 +19,7 @@ define([
         },
 
         _create: function() {
-
             window._rejoiner = this.getRejoinerObject();
-            this.connectRemoteScript();
-
         },
 
         getRejoinerObject: function () {
@@ -46,18 +47,7 @@ define([
                 });
             }
             return _rejoiner;
-        },
-
-
-        connectRemoteScript: function() {
-            var s = document.createElement('script');
-            s.type = 'text/javascript';
-            s.async = true;
-            s.src = 'https://s3.amazonaws.com/rejoiner/js/v3/t.js';
-            var x = document.getElementsByTagName('script')[0];
-            x.parentNode.insertBefore(s, x);
         }
-
     });
     return $.rejoiner.acrTracking;
 });

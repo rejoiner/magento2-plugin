@@ -1,21 +1,53 @@
 <?php
+/**
+ * Copyright © 2016 Rejoiner. All rights reserved.
+ * See COPYING.txt for license details.
+ */
 namespace Rejoiner\Acr\Block;
 
-use \Magento\Framework\View\Element\Template\Context;
-use \Rejoiner\Acr\Helper\Data;
-use \Magento\Catalog\Helper\Image;
-use \Magento\Customer\Model\Session;
-use \Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Framework\View\Element\Template\Context;
+use Rejoiner\Acr\Helper\Data;
+use Magento\Catalog\Helper\Image;
+use Magento\Customer\Model\Session;
+use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Framework\Json\Helper\Data as JsonData;
+use Magento\Framework\View\Element\Template;
 
-
-class Snippets extends \Magento\Framework\View\Element\Template
+class Snippets extends Template
 {
-    private $_checkoutSession;
-    private $_rejoinerHelper;
-    private $_imageHelper;
-    private $_customerSession;
+    /**
+     * @var $jsonHelper JsonData
+     */
+    protected $jsonHelper;
 
     /**
+     * @var $checkoutSession CheckoutSession
+     */
+    protected $checkoutSession;
+
+    /**
+     * @var $rejoinerHelper Data
+     */
+    protected $rejoinerHelper;
+
+    /**
+     * @var $imageHelper Image
+     */
+    protected $imageHelper;
+
+    /**
+     * @var $customerSession Session
+     */
+    protected $customerSession;
+
+    /**
+     * @var $items array
+     */
+    protected $items;
+
+    /**
+     * Snippets constructor.
+     * @param JsonData $jsonHelper
      * @param Context $context
      * @param Data $rejoinerHelper
      * @param Image $imageHelper
@@ -24,6 +56,7 @@ class Snippets extends \Magento\Framework\View\Element\Template
      * @param array $data
      */
     public function __construct(
+        JsonData $jsonHelper,
         Context $context,
         Data $rejoinerHelper,
         Image $imageHelper,
@@ -31,74 +64,77 @@ class Snippets extends \Magento\Framework\View\Element\Template
         CheckoutSession $checkoutSession,
         array $data = []
     ) {
-        $this->_checkoutSession = $checkoutSession;
-        $this->_imageHelper     = $imageHelper;
-        $this->_rejoinerHelper  = $rejoinerHelper;
-        $this->_customerSession = $customerSession;
+        $this->checkoutSession = $checkoutSession;
+        $this->imageHelper     = $imageHelper;
+        $this->rejoinerHelper  = $rejoinerHelper;
+        $this->customerSession = $customerSession;
+        $this->jsonHelper      = $jsonHelper;
         parent::__construct($context, $data);
     }
 
     /**
+     *
+     * Returns array with information about each product in shopping cart
+     *
      * @return array
      */
     public function getCartItems()
     {
-        $items = array();
-        $displayPriceWithTax = $this->_rejoinerHelper->getTrackPriceWithTax();
+        if (!$this->items) {
+            $displayPriceWithTax = $this->getRejoinerHelper()->getTrackPriceWithTax();
+            $quote = $this->checkoutSession->getQuote();
+            $imageWidth = $this->getRejoinerHelper()->getImageWidth();
+            $imageHeight = $this->getRejoinerHelper()->getImageHeight();
 
-        if ($quote = $this->_checkoutSession->getQuote()) {
-            $imageWidth  = $this->_rejoinerHelper->getImageWidth();
-            $imageHeight = $this->_rejoinerHelper->getImageHeight();
             foreach ($quote->getAllVisibleItems() as $item) {
-                $product  = $item->getProduct();
-                $imageUrl = $this->_imageHelper->init($product, 'category_page_grid')->resize($imageWidth, $imageHeight)->getUrl();
-
+                $product = $item->getProduct();
+                $imageUrl = $this->imageHelper->init($product, 'category_page_grid')->resize($imageWidth, $imageHeight)->getUrl();
                 if ($displayPriceWithTax) {
                     $productPrice = $item->getPriceInclTax();
-                    $rowTotal     = $item->getRowTotalInclTax();
+                    $rowTotal = $item->getRowTotalInclTax();
                 } else {
                     $productPrice = $item->getPrice();
-                    $rowTotal     = $item->getRowTotal();
+                    $rowTotal = $item->getRowTotal();
                 }
-
-                $newItem = array(
+                $newItem = [
                     'name'       => $item->getName(),
                     'image_url'  => $imageUrl,
-                    'price'      => (string) $this->_rejoinerHelper->convertPriceToCents($productPrice),
+                    'price'      => (string) $this->getRejoinerHelper()->convertPriceToCents($productPrice),
                     'product_id' => (string) $item->getSku(),
                     'item_qty'   => (string) $item->getQty(),
-                    'qty_price'  => (string) $this->_rejoinerHelper->convertPriceToCents($rowTotal)
-                );
-                $items[] = $newItem;
+                    'qty_price'  => (string) $this->getRejoinerHelper()->convertPriceToCents($rowTotal)
+                ];
+                $this->items[] = $newItem;
             }
         }
-        return $items;
+        return $this->items;
     }
 
     /**
+     * Returns general shopping cart information
      * @return string
      */
     public function getCartData()
     {
-        $result = '';
-        $displayPriceWithTax = $this->_rejoinerHelper->getTrackPriceWithTax();
-        if ($quote = $this->_checkoutSession->getQuote()) {
-            $total = $displayPriceWithTax? $quote->getGrandTotal() : $quote->getSubtotal();
-            $result = array(
-                'totalItems'   => (string) $quote->getItemsQty(),
-                'value'        => (string) $this->_rejoinerHelper->convertPriceToCents($total),
-                'returnUrl'    => (string) $this->_rejoinerHelper->getRestoreUrl()
-            );
-            if ($this->_rejoinerHelper->getIsEnabledCouponCodeGeneration()) {
-                $result['promo'] = $this->_rejoinerHelper->generateCouponCode();
-            }
-
-            if ($this->isCustomerLoggedIn()) {
-                $result['email'] = $this->getCustomer()->getEmail();
-            }
-
+        $displayPriceWithTax = $this->getRejoinerHelper()->getTrackPriceWithTax();
+        // No need to check what session returns because Quote object is always returned,
+        // but may not contain data if it is empty
+        $quote = $this->checkoutSession->getQuote();
+        $total = $displayPriceWithTax? $quote->getGrandTotal() : $quote->getSubtotal();
+        $result = [
+            'totalItems'   => (string) $quote->getItemsQty(),
+            'value'        => (string) $this->getRejoinerHelper()->convertPriceToCents($total),
+            'returnUrl'    => (string) $this->getRejoinerHelper()->getRestoreUrl()
+        ];
+        if ($this->getRejoinerHelper()->getIsEnabledCouponCodeGeneration()) {
+            $result['promo'] = $this->getRejoinerHelper()->generateCouponCode();
         }
-        return json_encode($result, JSON_UNESCAPED_SLASHES);
+
+        if ($this->isCustomerLoggedIn()) {
+            $result['email'] = $this->getCustomer()->getEmail();
+        }
+
+        return $this->getJsonHelper()->jsonEncode($result);
     }
 
     /**
@@ -106,22 +142,31 @@ class Snippets extends \Magento\Framework\View\Element\Template
      */
     public function getRejoinerHelper()
     {
-        return $this->_rejoinerHelper;
+        return $this->rejoinerHelper;
     }
 
     /**
      * @return bool
      */
-    public function isCustomerLoggedIn()
+    protected function isCustomerLoggedIn()
     {
-        return $this->_customerSession->isLoggedIn();
+        return $this->customerSession->isLoggedIn();
     }
 
     /**
      * @return \Magento\Customer\Api\Data\CustomerInterface
      */
-    public function getCustomer()
+    protected function getCustomer()
     {
-        return $this->_customerSession->getCustomerData();
+        return $this->customerSession->getCustomerData();
+    }
+
+    /**
+     * @return JsonData
+     */
+    public function getJsonHelper()
+    {
+        return $this->jsonHelper;
     }
 }
+

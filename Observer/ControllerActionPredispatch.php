@@ -1,36 +1,79 @@
 <?php
+/**
+ * Copyright © 2016 Rejoiner. All rights reserved.
+ * See COPYING.txt for license details.
+ */
 namespace Rejoiner\Acr\Observer;
 
-class ControllerActionPredispatch implements \Magento\Framework\Event\ObserverInterface
-{
-    private $_cookieMetadataFactory;
-    private $_cookieManager;
+use Magento\Framework\Stdlib\Cookie\CookieMetadataFactory;
+use Magento\Framework\Json\Helper\Data;
+use Magento\Framework\Stdlib\Cookie\PhpCookieManager;
+use Magento\Framework\Event\Observer;
+use Magento\Framework\Event\ObserverInterface;
 
+class ControllerActionPredispatch implements ObserverInterface
+{
+    /**
+     * @var $_cookieMetadataFactory \Magento\Framework\Stdlib\Cookie\CookieMetadataFactory
+     */
+    protected $cookieMetadataFactory;
+
+    /**
+     * @var $_cookieManager \Magento\Framework\Stdlib\Cookie\PhpCookieManager
+     */
+    protected $cookieManager;
+
+    /**
+     * @var $jsonData \Magento\Framework\Json\Helper\Data
+     */
+    protected $jsonData;
+
+    /**
+     * ControllerActionPredispatch constructor.
+     * @param CookieMetadataFactory $cookieMetadataFactory
+     * @param Data $jsonData
+     * @param PhpCookieManager $cookieManager
+     */
     public function __construct(
-        \Magento\Framework\Stdlib\Cookie\CookieMetadataFactory $cookieMetadataFactory,
-        \Magento\Framework\Stdlib\Cookie\PhpCookieManager $cookieManager
+        CookieMetadataFactory $cookieMetadataFactory,
+        Data $jsonData,
+        PhpCookieManager $cookieManager
     ) {
-        $this->_cookieMetadataFactory = $cookieMetadataFactory;
-        $this->_cookieManager         = $cookieManager;
+        $this->cookieMetadataFactory = $cookieMetadataFactory;
+        $this->cookieManager         = $cookieManager;
+        $this->jsonData               = $jsonData;
+
     }
 
-    public function execute(\Magento\Framework\Event\Observer $observer)
+    /**
+     * @param Observer $observer
+     */
+    public function execute(Observer $observer)
     {
-
-        if ($observer->getRequest()->getModuleName() == 'checkout'
-            && $observer->getRequest()->getControllerName() == 'cart'
-            && $observer->getRequest()->getActionName() == 'index'
-            && $observer->getRequest()->getParam('updateCart')
-        ) {
-            $cookiesManager = $this->_cookieManager;
-            $publicCookieMetadata = $this->_cookieMetadataFactory->createPublicCookieMetadata()
+        if ($this->checkIfCacheShouldBeValidated($observer)) {
+            $cookiesManager = $this->cookieManager;
+            $publicCookieMetadata = $this->cookieMetadataFactory->createPublicCookieMetadata()
                 ->setPath('/');
-            $sectionDataIds = json_decode($cookiesManager->getCookie('section_data_ids'));
+            $sectionDataIds = $this->jsonData->jsonDecode($cookiesManager->getCookie('section_data_ids'));
             if ($sectionDataIds && isset($sectionDataIds->cart)) {
                 $sectionDataIds->cart += 1000;
-                $cookiesManager->setPublicCookie('section_data_ids', json_encode($sectionDataIds), $publicCookieMetadata);
+                $cookiesManager->setPublicCookie('section_data_ids', $this->jsonData->jsonEncode($sectionDataIds), $publicCookieMetadata);
             }
         }
+    }
 
+    /**
+     * @param Observer $observer
+     * @return bool
+     */
+    protected function checkIfCacheShouldBeValidated(Observer $observer)
+    {
+        $request = $observer->getEvent()->getData('request');
+        return (
+            $request->getModuleName()        == 'checkout'
+            && $request->getControllerName() == 'cart'
+            && $request->getActionName()     == 'index'
+            && $request->getParam('updateCart')
+        );
     }
 }
