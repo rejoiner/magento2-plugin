@@ -3,7 +3,6 @@
  * Copyright © 2016 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
-// @TODO: add proper copyrights to all files
 namespace Rejoiner\Acr\Block\Adminhtml\Form\Field;
 
 use Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray;
