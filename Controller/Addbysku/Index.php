@@ -1,120 +1,168 @@
 <?php
+/**
+ * Copyright © 2016 Rejoiner. All rights reserved.
+ * See COPYING.txt for license details.
+ */
 namespace Rejoiner\Acr\Controller\Addbysku;
 
+use Magento\Framework\App\Action\Context;
+use Magento\Checkout\Model\Cart;
+use Magento\Checkout\Model\Session;
+use Rejoiner\Acr\Helper\Data;
+use Magento\CatalogInventory\Model\ResourceModel\Stock\ItemFactory;
+use Magento\CatalogInventory\Api\Data\StockItemInterfaceFactory;
+use Magento\Store\Model\StoreManagerInterface;
+use Magento\Catalog\Model\ProductFactory;
+use Magento\Framework\Escaper;
+use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Catalog\Api\ProductRepositoryInterface;
+use Magento\Framework\App\Action\Action;
 
-use \Magento\Framework\App\Action\Context;
-use \Magento\Checkout\Model\CartFactory;
-use \Magento\Framework\ObjectManagerInterface;
-use \Magento\Checkout\Model\Session;
-use \Rejoiner\Acr\Helper\Data;
-use \Magento\CatalogInventory\Model\ResourceModel\Stock\ItemFactory;
-use \Magento\CatalogInventory\Api\Data\StockItemInterfaceFactory;
-use \Magento\Store\Model\StoreManagerInterface;
-use \Magento\Catalog\Model\ProductFactory;
-
-class Index extends \Magento\Framework\App\Action\Action
+class Index extends Action
 {
-
     const XML_PATH_REJOINER_DEBUG_ENABLED   = 'checkout/rejoiner_acr/debug_enabled';
 
-    protected $_checkoutSession;
-    protected $_rejoinerHelper;
-    protected $_messageManager;
-    protected $_cartModel;
-    protected $_stockItemFactory;
-    protected $_stockItem;
-
-    protected $_storeManagerInterface;
-    protected $_product;
+    /**
+     * @var Session $checkoutSession
+     */
+    protected $checkoutSession;
 
     /**
+     * @var Data $rejoinerHelper
+     */
+    protected $rejoinerHelper;
+
+    /**
+     * @var Cart $cartModel
+     */
+    protected $cartModel;
+
+    /**
+     * @var StockItemInterfaceFactory $stockItemFactory
+     */
+    protected $stockItemFactory;
+
+    /**
+     * @var ItemFactory $itemFactory
+     */
+    protected $itemFactory;
+
+    /**
+     * @var StoreManagerInterface $storeManager
+     */
+    protected $storeManager;
+
+    /**
+     * @var ProductFactory $productFactory
+     */
+    protected $productFactory;
+
+    /** @var Escaper $escaper */
+    protected $escaper;
+
+    /**
+     * @var SearchCriteriaBuilder $searchCriteriaBuilder
+     */
+    protected $searchCriteriaBuilder;
+
+    /**
+     * @var ProductRepositoryInterface $productRepositoryInterface
+     */
+    protected $productRepositoryInterface;
+
+
+    /**
+     * Index constructor.
      * @param Context $context
-     * @param CartFactory $cartModel
-     * @param ObjectManagerInterface $objectInterface
+     * @param Cart $cartModel
      * @param Session $checkoutSession
      * @param Data $rejoinerHelper
-     * @param ItemFactory $stockItem
+     * @param ItemFactory $itemFactory
      * @param StockItemInterfaceFactory $stockItemFactory
-     * @param StoreManagerInterface $storeManagerInterface
-     * @param ProductFactory $product
+     * @param StoreManagerInterface $storeManager
+     * @param ProductFactory $productFactory
+     * @param ProductRepositoryInterface $productRepositoryInterface
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param Escaper $escaper
      */
     public function __construct(
         Context $context,
-        CartFactory $cartModel,
-        ObjectManagerInterface $objectInterface,
+        Cart $cartModel,
         Session $checkoutSession,
         Data $rejoinerHelper,
-        ItemFactory $stockItem,
+        ItemFactory $itemFactory,
         StockItemInterfaceFactory $stockItemFactory,
-        StoreManagerInterface $storeManagerInterface,
-        ProductFactory $product
-    )
-    {
-        $this->_checkoutSession       = $checkoutSession;
-        $this->_objectInterface       = $objectInterface;
-        $this->_rejoinerHelper        = $rejoinerHelper;
-        $this->_stockItemFactory      = $stockItemFactory;
-        $this->_cartModel             = $cartModel;
-        $this->_stockItem             = $stockItem;
-        $this->_storeManagerInterface = $storeManagerInterface;
-        $this->_product               = $product;
-        $this->_messageManager        = $context->getMessageManager();
-
+        StoreManagerInterface $storeManager,
+        ProductFactory $productFactory,
+        Escaper $escaper,
+        ProductRepositoryInterface $productRepositoryInterface,
+        SearchCriteriaBuilder $searchCriteriaBuilder
+    ) {
+        $this->checkoutSession            = $checkoutSession;
+        $this->rejoinerHelper             = $rejoinerHelper;
+        $this->stockItemFactory           = $stockItemFactory;
+        $this->cartModel                  = $cartModel;
+        $this->itemFactory                = $itemFactory;
+        $this->storeManager               = $storeManager;
+        $this->productFactory             = $productFactory;
+        $this->escaper                    = $escaper;
+        $this->searchCriteriaBuilder      = $searchCriteriaBuilder;
+        $this->productRepositoryInterface = $productRepositoryInterface;
         parent::__construct($context);
     }
 
+    /**
+     *  Adds products to shopping cart by product sku
+     *
+     * @return \Magento\Framework\App\ResponseInterface
+     */
     public function execute()
     {
         $params = $this->getRequest()->getParams();
-        $cart = $this->_cartModel->create();
-        $successMessage = '';
-        $storeId = $this->_storeManagerInterface->getStore()->getId();
+        $cart = $this->cartModel;
+        $successMessages = [];
+        $storeId = $this->storeManager->getStore()->getId();
+        $productSkuArray = array();
         foreach ($params as $key => $product) {
-            if ($product && is_array($product)) {
-                $productModel = $this->_product->create();
-                $productBySKU = $productModel->loadByAttribute('sku', $product['sku']);
-                if (!$productBySKU->getId()) {
-                    continue;
-                }
-                $productId = $productBySKU->getId();
-                if ($productId) {
-                    $stockItem = $this->_stockItemFactory->create();
-                    /** @var \Magento\CatalogInventory\Model\ResourceModel\Stock\Item $stockItemResource */
-                    $stockItemResource = $this->_stockItem->create();
-                    $stockItemResource->loadByProductId($stockItem, $productId, $storeId);
-                    $qty = $stockItem->getQty();
-                    try {
-                        if(!$cart->getQuote()->hasProductId($productId) && is_numeric($product['qty']) && $qty > $product['qty']) {
-                            $cart->addProduct($productBySKU, (int)$product['qty']);
-                            $successMessage .= __('%1 was added to your shopping cart.'.'</br>', $this->_objectManager->get('Magento\Framework\Escaper')->escapeHtml($productBySKU->getName()));
-                        }
-                        unset($params[$key]);
-                    } catch (\Exception $e) {
-                        if($this->_rejoinerHelper->getStoreConfig(self::XML_PATH_REJOINER_DEBUG_ENABLED)) {
-                            $this->_rejoinerHelper->log($e->getMessage());
-                        }
-                    }
-                }
+            if (is_array($product) && isset($product['sku'])) {
+                $productSkuArray[$product['sku']] = $product['qty'];
             }
         }
-        if (isset($params['coupon_code'])) {
-            $cart->getQuote()->setCouponCode($params['coupon_code'])->collectTotals();
+        $filter = $this->searchCriteriaBuilder->addFilter('sku', array_keys($productSkuArray), 'in')->create();
+        $searchResult = $this->productRepositoryInterface->getList($filter);
+        foreach ($searchResult->getItems() as $product) {
+            $productId = $product->getId();
+            $stockItem = $this->stockItemFactory->create();
+            /** @var \Magento\CatalogInventory\Model\ResourceModel\Stock\Item $stockItemResource */
+            $stockItemResource = $this->itemFactory->create();
+            $stockItemResource->loadByProductId($stockItem, $product->getId(), $storeId);
+            try {
+                if (!$cart->getQuote()->hasProductId($productId) && floatval($productSkuArray[$product->getSku()])) {
+                    $cart->addProduct($product->getId(), $productSkuArray[$product->getSku()]);
+                    $successMessages[] = __('%1 was added to your shopping cart.', $this->escaper->escapeHtml($product->getName()));
+                }
+            } catch (\Exception $e) {
+                $this->rejoinerHelper->log($e->getMessage());
+            }
         }
+
+        if (isset($params['coupon_code'])) {
+            $cart->getQuote()->setCouponCode($params['coupon_code']);
+        }
+
         try {
-            $cart->getQuote()->save();
             $cart->save();
         }  catch (\Exception $e) {
-            if($this->_rejoinerHelper->getStoreConfig(self::XML_PATH_REJOINER_DEBUG_ENABLED)) {
-                $this->_rejoinerHelper->log($e->getMessage());
-            }
+            $this->rejoinerHelper->log($e->getMessage());
         }
-        $this->_checkoutSession->setCartWasUpdated(true);
-
-        if ($successMessage) {
-            $this->_messageManager->addSuccess($successMessage);
+        $this->checkoutSession->setCartWasUpdated(true);
+        if ($successMessages) {
+            foreach($successMessages as $message)
+            $this->messageManager->addSuccess($message);
         }
-        $url = $this->_objectManager->get('\Magento\Framework\UrlInterface')->getUrl('checkout/cart/', ['updateCart' => true]);
+        $url = $this->_url->getUrl('checkout/cart/', ['updateCart' => true]);
         $this->getResponse()->setRedirect($url);
+        return $this->_response;
     }
 
 }

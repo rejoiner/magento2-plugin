@@ -1,14 +1,14 @@
 <?php
 /**
- * Copyright © 2015 Magento. All rights reserved.
+ * Copyright © 2016 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
-
 namespace Rejoiner\Acr\Setup;
 
 use Magento\Framework\Setup\InstallSchemaInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\SchemaSetupInterface;
+use Magento\Framework\DB\Ddl\Table;
 
 /**
  * @codeCoverageIgnore
@@ -27,7 +27,7 @@ class InstallSchema implements InstallSchemaInterface
             $installer->getTable('quote'),
             'promo',
             [
-                'type'     => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                'type'     => Table::TYPE_TEXT,
                 'nullable' => true,
                 'comment'  => 'Promo'
             ]
