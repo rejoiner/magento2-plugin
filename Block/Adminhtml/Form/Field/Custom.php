@@ -1,8 +1,19 @@
 <?php
+/**
+ * Copyright © 2016 Rejoiner. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+// @TODO: add proper copyrights to all files
 namespace Rejoiner\Acr\Block\Adminhtml\Form\Field;
 
-class Custom extends \Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray
+use Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray;
+
+class Custom extends AbstractFieldArray
 {
+    protected $_addButtonLabel = 'Add Rule';
+
+    protected $_addAfter = false;
+
     /**
      * Prepare to render
      * @return void
@@ -21,7 +32,5 @@ class Custom extends \Magento\Config\Block\System\Config\Form\Field\FieldArray\A
                 'label' => __('Value'),
             ]
         );
-        $this->_addAfter = false;
-        $this->_addButtonLabel = __('Add Rule');
     }
 }

@@ -1,22 +1,35 @@
 <?php
+/**
+ * Copyright © 2016 Rejoiner. All rights reserved.
+ * See COPYING.txt for license details.
+ */
 namespace Rejoiner\Acr\Block\Adminhtml\Form\Field;
 
-class Source extends \Magento\Framework\View\Element\Html\Select
+use \Magento\Framework\View\Element\Html\Select;
+
+/**
+ * Class Source
+ * @package Rejoiner\Acr\Block\Adminhtml\Form\Field
+ *
+ * @method string setName(string $value)
+ */
+class Source extends Select
 {
-
-    protected $_metaSources = array(
-        'utm_source' =>  'Campaign Source',
-        'utm_medium'  =>  'Campaign Medium',
+    /**
+     * @var array
+     */
+    protected $_metaSources = [
+        'utm_source'   =>  'Campaign Source',
+        'utm_medium'   =>  'Campaign Medium',
         'utm_campaign' =>  'Campaign Name',
-    );
-
+    ];
 
     /**
      * Render block HTML
      *
      * @return string
      */
-    public function _toHtml()
+    protected function _toHtml()
     {
         if (!$this->getOptions()) {
             foreach ($this->_metaSources as $groupId => $groupLabel) {
@@ -25,7 +38,6 @@ class Source extends \Magento\Framework\View\Element\Html\Select
         }
         return parent::_toHtml();
     }
-
 
     /**
      * Sets name for input element

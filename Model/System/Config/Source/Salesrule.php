@@ -1,37 +1,54 @@
 <?php
+/**
+ * Copyright © 2016 Rejoiner. All rights reserved.
+ * See COPYING.txt for license details.
+ */
 namespace Rejoiner\Acr\Model\System\Config\Source;
 
-class Salesrule implements \Magento\Framework\Option\ArrayInterface
+use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\SalesRule\Model\RuleRepository;
+use Magento\Framework\Option\ArrayInterface;
+
+class Salesrule implements ArrayInterface
 {
-    private $_ruleFactory;
+    /**
+     * @var $ruleRepository RuleRepository
+     */
+    protected $ruleRepository;
 
+    /**
+     * @var $searchCriteriaBuilder SearchCriteriaBuilder
+     */
+    protected $searchCriteriaBuilder;
+
+    /**
+     * Salesrule constructor.
+     * @param RuleRepository $ruleRepository
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     */
     public function __construct(
-        \Magento\SalesRule\Model\RuleFactory $ruleFactory
+        RuleRepository $ruleRepository,
+        SearchCriteriaBuilder $searchCriteriaBuilder
     ) {
-        $this->_ruleFactory = $ruleFactory;
-
+        $this->ruleRepository        = $ruleRepository;
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
     }
 
+    /**
+     * @return array
+     */
     public function toOptionArray()
     {
-        $options   = array();
-        $additional= array(
-            'value' => 'rule_id',
-            'label' => 'name'
-        );
-
-        $collection = $this->_ruleFactory->create()->getResourceCollection();
-        foreach ($collection as $item) {
-            if ($item->getUseAutoGeneration()) {
-                $data = array();
-                foreach ($additional as $code => $field) {
-                    $data[$code] = $item->getData($field);
-                }
-                $options[] = $data;
-            }
-
+        $options = [];
+        $searchCriteria = $this->searchCriteriaBuilder->addFilter('use_auto_generation', 1)->create();
+        $collection = $this->ruleRepository->getList($searchCriteria);
+        /** @var \Magento\SalesRule\Model\Data\Rule $item */
+        foreach ($collection->getItems() as $item) {
+            $options[] = [
+                'value' => $item->getRuleId(),
+                'label' => $item->getName()
+            ];
         }
-
         array_unshift($options, array('value'=>'', 'label'=> __('--Please Select--')));
         return $options;
     }
