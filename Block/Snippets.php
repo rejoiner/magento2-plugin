@@ -1,8 +1,5 @@
 <?php
-/**
- * Copyright © 2016 Rejoiner. All rights reserved.
- * See COPYING.txt for license details.
- */
+
 namespace Rejoiner\Acr\Block;
 
 use Magento\Framework\View\Element\Template\Context;
@@ -97,12 +94,13 @@ class Snippets extends Template
                     $rowTotal = $item->getRowTotal();
                 }
                 $newItem = [
-                    'name'       => $item->getName(),
-                    'image_url'  => $imageUrl,
-                    'price'      => (string) $this->getRejoinerHelper()->convertPriceToCents($productPrice),
-                    'product_id' => (string) $item->getSku(),
-                    'item_qty'   => (string) $item->getQty(),
-                    'qty_price'  => (string) $this->getRejoinerHelper()->convertPriceToCents($rowTotal)
+                    'name'        => $item->getName(),
+                    'image_url'   => $imageUrl,
+                    'price'       => (string) $this->getRejoinerHelper()->convertPriceToCents($productPrice),
+                    'product_id'  => (string) $item->getSku(),
+                    'item_qty'    => (string) $item->getQty(),
+                    'product_url' => (string) $product->getProductUrl(),
+                    'qty_price'   => (string) $this->getRejoinerHelper()->convertPriceToCents($rowTotal)
                 ];
                 $this->items[] = $newItem;
             }
