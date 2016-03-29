@@ -1,4 +1,8 @@
 <?php
+/**
+* Copyright © 2016 Rejoiner. All rights reserved.
+* See COPYING.txt for license details.
+*/
 
 namespace Rejoiner\Acr\Block;
 
@@ -9,6 +13,7 @@ use Magento\Customer\Model\Session;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\Json\Helper\Data as JsonData;
 use Magento\Framework\View\Element\Template;
+use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory;
 
 class Snippets extends Template
 {
@@ -43,6 +48,11 @@ class Snippets extends Template
     protected $items;
 
     /**
+     * @var CollectionFactory $categoryCollection
+     */
+    protected $categoryCollection;
+
+    /**
      * Snippets constructor.
      * @param JsonData $jsonHelper
      * @param Context $context
@@ -50,8 +60,10 @@ class Snippets extends Template
      * @param Image $imageHelper
      * @param Session $customerSession
      * @param CheckoutSession $checkoutSession
+     * @param CollectionFactory $categoryCollection
      * @param array $data
      */
+
     public function __construct(
         JsonData $jsonHelper,
         Context $context,
@@ -59,6 +71,7 @@ class Snippets extends Template
         Image $imageHelper,
         Session $customerSession,
         CheckoutSession $checkoutSession,
+        CollectionFactory $categoryCollection,
         array $data = []
     ) {
         $this->checkoutSession = $checkoutSession;
@@ -66,6 +79,7 @@ class Snippets extends Template
         $this->rejoinerHelper  = $rejoinerHelper;
         $this->customerSession = $customerSession;
         $this->jsonHelper      = $jsonHelper;
+        $this->categoryCollection = $categoryCollection;
         parent::__construct($context, $data);
     }
 
@@ -78,10 +92,19 @@ class Snippets extends Template
     public function getCartItems()
     {
         if (!$this->items) {
+            $categories = [];
             $displayPriceWithTax = $this->getRejoinerHelper()->getTrackPriceWithTax();
             $quote = $this->checkoutSession->getQuote();
             $imageWidth = $this->getRejoinerHelper()->getImageWidth();
             $imageHeight = $this->getRejoinerHelper()->getImageHeight();
+            foreach ($quote->getAllVisibleItems() as $item) {
+                $categories = array_merge($categories, $item->getProduct()->getCategoryIds());
+            }
+
+            $categoriesArray = $this->categoryCollection->create()
+            ->addAttributeToSelect('name')
+            ->addAttributeToFilter('entity_id', array('in' => $categories))
+            ->load()->getItems();
 
             foreach ($quote->getAllVisibleItems() as $item) {
                 $product = $item->getProduct();
@@ -100,10 +123,10 @@ class Snippets extends Template
                     'product_id'  => (string) $item->getSku(),
                     'item_qty'    => (string) $item->getQty(),
                     'product_url' => (string) $product->getProductUrl(),
-                    'qty_price'   => (string) $this->getRejoinerHelper()->convertPriceToCents($rowTotal)
+                    'qty_price'   => (string) $this->getRejoinerHelper()->convertPriceToCents($rowTotal),
+                    'category'    => (string) $this->getRejoinerHelper()->getProductCategories($product, $categoriesArray)
                 ];
-                $this->items[] = $newItem;
-            }
+                $this->items[] = $newItem;            }
         }
         return $this->items;
     }
