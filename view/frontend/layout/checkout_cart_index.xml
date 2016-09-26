@@ -1,10 +1,14 @@
 <?xml version="1.0"?>
 <!--
 /**
-* Copyright © 2016 Rejoiner. All rights reserved.
-* See COPYING.txt for license details.
-*/
+ * Copyright © 2016 Rejoiner. All rights reserved.
+ * See COPYING.txt for license details.
+ */
 -->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
-    <update handle="tracking"/>
+    <body>
+        <referenceBlock name="rejoiner_base">
+            <block class="Rejoiner\Acr\Block\Snippets" name="rejoiner_tracking" template="Rejoiner_Acr::rejoiner_acr/tracking.phtml" after="-" cacheable="false" />
+        </referenceBlock>
+    </body>
 </page>

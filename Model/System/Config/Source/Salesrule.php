@@ -1,37 +1,17 @@
 <?php
-/**
- * Copyright © 2016 Rejoiner. All rights reserved.
- * See COPYING.txt for license details.
- */
 namespace Rejoiner\Acr\Model\System\Config\Source;
 
-use Magento\Framework\Api\SearchCriteriaBuilder;
-use Magento\SalesRule\Model\RuleRepository;
-use Magento\Framework\Option\ArrayInterface;
-
-class Salesrule implements ArrayInterface
+class Salesrule implements \Magento\Framework\Option\ArrayInterface
 {
     /**
-     * @var $ruleRepository RuleRepository
+     * @var \Magento\SalesRule\Model\RuleFactory $ruleFactory
      */
-    protected $ruleRepository;
+    private $ruleFactory;
 
-    /**
-     * @var $searchCriteriaBuilder SearchCriteriaBuilder
-     */
-    protected $searchCriteriaBuilder;
-
-    /**
-     * Salesrule constructor.
-     * @param RuleRepository $ruleRepository
-     * @param SearchCriteriaBuilder $searchCriteriaBuilder
-     */
     public function __construct(
-        RuleRepository $ruleRepository,
-        SearchCriteriaBuilder $searchCriteriaBuilder
+        \Magento\SalesRule\Model\RuleFactory $ruleFactory
     ) {
-        $this->ruleRepository        = $ruleRepository;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->ruleFactory = $ruleFactory;
     }
 
     /**
@@ -40,16 +20,23 @@ class Salesrule implements ArrayInterface
     public function toOptionArray()
     {
         $options = [];
-        $searchCriteria = $this->searchCriteriaBuilder->addFilter('use_auto_generation', 1)->create();
-        $collection = $this->ruleRepository->getList($searchCriteria);
-        /** @var \Magento\SalesRule\Model\Data\Rule $item */
-        foreach ($collection->getItems() as $item) {
-            $options[] = [
-                'value' => $item->getRuleId(),
-                'label' => $item->getName()
-            ];
+        $additional = [
+            'value' => 'rule_id',
+            'label' => 'name'
+        ];
+
+        $collection = $this->ruleFactory->create()->getResourceCollection();
+        foreach ($collection as $item) {
+            if ($item->getUseAutoGeneration()) {
+                $data = [];
+                foreach ($additional as $code => $field) {
+                    $data[$code] = $item->getData($field);
+                }
+                $options[] = $data;
+            }
+
         }
-        array_unshift($options, array('value'=>'', 'label'=> __('--Please Select--')));
+        array_unshift($options, ['value'=>'', 'label'=> __('--Please Select--')]);
         return $options;
     }
 }

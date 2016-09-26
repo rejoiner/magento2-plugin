@@ -1,0 +1,30 @@
+<?php /* @var \Rejoiner\Acr\Block\Base $block */ ?>
+<?php
+$rejoinerHelper = $block->getRejoinerHelper();
+// Need to render blocks one by one to implode them into the single JSON
+$childBlockNames = $block->getChildNames();
+$childBlocksHtml = [];
+foreach ($childBlockNames as $childBlockName) {
+    if ($html = $block->getChildHtml($childBlockName, false)) {
+        $childBlocksHtml[] = $html;
+    }
+}
+?>
+<?php if ($rejoinerHelper->getRejoinerSiteId() && $rejoinerHelper->getDomain()) : ?>
+    <?php
+    $domain = $block->escapeHtml($rejoinerHelper->getDomain());
+    $siteId = $block->escapeHtml($rejoinerHelper->getRejoinerSiteId());
+    ?>
+    <script type="text/x-magento-init">
+        {
+            "*": {
+                "RejoinerAcrTracking": {
+                    "rejoinerSiteId"      : "<?php echo $siteId; ?>",
+                    "rejoinerDomain"      : "<?php echo $domain; ?>"<?php echo (!empty($childBlocksHtml))? ',': ''?>
+                    <?php echo implode(',', $childBlocksHtml); ?>
+                }
+            }
+        }
+    </script>
+<?php endif ?>
+

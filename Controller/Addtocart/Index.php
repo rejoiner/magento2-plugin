@@ -1,77 +1,74 @@
 <?php
-/**
- * Copyright © 2016 Rejoiner. All rights reserved.
- * See COPYING.txt for license details.
- */
 namespace Rejoiner\Acr\Controller\Addtocart;
 
 use \Rejoiner\Acr\Helper\Data;
 use \Magento\Checkout\Model\Session;
 use \Magento\Framework\App\Action\Context;
 use \Magento\Framework\View\Result\PageFactory;
-use \Magento\Checkout\Model\Cart;
-use \Magento\Framework\App\Action\Action;
+use \Magento\Framework\ObjectManagerInterface;
+use \Magento\Checkout\Model\SessionFactory;
+use \Magento\Checkout\Model\CartFactory;
+use \Magento\Catalog\Model\ProductFactory;
 
-class Index extends Action
+class Index extends \Magento\Framework\App\Action\Action
 {
     /**
-     * @var $_product \Magento\Framework\View\Result\PageFactory
+     * @var \Magento\Framework\View\Result\PageFactory
      */
     protected $resultPageFactory;
-
-    /**
-     * @var $rejoinerHelper Data
-     */
+    protected $objectInterface;
+    protected $productRepository;
+    protected $logger;
     protected $rejoinerHelper;
-
-    /**
-     * @var $cart Cart
-     */
     protected $cart;
-
-    /**
-     * @var $session Session
-     */
+    protected $product;
     protected $session;
 
     /**
-     * Index constructor.
-     * @param Data $rejoinerHelper
-     * @param Session $session
-     * @param Context $context
-     * @param PageFactory $resultPageFactory
-     * @param Cart $cart
+     * @param \Rejoiner\Acr\Helper\Data $rejoinerHelper
+     * @param \Magento\Checkout\Model\Session $checkoutSession
+     * @param \Magento\Framework\App\Action\Context $context
+     * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
+     * @param \Magento\Framework\ObjectManagerInterface $objectInterface
+     * @param \Magento\Checkout\Model\SessionFactory $session
+     * @param \Magento\Checkout\Model\CartFactory $cart
+     * @param \Magento\Catalog\Model\ProductFactory $product
      */
-
     public function __construct(
         Data $rejoinerHelper,
-        Session $session,
+        Session $checkoutSession,
         Context $context,
         PageFactory $resultPageFactory,
-        Cart $cart
+        ObjectManagerInterface $objectInterface,
+        SessionFactory $session,
+        CartFactory $cart,
+        ProductFactory $product
     ) {
-        $this->rejoinerHelper             = $rejoinerHelper;
-        $this->resultPageFactory          = $resultPageFactory;
-        $this->cart                       = $cart;
-        $this->session                    = $session;
+        $this->rejoinerHelper    = $rejoinerHelper;
+        $this->resultPageFactory = $resultPageFactory;
+        $this->objectInterface   = $objectInterface;
+        $this->cart              = $cart;
+        $this->session           = $session;
+        $this->product           = $product;
+        $this->logger            = $objectInterface->get('\Psr\Log\LoggerInterface');
         parent::__construct($context);
     }
 
     /**
-     *
-     * Adds products to shopping cart
-
      * @return \Magento\Framework\App\ResponseInterface
      */
     public function execute()
     {
         if ($params = $this->getRequest()->getParams()) {
-            $cartModel = $this->cart;
+            $cartModel = $this->cart->create();
             $cartModel->truncate();
+
             foreach ($params as $key => $product) {
                 if ($product && is_array($product)) {
+                    $productModel = $this->product->create();
+                    $productModel->load((int)$product['product']);
                     try {
-                        $cartModel->addProduct($product['product'], $product);
+                        $cartModel->addProduct($productModel, $product);
                         unset($params[$key]);
                     } catch (\Exception $e) {
                         $this->rejoinerHelper->log($e->getMessage());
@@ -79,14 +76,13 @@ class Index extends Action
                 }
             }
             if (isset($params['coupon_code'])) {
-                $cartModel->getQuote()->setCouponCode($params['coupon_code']);
+                $cartModel->getQuote()->setCouponCode($params['coupon_code'])->collectTotals();
             }
             $cartModel->save();
-            $this->session->setCartWasUpdated(true);
+            $this->session->create()->setCartWasUpdated(true);
         }
-        $url = $this->_url->getUrl('checkout/cart/', ['updateCart' => true]);
+        $url = $this->_objectManager->get('\Magento\Framework\UrlInterface')->getUrl('checkout/cart/', ['updateCart' => true]);
         $this->getResponse()->setRedirect($url);
         return $this->_response;
     }
 }
-

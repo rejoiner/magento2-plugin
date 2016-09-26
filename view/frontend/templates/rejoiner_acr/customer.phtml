@@ -1,0 +1,3 @@
+<?php /* @var \Rejoiner\Acr\Block\Customer $block */ ?>
+"customerData"  : <?php /* @escapeNotVerified */ echo json_encode($block->getCustomerInfo(), JSON_UNESCAPED_SLASHES); ?>,
+"customerEmail" : <?php /* @escapeNotVerified */ echo json_encode($block->getCustomerEmail(), JSON_UNESCAPED_SLASHES); ?>

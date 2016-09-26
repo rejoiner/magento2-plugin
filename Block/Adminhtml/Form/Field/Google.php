@@ -5,18 +5,9 @@
  */
 namespace Rejoiner\Acr\Block\Adminhtml\Form\Field;
 
-use Magento\Framework\DataObject;
-use Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray;
-
-/**
- * Class Google
- * @package Rejoiner\Acr\Block\Adminhtml\Form\Field
- *
- * @method string getSourceRendererBlockType()
- */
-class Google extends AbstractFieldArray
+class Google extends \Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray
 {
-    /** @var \Magento\Framework\View\Element\Html\Select $sourceRenderer */
+    /** @var \Rejoiner\Acr\Block\Adminhtml\Form\Field\Source $sourceRenderer */
     protected $sourceRenderer;
 
     /**
@@ -29,7 +20,7 @@ class Google extends AbstractFieldArray
             'attr_name',
             [
                 'label' => __('Attribute Name'),
-                'renderer'  => $this->_getSourceRenderer(),
+                'renderer'  => $this->getSourceRenderer(),
             ]
         );
         $this->addColumn(
@@ -42,15 +33,12 @@ class Google extends AbstractFieldArray
         $this->_addButtonLabel = __('Add Rule');
     }
 
-    /**
-     * @param \Magento\Framework\DataObject $row
-     */
-    protected function _prepareArrayRow(DataObject $row)
+    protected function _prepareArrayRow(\Magento\Framework\DataObject $row)
     {
         $attrName = $row->getAttrName();
         $options = [];
         if ($attrName) {
-            $options['option_' . $this->_getSourceRenderer()->calcOptionHash($attrName)]
+            $options['option_' . $this->getSourceRenderer()->calcOptionHash($attrName)]
                 = 'selected="selected"';
         }
         $row->setData('option_extra_attrs', $options);
@@ -58,18 +46,18 @@ class Google extends AbstractFieldArray
     }
 
     /**
-     * @return \Magento\Framework\View\Element\Html\Select
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @return \Rejoiner\Acr\Block\Adminhtml\Form\Field\Source
      */
-    protected function _getSourceRenderer()
+    protected function getSourceRenderer()
     {
         if (!$this->sourceRenderer) {
             $this->sourceRenderer = $this->getLayout()->createBlock(
-                $this->getSourceRendererBlockType(),
+                '\Rejoiner\Acr\Block\Adminhtml\Form\Field\Source',
                 'google_anal',
                 ['data' => ['is_render_to_js_template' => true]]
             );
         }
         return $this->sourceRenderer;
+
     }
 }

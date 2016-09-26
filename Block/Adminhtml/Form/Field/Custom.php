@@ -5,14 +5,8 @@
  */
 namespace Rejoiner\Acr\Block\Adminhtml\Form\Field;
 
-use Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray;
-
-class Custom extends AbstractFieldArray
+class Custom extends \Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray
 {
-    protected $_addButtonLabel = 'Add Rule';
-
-    protected $_addAfter = false;
-
     /**
      * Prepare to render
      * @return void
@@ -31,5 +25,7 @@ class Custom extends AbstractFieldArray
                 'label' => __('Value'),
             ]
         );
+        $this->_addAfter = false;
+        $this->_addButtonLabel = __('Add Rule');
     }
 }

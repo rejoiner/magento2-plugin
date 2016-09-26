@@ -5,169 +5,125 @@
  */
 namespace Rejoiner\Acr\Helper;
 
-use Magento\Checkout\Model\Session;
-use Magento\Framework\Session\SessionManager;
-use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Framework\UrlInterface;
-use Magento\Framework\HTTP\ZendClientFactory;
-use Magento\Framework\App\Helper\Context;
-use Magento\SalesRule\Api\RuleRepositoryInterface;
-use Magento\SalesRule\Model\Coupon\Codegenerator;
-use Magento\SalesRule\Model\CouponFactory;
-use Magento\Sales\Api\Data\OrderInterface;
-use Rejoiner\Acr\Logger\Logger;
-use Magento\Framework\App\Helper\AbstractHelper;
-use Magento\Store\Model\ScopeInterface;
-use Magento\SalesRule\Helper\Coupon;
+use \Magento\Store\Model\ScopeInterface;
+use \Magento\Sales\Model\Order;
 
-class Data extends AbstractHelper
+class Data extends \Magento\Framework\App\Helper\AbstractHelper
 {
     const XML_PATH_REJOINER_SITE_ID              = 'checkout/rejoiner_acr/site_id';
     const XML_PATH_REJOINER_DOMAIN               = 'checkout/rejoiner_acr/domain';
     const XML_PATH_REJOINER_TRACK_NUMBERS        = 'checkout/rejoiner_acr/track_numbers';
     const XML_PATH_REJOINER_TRACK_PRICE_WITH_TAX = 'checkout/rejoiner_acr/track_price_with_tax';
     const XML_PATH_REJOINER_PERSIST_FORMS        = 'checkout/rejoiner_acr/persist_forms';
-    const XML_PATH_REJOINER_DEBUGGER_ENABLED     = 'checkout/rejoiner_acr/debug_enabled';
+    const XML_PATH_REJOINER_DEBUG_ENABLED        = 'checkout/rejoiner_acr/debug_enabled';
     const XML_PATH_REJOINER_API_KEY              = 'checkout/rejoiner_acr/api_key';
     const XML_PATH_REJOINER_API_SECRET           = 'checkout/rejoiner_acr/api_secret';
     const XML_PATH_REJOINER_API_SITE_ID          = 'checkout/rejoiner_acr/site_id';
     const XML_PATH_REJOINER_PROCESS_BY_CRON      = 'checkout/rejoiner_acr/process_by_cron';
     const XML_PATH_REJOINER_COUPON_GENERATION    = 'checkout/rejoiner_acr/coupon_code';
-    const XML_PATH_REJOINER_COUPON_RULE          = 'checkout/rejoiner_acr/coupon_rule';
+    const XML_PATH_REJOINER_COUPON_RULE          = 'checkout/rejoiner_acr/salesrule_model';
     const XML_PATH_REJOINER_THUMBNAIL_WIDTH      = 'checkout/rejoiner_acr/thumbnail_size_width';
     const XML_PATH_REJOINER_THUMBNAIL_HEIGHT     = 'checkout/rejoiner_acr/thumbnail_size_height';
+
     const REJOINER_API_URL                    = 'https://app.rejoiner.com';
     const REJOINER_API_REQUEST_PATH           = '/api/1.0/site/%s/lead/convert';
     const REMOVED_CART_ITEM_SKU_VARIABLE      = 'rejoiner_sku';
 
-    /**
-     * @var $_currentProtocolSecurity null|bool
-     */
-    protected $_currentProtocolSecurity = null;
+    /** @var bool $currentProtocolSecurity */
+    protected $currentProtocolSecurity = false;
 
-    /**
-     * @var $_checkoutSession \Magento\Checkout\Model\Session
-     */
-    protected $_checkoutSession;
+    /** @var \Magento\Checkout\Model\Session $_checkoutSession */
+    protected $checkoutSession;
 
-    /**
-     * @var $_urlInterface \Magento\Framework\UrlInterface
-     */
-    protected $_urlInterface;
+    /** @var \Magento\Framework\UrlInterface $urlInterface */
+    protected $urlInterface;
 
-    /**
-     * @var $scopeConfig \Magento\Framework\App\Config\ScopeConfigInterface
-     */
-    protected $scopeConfig;
+    /** @var \Magento\Framework\ObjectManagerInterface $objectInterface*/
+    protected $objectInterface;
 
-    /**
-     * @var $sessionManager \Magento\Framework\Session\SessionManager
-     */
+    /** @var \Magento\Framework\Session\SessionManager $sessionManager*/
     protected $sessionManager;
 
-    /**
-     * @var RuleRepositoryInterface
-     */
-    protected $ruleRepository;
-
-    /**
-     * @var $codegenerator Codegenerator
-     */
-    protected $codegenerator;
-
-    /**
-     * @var $couponFactory CouponFactory
-     */
-    protected $couponFactory;
-
-    /**
-     * @var $httpClient \Magento\Framework\HTTP\ZendClientFactory
-     */
+    /** @var \Magento\Framework\HTTP\ZendClientFactory $httpClient */
     protected $httpClient;
 
-    /**
-     * @var $logger Logger
-     */
+    /** @var \Monolog\Logger $logger */
     protected $logger;
+
+    /** @var \Magento\Store\Model\StoreManagerInterface  $storeManager*/
+    protected $storeManager;
 
     /**
      * Data constructor.
-     * @param Session $checkoutSession
-     * @param SessionManager $sessionManager
-     * @param ScopeConfigInterface $scopeConfig
-     * @param UrlInterface $urlInterface
-     * @param ZendClientFactory $httpClient
-     * @param RuleRepositoryInterface $ruleRepository
-     * @param Codegenerator $codegenerator
-     * @param CouponFactory $couponFactory
-     * @param Logger $logger
-     * @param Context $context
+     * @param \Magento\Checkout\Model\Session $checkoutSession
+     * @param \Magento\Framework\Session\SessionManager $sessionManager
+     * @param \Magento\Framework\UrlInterface $urlInterface
+     * @param \Magento\Framework\HTTP\ZendClientFactory $httpClient
+     * @param \Magento\Framework\ObjectManagerInterface $objectInterface
+     * @param \Monolog\Logger $logger
+     * @param \Magento\Framework\App\Helper\Context $context
      */
     public function __construct(
-        Session $checkoutSession,
-        SessionManager $sessionManager,
-        ScopeConfigInterface $scopeConfig,
-        UrlInterface $urlInterface,
-        ZendClientFactory $httpClient,
-        RuleRepositoryInterface $ruleRepository,
-        Codegenerator $codegenerator,
-        CouponFactory $couponFactory,
-        Logger $logger,
-        Context $context
+        \Magento\Checkout\Model\Session $checkoutSession,
+        \Magento\Framework\Session\SessionManager $sessionManager,
+        \Magento\Framework\UrlInterface $urlInterface,
+        \Magento\Framework\HTTP\ZendClientFactory $httpClient,
+        \Magento\Framework\ObjectManagerInterface $objectInterface,
+        \Monolog\Logger $logger,
+        \Magento\Store\Model\StoreManagerInterface $storeManager,
+        \Magento\Framework\App\Helper\Context $context
     ) {
-        $this->_checkoutSession = $checkoutSession;
-        $this->_urlInterface    = $urlInterface;
-        $this->scopeConfig     = $scopeConfig;
-        $this->sessionManager   = $sessionManager;
-        $this->ruleRepository   = $ruleRepository;
-        $this->codegenerator    = $codegenerator;
-        $this->couponFactory    = $couponFactory;
+        $this->checkoutSession = $checkoutSession;
+        $this->urlInterface    = $urlInterface;
+        $this->objectInterface = $objectInterface;
+        $this->sessionManager  = $sessionManager;
+        $this->_httpClient      = $httpClient;
         $this->logger           = $logger;
-        $this->httpClient       = $httpClient;
+        $this->httpClient      = $httpClient;
         parent::__construct($context);
     }
 
     /**
-     * @param $price
+     * @param $price int
      * @return float
      */
     public function convertPriceToCents($price) {
-        return round($price * 100);
+        return round($price*100);
     }
 
     /**
-     * Generates restore url.
      * @return string
      */
     public function getRestoreUrl()
     {
         $product = [];
-        try {
-            foreach ($this->_checkoutSession->getQuote()->getAllVisibleItems() as $item) {
+        if ($items = $this->checkoutSession->getQuote()->getAllVisibleItems()) {
+            /** @var \Magento\Quote\Model\Quote\Item $item */
+            foreach ($items as $item) {
                 $options = unserialize($item->getOptionByCode('info_buyRequest')->getValue());
                 $options['qty'] = $item->getQty();
                 $options['product'] = $item->getProductId();
                 $product[] = $options;
             }
-        } catch (\Exception $e) {
-            $this->log(_('There is some problem with serialized data'));
         }
-        $googleAttributesArray = $this->getGoogleAttributes();
-        $customAttributesArray = $this->getCustomAttributes();
-        $url = $this->_urlInterface->getUrl('rejoiner/addtocart?'.http_build_query(array_merge($product, $googleAttributesArray, $customAttributesArray)));
-        return substr($url, 0, strlen($url)-1);
+        $googleAttributesArray = $this->returnGoogleAttributes();
+        $customAttributesArray = $this->returnCustomAttributes();
+        $params = array_merge($product, $googleAttributesArray, $customAttributesArray);
+        $url = $this->urlInterface->getUrl('rejoiner/addtocart', [
+            '_query'  => $params,
+            '_secure' => true
+        ]);
+        return $url;
     }
 
     /**
-     * Returns additional google attributes set in Admin Panel
-     *
      * @return array
      */
-    protected function getGoogleAttributes() {
+    public function returnGoogleAttributes() {
         $result = [];
-        if ($googleAnalitics = $this->scopeConfig->getValue('checkout/rejoiner_acr/google_attributes', ScopeInterface::SCOPE_STORE)) {
+        if ($googleAnalitics = $this->scopeConfig->getValue('checkout/rejoiner_acr/google_attributes', \Magento\Store\Model\ScopeInterface::SCOPE_STORE)) {
             foreach (unserialize($googleAnalitics) as $attr) {
-                if (isset($attr['attr_name']) && isset($attr['value'])) {
+                if ($attr['attr_name'] && $attr['value']) {
                     $result[$attr['attr_name']] = $attr['value'];
                 }
             }
@@ -176,13 +132,12 @@ class Data extends AbstractHelper
     }
 
     /**
-     * Returns custom additional attributes set in Admin Panel
-     *
      * @return array
      */
-    protected function getCustomAttributes() {
+    public function returnCustomAttributes()
+    {
         $result = [];
-        if ($customAttr = $this->scopeConfig->getValue('checkout/rejoiner_acr/custom_attributes', ScopeInterface::SCOPE_STORE)) {
+        if ($customAttr = $this->scopeConfig->getValue('checkout/rejoiner_acr/custom_attributes', \Magento\Store\Model\ScopeInterface::SCOPE_STORE)) {
             foreach (unserialize($customAttr) as $attr) {
                 if ($attr['attr_name'] && $attr['value']) {
                     $result[$attr['attr_name']] = $attr['value'];
@@ -193,26 +148,24 @@ class Data extends AbstractHelper
     }
 
     /**
-     * Generate discount coupon code according to selected shopping cart rule.
-     *
      * @return string
      */
     public function generateCouponCode()
     {
-        $couponCode = $this->_checkoutSession->getQuote()->getPromo();
-        $ruleId = $this->scopeConfig->getValue(self::XML_PATH_REJOINER_COUPON_RULE);
-        $ruleItem = $this->ruleRepository->getById($ruleId);
+        $couponCode = $this->checkoutSession->getQuote()->getPromo();
+        $rule_id = $this->scopeConfig->getValue(self::XML_PATH_REJOINER_COUPON_RULE);
+        $ruleItem = $this->objectInterface->get('\Magento\SalesRule\Model\Rule')->load($rule_id);
         if ($ruleItem->getUseAutoGeneration() && !$couponCode)
         {
-            $couponCode = $this->codegenerator->generateCode();
-            $salesRuleModel = $this->couponFactory->create();
-            $salesRuleModel->setRuleId($ruleId)
+            $couponCode = $this->objectInterface->get('\Magento\SalesRule\Model\Coupon\Codegenerator')->generateCode();
+            $salesRuleModel = $this->objectInterface->get('Magento\SalesRule\Model\Coupon');
+            $salesRuleModel->setRuleId($rule_id)
                 ->setCode($couponCode)
                 ->setUsageLimit(1)
                 ->setCreatedAt(time())
-                ->setType(Coupon::COUPON_TYPE_SPECIFIC_AUTOGENERATED)
+                ->setType(\Magento\SalesRule\Helper\Coupon::COUPON_TYPE_SPECIFIC_AUTOGENERATED)
                 ->save();
-            $this->_checkoutSession->getQuote()->setPromo($couponCode)->save();
+            $this->checkoutSession->getQuote()->setPromo($couponCode)->save();
         }
         return $couponCode;
     }
@@ -275,7 +228,7 @@ class Data extends AbstractHelper
      */
     public function getImageWidth()
     {
-        return $this->scopeConfig->getValue(self::XML_PATH_REJOINER_THUMBNAIL_WIDTH);
+        return $this->scopeConfig->getValue(self::XML_PATH_REJOINER_THUMBNAIL_WIDTH, ScopeInterface::SCOPE_STORE);
     }
 
     /**
@@ -315,9 +268,17 @@ class Data extends AbstractHelper
      */
     public function log($message)
     {
-        if ($this->scopeConfig->getValue(self::XML_PATH_REJOINER_DEBUGGER_ENABLED)) {
+        if ($this->isDebugEnabled()) {
             $this->logger->info($message);
         }
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function isDebugEnabled()
+    {
+        return (bool) $this->scopeConfig->getValue(self::XML_PATH_REJOINER_DEBUG_ENABLED, ScopeInterface::SCOPE_STORE);
     }
 
     /**
@@ -335,11 +296,11 @@ class Data extends AbstractHelper
     }
 
     /**
-     * @param $orderModel
+     * @param Order $orderModel
      * @return int
      * @throws \Zend_Http_Client_Exception
      */
-    public function sendInfoToRejoiner(OrderInterface $orderModel)
+    public function sendInfoToRejoiner(Order $orderModel)
     {
         $apiKey = $this->scopeConfig->getValue(self::XML_PATH_REJOINER_API_KEY);
         $apiSecret = utf8_encode($this->scopeConfig->getValue(self::XML_PATH_REJOINER_API_SECRET));
@@ -350,7 +311,7 @@ class Data extends AbstractHelper
         $hmacData = utf8_encode(implode("\n", [\Zend_Http_Client::POST, $requestPath, $requestBody]));
         $codedApiSecret = base64_encode(hash_hmac('sha1', $hmacData, $apiSecret, true));
         $authorization = sprintf('Rejoiner %s:%s', $apiKey, $codedApiSecret);
-        $client = $this->httpClient->create(['uri' => self::REJOINER_API_URL . $requestPath]);
+        $client = $this->_httpClient->create(['uri' => self::REJOINER_API_URL . $requestPath]);
         $client->setRawData($requestBody);
         $client->setHeaders(['Authorization' => $authorization, 'Content-type' => 'application/json;']);
         try {
@@ -362,21 +323,33 @@ class Data extends AbstractHelper
         }
         switch ($responseCode) {
             case '200':
-                $this->log(__('%1 : Everything is alright.', $responseCode));
+                $this->log($responseCode . ': Everything is alright.');
                 break;
             case '400':
-                $this->log(__('%1  : required params were not specified and/or the body was malformed', $responseCode));
+                $this->log($responseCode . ': required params were not specified and/or the body was malformed');
                 break;
             case '403':
-                $this->log(__('%1: failed authentication and/or incorrect signature', $responseCode));
+                $this->log($responseCode . ': failed authentication and/or incorrect signature');
                 break;
             case '500':
-                $this->log(__('%1 : internal error, contact us for details', $responseCode));
+                $this->log($responseCode . ': internal error, contact us for details');
                 break;
             default:
-                $this->log(__('%1 : unexpected response code', $responseCode));
+                $this->log($responseCode . ': unexpected response code');
                 break;
         }
         return $responseCode;
     }
+
+    public function getProductCategories($product, $categoriesArray)
+    {
+        $result = [];
+        foreach ($product->getCategoryIds() as $catId) {
+            if (isset($categoriesArray[$catId])) {
+                $result[] = $categoriesArray[$catId]->getName();
+            }
+        }
+        return $result;
+    }
+
 }
