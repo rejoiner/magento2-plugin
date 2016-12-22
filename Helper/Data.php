@@ -35,9 +35,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /** @var \Magento\Checkout\Model\Session $_checkoutSession */
     protected $checkoutSession;
 
-    /** @var \Magento\Framework\UrlInterface $urlInterface */
-    protected $urlInterface;
-
     /** @var \Magento\Framework\ObjectManagerInterface $objectInterface*/
     protected $objectInterface;
 
@@ -57,7 +54,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * Data constructor.
      * @param \Magento\Checkout\Model\Session $checkoutSession
      * @param \Magento\Framework\Session\SessionManager $sessionManager
-     * @param \Magento\Framework\UrlInterface $urlInterface
      * @param \Magento\Framework\HTTP\ZendClientFactory $httpClient
      * @param \Magento\Framework\ObjectManagerInterface $objectInterface
      * @param \Monolog\Logger $logger
@@ -66,7 +62,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function __construct(
         \Magento\Checkout\Model\Session $checkoutSession,
         \Magento\Framework\Session\SessionManager $sessionManager,
-        \Magento\Framework\UrlInterface $urlInterface,
         \Magento\Framework\HTTP\ZendClientFactory $httpClient,
         \Magento\Framework\ObjectManagerInterface $objectInterface,
         \Monolog\Logger $logger,
@@ -74,7 +69,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Framework\App\Helper\Context $context
     ) {
         $this->checkoutSession = $checkoutSession;
-        $this->urlInterface    = $urlInterface;
         $this->objectInterface = $objectInterface;
         $this->sessionManager  = $sessionManager;
         $this->_httpClient      = $httpClient;
@@ -109,7 +103,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $googleAttributesArray = $this->returnGoogleAttributes();
         $customAttributesArray = $this->returnCustomAttributes();
         $params = array_merge($product, $googleAttributesArray, $customAttributesArray);
-        $url = $this->urlInterface->getUrl('rejoiner/addtocart', [
+        $url = $this->_urlBuilder->getUrl('rejoiner/addtocart', [
             '_query'  => $params,
             '_secure' => true
         ]);
