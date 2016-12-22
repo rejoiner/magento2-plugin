@@ -16,9 +16,7 @@ class Index extends \Magento\Framework\App\Action\Action
      * @var \Magento\Framework\View\Result\PageFactory
      */
     protected $resultPageFactory;
-    protected $objectInterface;
     protected $productRepository;
-    protected $logger;
     protected $rejoinerHelper;
     protected $cart;
     protected $product;
@@ -29,7 +27,6 @@ class Index extends \Magento\Framework\App\Action\Action
      * @param \Magento\Checkout\Model\Session $checkoutSession
      * @param \Magento\Framework\App\Action\Context $context
      * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
-     * @param \Magento\Framework\ObjectManagerInterface $objectInterface
      * @param \Magento\Checkout\Model\SessionFactory $session
      * @param \Magento\Checkout\Model\CartFactory $cart
      * @param \Magento\Catalog\Model\ProductFactory $product
@@ -39,18 +36,15 @@ class Index extends \Magento\Framework\App\Action\Action
         Session $checkoutSession,
         Context $context,
         PageFactory $resultPageFactory,
-        ObjectManagerInterface $objectInterface,
         SessionFactory $session,
         CartFactory $cart,
         ProductFactory $product
     ) {
         $this->rejoinerHelper    = $rejoinerHelper;
         $this->resultPageFactory = $resultPageFactory;
-        $this->objectInterface   = $objectInterface;
         $this->cart              = $cart;
         $this->session           = $session;
         $this->product           = $product;
-        $this->logger            = $objectInterface->get('\Psr\Log\LoggerInterface');
         parent::__construct($context);
     }
 
