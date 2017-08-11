@@ -30,6 +30,17 @@
                     <validate>required-entry</validate>
                 </field>
 
+                <field id="passing_new_customers" translate="label" type="select" sortOrder="25" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Pass "new customers" to Rejoiner</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="list_id" translate="label" type="text" sortOrder="26" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>List ID</label>
+                    <depends>
+                        <field id="passing_new_customers">1</field>
+                    </depends>
+                </field>
+
                 <field id="process_by_cron" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Scheduled Conversion API Calls</label>
                     <comment>If disabled calls to the external API will be performed inline during order placement. Under specific circumstances could lead to slower page rendering.</comment>

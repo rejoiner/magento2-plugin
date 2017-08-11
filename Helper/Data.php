@@ -24,10 +24,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_PATH_REJOINER_COUPON_RULE          = 'checkout/rejoiner_acr/salesrule_model';
     const XML_PATH_REJOINER_THUMBNAIL_WIDTH      = 'checkout/rejoiner_acr/thumbnail_size_width';
     const XML_PATH_REJOINER_THUMBNAIL_HEIGHT     = 'checkout/rejoiner_acr/thumbnail_size_height';
+    const XML_PATH_REJOINER_PASS_NEW_CUSTOMERS   = 'checkout/rejoiner_acr/passing_new_customers';
+    const XML_PATH_REJOINER_LIST_ID              = 'checkout/rejoiner_acr/list_id';
 
-    const REJOINER_API_URL                    = 'https://app.rejoiner.com';
-    const REJOINER_API_REQUEST_PATH           = '/api/1.0/site/%s/lead/convert';
-    const REMOVED_CART_ITEM_SKU_VARIABLE      = 'rejoiner_sku';
+
+    const REJOINER_API_URL                      = 'https://app.rejoiner.com';
+    const REJOINER_API_REQUEST_PATH             = '/api/1.0/site/%s/lead/convert';
+    const REJOINER_API_ADD_TO_LIST_REQUEST_PATH = '/api/1.0/site/%s/contact_add';
+    const REMOVED_CART_ITEM_SKU_VARIABLE        = 'rejoiner_sku';
 
     /** @var bool $currentProtocolSecurity */
     protected $currentProtocolSecurity = false;
@@ -298,16 +302,75 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $apiKey = $this->scopeConfig->getValue(self::XML_PATH_REJOINER_API_KEY);
         $apiSecret = utf8_encode($this->scopeConfig->getValue(self::XML_PATH_REJOINER_API_SECRET));
-        $siteId = $this->scopeConfig->getValue(self::XML_PATH_REJOINER_API_SITE_ID);
-        $requestPath = sprintf(self::REJOINER_API_REQUEST_PATH, $siteId);
-        $customerEmail = $orderModel->getBillingAddress()->getEmail();
-        $requestBody = utf8_encode(sprintf('{"email": "%s"}', $customerEmail));
-        $hmacData = utf8_encode(implode("\n", [\Zend_Http_Client::POST, $requestPath, $requestBody]));
+        if ($apiKey && $apiSecret) {
+            $siteId = $this->scopeConfig->getValue(self::XML_PATH_REJOINER_API_SITE_ID);
+            $customerEmail = $orderModel->getBillingAddress()->getEmail();
+            $this->convert($apiKey, $apiSecret, $siteId, $customerEmail);
+
+            if ($this->scopeConfig->getValue(self::XML_PATH_REJOINER_PASS_NEW_CUSTOMERS) && $this->scopeConfig->getValue(self::XML_PATH_REJOINER_LIST_ID)) {
+                $this->addToList($apiKey, $apiSecret, $siteId, $orderModel);
+            }
+
+        }
+    }
+
+    /**
+     * @param $apiKey
+     * @param $apiSecret
+     * @param $siteId
+     * @param $customerEmail
+     * @return $this
+     */
+    private function convert($apiKey, $apiSecret, $siteId, $customerEmail)
+    {
+        $requestPath    = sprintf(self::REJOINER_API_REQUEST_PATH, $siteId);
+        $requestBody    = utf8_encode(sprintf('{"email": "%s"}', $customerEmail));
+        $hmacData       = utf8_encode(implode("\n", [\Zend_Http_Client::POST, $requestPath, $requestBody]));
         $codedApiSecret = base64_encode(hash_hmac('sha1', $hmacData, $apiSecret, true));
-        $authorization = sprintf('Rejoiner %s:%s', $apiKey, $codedApiSecret);
+        $authorization  = sprintf('Rejoiner %s:%s', $apiKey, $codedApiSecret);
         $client = $this->_httpClient->create(['uri' => self::REJOINER_API_URL . $requestPath]);
         $client->setRawData($requestBody);
         $client->setHeaders(['Authorization' => $authorization, 'Content-type' => 'application/json;']);
+        $this->sendRequest($client);
+        return $this;
+    }
+
+    /**
+     * @param $apiKey
+     * @param $apiSecret
+     * @param $siteId
+     * @param Order $order
+     * @return $this
+     */
+    private function addToList($apiKey, $apiSecret, $siteId, $order)
+    {
+        $listId = $this->scopeConfig->getValue(self::XML_PATH_REJOINER_LIST_ID);
+        if (!$listId) {
+            return $this;
+        }
+        $data = array(
+            'email'      => $order->getCustomerEmail(),
+            'list_id'    => $listId,
+            'first_name' => $order->getBillingAddress()->getFirstname()
+        );
+        $requestBody    = utf8_encode(json_encode($data));
+        $requestPath    = sprintf(self::REJOINER_API_ADD_TO_LIST_REQUEST_PATH, $siteId);
+        $hmacData       = utf8_encode(implode("\n", [\Zend_Http_Client::POST, $requestPath, $requestBody]));
+        $codedApiSecret = base64_encode(hash_hmac('sha1', $hmacData, $apiSecret, true));
+        $authorization  = sprintf('Rejoiner %s:%s', $apiKey , $codedApiSecret);
+        $client         = $this->_httpClient->create(['uri' => self::REJOINER_API_URL . $requestPath]);
+        $client->setRawData($requestBody);
+        $client->setHeaders(array('Authorization' => $authorization, 'Content-type' => 'application/json;' ));
+        $this->sendRequest($client);
+        return $this;
+    }
+
+    /**
+     * @param \Magento\Framework\HTTP\ZendClient $client
+     * @return int
+     */
+    private function sendRequest($client)
+    {
         try {
             $response = $client->request(\Zend_Http_Client::POST);
             $responseCode = $response->getStatus();
@@ -335,6 +398,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $responseCode;
     }
 
+
+    /**
+     * @param $product
+     * @param $categoriesArray
+     * @return array;
+     */
     public function getProductCategories($product, $categoriesArray)
     {
         $result = [];
