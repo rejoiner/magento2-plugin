@@ -2,9 +2,10 @@
   "name": "pavlo/rejoiner-magento2",
   "description": "Rejoiner extension for Magento 2",
   "require": {
-    "magento/module-checkout": ">=100.1.0",
-    "magento/module-catalog": ">=101.0.0",
-    "magento/module-customer": ">=100.1.0"
+    "magento/module-checkout": ">=100.0.0",
+    "magento/module-catalog": ">=100.0.0",
+    "magento/module-customer": ">=100.0.0",
+    "pavlo/rejoiner-magento2": "2.1.0"
   },
   "type": "magento2-module",
   "version": "2.1.0",
