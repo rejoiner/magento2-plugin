@@ -1,4 +1,5 @@
 <?php
+
 namespace Rejoiner\Acr\Model\ResourceModel;
 
 class Acr extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
@@ -10,7 +11,6 @@ class Acr extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
      */
     protected function _construct()
     {
-        //rejoiner_acr is table and entity_id is primary key of this table
         $this->_init('rejoiner_acr_success_orders', 'entity_id');
     }
 }

@@ -5,6 +5,8 @@
  */
 namespace Rejoiner\Acr\Block;
 
+use Rejoiner\Acr\Plugin\Framework\Model\Layout\Customer\DepersonalizePlugin;
+
 class Customer extends Base
 {
     /** @var \Magento\Customer\Model\Customer $currentCustomer */
@@ -13,6 +15,19 @@ class Customer extends Base
     /** @var  \Magento\Framework\ObjectManagerInterface $objectManager */
     protected $objectManager;
 
+    /**
+     * Customer constructor.
+     * @param \Rejoiner\Acr\Helper\Data $rejoinerHelper
+     * @param \Magento\Framework\Json\Helper\Data $jsonHelper
+     * @param \Magento\Catalog\Helper\Image $imageHelper
+     * @param \Magento\Customer\Model\Session $customerSession
+     * @param \Magento\Checkout\Model\Session $checkoutSession
+     * @param \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollectionFactory
+     * @param \Magento\Framework\Locale\Resolver $localeResolver
+     * @param \Magento\Framework\Registry $registry
+     * @param \Magento\Framework\View\Element\Template\Context $context
+     * @param array $data
+     */
     public function __construct(
         \Rejoiner\Acr\Helper\Data $rejoinerHelper,
         \Magento\Framework\Json\Helper\Data $jsonHelper,
@@ -25,7 +40,7 @@ class Customer extends Base
         \Magento\Framework\View\Element\Template\Context $context,
         array $data
     ) {
-        $this->currentCustomer = $registry->registry(\Rejoiner\Acr\Model\Layout\Customer\DepersonalizePlugin::REGISTRY_KEY);
+        $this->currentCustomer = $registry->registry(DepersonalizePlugin::REGISTRY_KEY);
         parent::__construct(
             $rejoinerHelper,
             $jsonHelper,
@@ -94,9 +109,7 @@ class Customer extends Base
      */
     protected function _toHtml()
     {
-        return $this->getCurrentCustomer()->getId()
-            ? parent::_toHtml()
-            : '';
+        return $this->getCurrentCustomer()->getId() ? parent::_toHtml() : '';
     }
 
     /**

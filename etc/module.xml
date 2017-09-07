@@ -1,3 +1,9 @@
+<?xml version="1.0"?>
+
 <config>
-    <module name="Rejoiner_Acr" setup_version="2.1.0"/>
+    <module name="Rejoiner_Acr" setup_version="2.2.0">
+        <sequence>
+            <module name="Magento_Newsletter" />
+        </sequence>
+    </module>
 </config>

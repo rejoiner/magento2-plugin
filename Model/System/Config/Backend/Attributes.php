@@ -1,4 +1,5 @@
 <?php
+
 namespace Rejoiner\Acr\Model\System\Config\Backend;
 
 class Attributes extends \Magento\Framework\App\Config\Value
@@ -10,12 +11,15 @@ class Attributes extends \Magento\Framework\App\Config\Value
      */
     public function beforeSave()
     {
+        /** @var array $value */
         $value = $this->getValue();
+        $value = is_array($value) ? $value : [];
         foreach ($value as $key => $data) {
             if (!$data ) {
                 unset($value[$key]);
             }
         }
+
         $this->setValue(serialize($value));
         return $this;
     }

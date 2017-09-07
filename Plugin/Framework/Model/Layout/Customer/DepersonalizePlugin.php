@@ -1,5 +1,6 @@
 <?php
-namespace Rejoiner\Acr\Model\Layout\Customer;
+
+namespace Rejoiner\Acr\Plugin\Framework\Model\Layout\Customer;
 
 /**
  * Class DepersonalizePlugin
@@ -17,7 +18,12 @@ class DepersonalizePlugin
     /** @var \Magento\Framework\Registry $customerSession */
     protected $registry;
 
-
+    /**
+     * DepersonalizePlugin constructor.
+     * @param \Magento\PageCache\Model\DepersonalizeChecker $depersonalizeChecker
+     * @param \Magento\Framework\Registry $registry
+     * @param \Magento\Customer\Model\Session $customerSession
+     */
     public function __construct(
         \Magento\PageCache\Model\DepersonalizeChecker $depersonalizeChecker,
         \Magento\Framework\Registry $registry,
@@ -40,6 +46,7 @@ class DepersonalizePlugin
         if (!$this->registry->registry(self::REGISTRY_KEY)) {
             $this->registry->register(self::REGISTRY_KEY, $this->customerSession->getCustomer());
         }
+
         return $result;
     }
 }

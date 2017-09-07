@@ -1,5 +1,6 @@
 <?php
-namespace Rejoiner\Acr\Model\Layout\Checkout;
+
+namespace Rejoiner\Acr\Plugin\Framework\Model\Layout\Checkout;
 
 /**
  * Class DepersonalizePlugin
@@ -11,11 +12,14 @@ class DepersonalizePlugin
     /** @var  \Magento\Quote\Model\Quote $quote */
     protected $quote;
 
-
     /** @var \Magento\Framework\Registry $customerSession */
     protected $registry;
 
-
+    /**
+     * DepersonalizePlugin constructor.
+     * @param \Magento\Framework\Registry $registry
+     * @param \Magento\Checkout\Model\Session $checkoutSession
+     */
     public function __construct(
         \Magento\Framework\Registry $registry,
         \Magento\Checkout\Model\Session $checkoutSession
@@ -36,6 +40,7 @@ class DepersonalizePlugin
         if (!$this->registry->registry(self::REGISTRY_KEY)) {
             $this->registry->register(self::REGISTRY_KEY, $this->checkoutSession->getQuote());
         }
+
         return $result;
     }
 }

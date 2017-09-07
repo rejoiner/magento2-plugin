@@ -8,9 +8,12 @@ class Salesrule implements \Magento\Framework\Option\ArrayInterface
      */
     private $ruleFactory;
 
-    public function __construct(
-        \Magento\SalesRule\Model\RuleFactory $ruleFactory
-    ) {
+    /**
+     * Salesrule constructor.
+     * @param \Magento\SalesRule\Model\RuleFactory $ruleFactory
+     */
+    public function __construct(\Magento\SalesRule\Model\RuleFactory $ruleFactory)
+    {
         $this->ruleFactory = $ruleFactory;
     }
 
@@ -37,6 +40,7 @@ class Salesrule implements \Magento\Framework\Option\ArrayInterface
 
         }
         array_unshift($options, ['value'=>'', 'label'=> __('--Please Select--')]);
+
         return $options;
     }
 }

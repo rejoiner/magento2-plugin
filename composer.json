@@ -5,6 +5,7 @@
     "magento/module-checkout": ">=100.0.0",
     "magento/module-catalog": ">=100.0.0",
     "magento/module-customer": ">=100.0.0",
+    "magento/module-newsletter": ">=100.0.0",
     "pavlo/rejoiner-magento2": "2.1.0"
   },
   "type": "magento2-module",

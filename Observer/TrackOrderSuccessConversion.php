@@ -28,9 +28,12 @@ class TrackOrderSuccessConversion
         $this->_timezone        = $timezone;
     }
 
-
+    /**
+     * @return $this
+     */
     public function trackOrder()
     {
+        /** @var \Rejoiner\Acr\Model\ResourceModel\Acr\Collection $collection */
         $collection = $this->_rejoinerFactory->create()->getResourceCollection();
         $collection->addFieldToFilter('sent_at', ['null' => true]);
         if (!empty($collection->getSize())
@@ -38,6 +41,7 @@ class TrackOrderSuccessConversion
             && $this->_rejoinerHelper->getRejoinerApiSecret()
         ) {
             foreach ($collection as $successOrder) {
+                /** @var \Magento\Sales\Model\Order $orderModel */
                 $orderModel = $this->_orderFactory->create();
                 $orderModel->load($successOrder->getOrderId());
                 $responseCode = $this->_rejoinerHelper->sendInfoToRejoiner($orderModel);
@@ -49,5 +53,4 @@ class TrackOrderSuccessConversion
 
         return $this;
     }
-
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace Rejoiner\Acr\Model;
 
 class Acr extends \Magento\Framework\Model\AbstractModel
@@ -10,6 +11,6 @@ class Acr extends \Magento\Framework\Model\AbstractModel
      */
     protected function _construct()
     {
-        $this->_init('Rejoiner\Acr\Model\ResourceModel\Acr');
+        $this->_init(\Rejoiner\Acr\Model\ResourceModel\Acr::class);
     }
 }

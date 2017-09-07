@@ -1,9 +1,9 @@
 <?php
+
 namespace Rejoiner\Acr\Model\ResourceModel\Acr;
 
 class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection
 {
-
     /**
      * Define resource model
      *
@@ -11,6 +11,6 @@ class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\Ab
      */
     protected function _construct()
     {
-        $this->_init('Rejoiner\Acr\Model\Acr', 'Rejoiner\Acr\Model\ResourceModel\Acr');
+        $this->_init(\Rejoiner\Acr\Model\Acr::class, \Rejoiner\Acr\Model\ResourceModel\Acr::class);
     }
 }
