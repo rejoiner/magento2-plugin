@@ -14,7 +14,10 @@ use Magento\Framework\Setup\SchemaSetupInterface;
  */
 class UpgradeSchema implements UpgradeSchemaInterface
 {
-
+    /**
+     * @param SchemaSetupInterface $setup
+     * @param ModuleContextInterface $context
+     */
     public function upgrade(SchemaSetupInterface $setup, ModuleContextInterface $context)
     {
         $version = $context->getVersion();
@@ -65,6 +68,25 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 'Backend Tracking'
             );
             $installer->getConnection()->createTable($table);
+
+            $installer->endSetup();
+        }
+
+        if (version_compare($version, '2.2.0', '<')) {
+            $installer = $setup;
+            $installer->startSetup();
+
+            $installer->getConnection()->addColumn(
+                $installer->getTable('newsletter_subscriber'),
+                'added_to_rejoiner',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                    'unsigned' => true,
+                    'nullable' => false,
+                    'default' => '2',
+                    'comment' => 'Added To Rejoiner'
+                ]
+            );
 
             $installer->endSetup();
         }
