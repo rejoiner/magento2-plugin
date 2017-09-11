@@ -1,0 +1,24 @@
+<?php
+/**
+ * Copyright © 2017 Rejoiner. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/* @var \Rejoiner\Acr\Block\Onepage\Success\Subscribe $block */
+?>
+<script>
+    require([
+        'jquery'
+    ], function($) {
+        if (window.rejoinerMarketing && window.rejoinerMarketing.subscribe_guest_checkout) {
+            $.ajax({
+                url: '<?php echo $block->getSubscribeUrl(); ?>',
+                data: <?php echo $block->getJsonData(); ?>,
+                type: 'post',
+                dataType: 'json',
+                success: function() {},
+                error: function() {}
+            });
+        }
+    });
+</script>

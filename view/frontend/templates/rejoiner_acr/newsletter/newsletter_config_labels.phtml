@@ -1,0 +1,24 @@
+<?php
+/**
+ * Copyright © 2017 Rejoiner. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/* @var \Rejoiner\Acr\Block\Newsletter $block */
+?>
+<?php if ($block->isEnabled()): ?>
+    <style type="text/css">
+        <?php if ($styles = $block->getStyles()): ?>
+            <?php echo $block->getCheckboxSelectors(); ?> {<?php echo $styles; ?>}
+        <?php endif; ?>
+
+        <?php if ($block->isLabelChanged()): ?>
+            body .page-wrapper #maincontent .newsletter [name=is_subscribed] + label,
+            body .page-wrapper #maincontent .form-newsletter-manage #subscription + label { display: none; }
+        <?php endif; ?>
+
+        <?php if ($block->hideInCustomerAccount()): ?>
+            .account .form-newsletter-manage { display: none !important; }
+    <?php endif; ?>
+    </style>
+<?php endif; ?>

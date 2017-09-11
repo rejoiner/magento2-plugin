@@ -1,0 +1,24 @@
+<?php
+/**
+ * Copyright © 2017 Rejoiner. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/* @var \Rejoiner\Acr\Block\Newsletter $block */
+?>
+<?php if ($block->isEnabled()): ?>
+    <?php if ($block->showOnLoginCheckout()): ?>
+    <div class="field choice newsletter">
+        <input
+                type="checkbox"
+                name="is_subscribed"
+                title="<?php echo $block->getLabel(); ?>"
+                value="1"
+                id="is_subscribed"
+                class="checkbox"
+                <?php echo $block->shouldBeCheckedByDefault() ? 'checked="checked"' : ''; ?>
+        />
+        <label for="is_subscribed" class="label"><span><?php echo $block->getLabel(); ?></span></label>
+    </div>
+    <?php endif; ?>
+<?php endif; ?>

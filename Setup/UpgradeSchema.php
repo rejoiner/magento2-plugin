@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2016 Rejoiner. All rights reserved.
+ * Copyright © 2017 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Setup;

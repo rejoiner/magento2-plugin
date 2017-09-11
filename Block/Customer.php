@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2016 Rejoiner. All rights reserved.
+ * Copyright © 2017 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Block;
@@ -38,7 +38,7 @@ class Customer extends Base
         \Magento\Framework\Locale\Resolver $localeResolver,
         \Magento\Framework\Registry $registry,
         \Magento\Framework\View\Element\Template\Context $context,
-        array $data
+        array $data = []
     ) {
         $this->currentCustomer = $registry->registry(DepersonalizePlugin::REGISTRY_KEY);
         parent::__construct(

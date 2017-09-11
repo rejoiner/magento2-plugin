@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
 /**
- * Copyright © 2016 Rejoiner. All rights reserved.
+ * Copyright © 2017 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 -->
@@ -10,5 +10,9 @@
         <referenceBlock name="rejoiner_base">
             <block class="Rejoiner\Acr\Block\Conversion" name="rejoiner_conversion" template="Rejoiner_Acr::rejoiner_acr/conversion.phtml" after="-" cacheable="false" />
         </referenceBlock>
+
+        <referenceContainer name="before.body.end">
+            <block class="Rejoiner\Acr\Block\Onepage\Success\Subscribe" name="rejoiner_newsletter_subscribe_checkout_success" template="Rejoiner_Acr::rejoiner_acr/newsletter/checkout_success.phtml" cacheable="false" />
+        </referenceContainer>
     </body>
 </page>

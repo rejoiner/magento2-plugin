@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2016 Rejoiner. All rights reserved.
+ * Copyright © 2017 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Block\Adminhtml\Form\Field;
@@ -33,6 +33,9 @@ class Google extends \Magento\Config\Block\System\Config\Form\Field\FieldArray\A
         $this->_addButtonLabel = __('Add Rule');
     }
 
+    /**
+     * @param \Magento\Framework\DataObject $row
+     */
     protected function _prepareArrayRow(\Magento\Framework\DataObject $row)
     {
         $attrName = $row->getAttrName();
@@ -42,6 +45,7 @@ class Google extends \Magento\Config\Block\System\Config\Form\Field\FieldArray\A
                 = 'selected="selected"';
         }
         $row->setData('option_extra_attrs', $options);
+
         return;
     }
 
@@ -57,7 +61,7 @@ class Google extends \Magento\Config\Block\System\Config\Form\Field\FieldArray\A
                 ['data' => ['is_render_to_js_template' => true]]
             );
         }
-        return $this->sourceRenderer;
 
+        return $this->sourceRenderer;
     }
 }

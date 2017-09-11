@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2016 Rejoiner. All rights reserved.
+ * Copyright © 2017 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Helper;
@@ -31,7 +31,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_PATH_REJOINER_SUBSCRIBE_ACCOUNT_REGISTRATION = 'checkout/rejoiner_acr/subscribe_customer_account_create';
     const XML_PATH_REJOINER_SUBSCRIBE_LOGIN_CHECKOUT       = 'checkout/rejoiner_acr/subscribe_customer_account_login';
     const XML_PATH_REJOINER_SUBSCRIBE_CUSTOMER_ACCOUNT     = 'checkout/rejoiner_acr/subscribe_newsletter_manage_index';
-    const XML_PATH_REJOINER_SUBSCRIBE_ALREADY_CHECKOUT     = 'checkout/rejoiner_acr/subscribe_already_checkout';
     const XML_PATH_REJOINER_SUBSCRIBE_CHECKBOX_DEFAULT     = 'checkout/rejoiner_acr/subscribe_checkbox_default';
     const XML_PATH_REJOINER_SUBSCRIBE_CHECKBOX_LABEL       = 'checkout/rejoiner_acr/subscribe_checkbox_label';
     const XML_PATH_REJOINER_SUBSCRIBE_CHECKBOX_SELECTOR    = 'checkout/rejoiner_acr/subscribe_checkbox_selector';
@@ -334,14 +333,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @return bool
      */
-    public function getRejoinerSubscribeAlreadyCheckout()
-    {
-        return $this->scopeConfig->isSetFlag(self::XML_PATH_REJOINER_SUBSCRIBE_ALREADY_CHECKOUT);
-    }
-
-    /**
-     * @return bool
-     */
     public function getRejoinerSubscribeCheckedDefault()
     {
         return $this->scopeConfig->isSetFlag(self::XML_PATH_REJOINER_SUBSCRIBE_CHECKBOX_DEFAULT);
@@ -477,11 +468,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             return $this;
         }
 
-        $data = array(
+        $data = [
             'email'      => $email,
             'list_id'    => $listId,
             'first_name' => $customerName
-        );
+        ];
 
         $client = $this->prepareClient(self::REJOINER_API_ADD_TO_LIST_REQUEST_PATH, $data);
         $this->sendRequest($client);

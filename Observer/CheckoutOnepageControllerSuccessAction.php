@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * Copyright © 2017 Rejoiner. All rights reserved.
+ * See COPYING.txt for license details.
+ */
 namespace Rejoiner\Acr\Observer;
 
 class CheckoutOnepageControllerSuccessAction implements \Magento\Framework\Event\ObserverInterface
@@ -29,10 +32,10 @@ class CheckoutOnepageControllerSuccessAction implements \Magento\Framework\Event
         \Magento\Sales\Model\OrderFactory $orderFactory,
         \Magento\Framework\Stdlib\DateTime\TimezoneInterface $timezone
     ) {
-        $this->rejoinerHelper  = $rejoinerHelper;
-        $this->timezone        = $timezone;
-        $this->acrFactory      = $acrFactory;
-        $this->orderFactory    = $orderFactory;
+        $this->rejoinerHelper = $rejoinerHelper;
+        $this->timezone       = $timezone;
+        $this->acrFactory     = $acrFactory;
+        $this->orderFactory   = $orderFactory;
     }
 
     /**

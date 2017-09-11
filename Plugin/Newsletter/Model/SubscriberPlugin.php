@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * Copyright © 2017 Rejoiner. All rights reserved.
+ * See COPYING.txt for license details.
+ */
 namespace Rejoiner\Acr\Plugin\Newsletter\Model;
 
 use Rejoiner\Acr\Helper\Data as RejoinerHelper;
