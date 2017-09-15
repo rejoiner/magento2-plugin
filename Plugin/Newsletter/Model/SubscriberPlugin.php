@@ -46,9 +46,6 @@ class SubscriberPlugin
 
                     $this->rejoinerHelper->subscribe($subscriber->getEmail(), $customerName);
                     $subscriber->setData('added_to_rejoiner', RejoinerHelper::STATUS_SUBSCRIBED);
-                } else {
-                    $this->rejoinerHelper->unSubscribe($subscriber->getEmail());
-                    $subscriber->setData('added_to_rejoiner', RejoinerHelper::STATUS_UNSUBSCRIBED);
                 }
             } catch (\Exception $e) {
                 $subscriber->setData('added_to_rejoiner', RejoinerHelper::STATUS_UNSUBSCRIBED);
