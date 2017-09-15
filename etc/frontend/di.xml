@@ -14,4 +14,8 @@
     <type name="Magento\Customer\Block\Form\Register">
         <plugin name="rejoiner_subscribe_customer_account_create" type="Rejoiner\Acr\Plugin\Customer\Block\Form\RegisterPlugin" sortOrder="10" />
     </type>
+
+    <type name="Magento\Customer\Block\Newsletter">
+        <plugin name="rejoiner_subscribe_customer_account_newsletter" type="Rejoiner\Acr\Plugin\Customer\Block\NewsletterPlugin" sortOrder="10" />
+    </type>
 </config>

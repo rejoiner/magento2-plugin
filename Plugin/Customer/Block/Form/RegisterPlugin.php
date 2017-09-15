@@ -7,9 +7,7 @@ namespace Rejoiner\Acr\Plugin\Customer\Block\Form;
 
 class RegisterPlugin
 {
-    /**
-     * @var \Rejoiner\Acr\Helper\Data
-     */
+    /** @var \Rejoiner\Acr\Helper\Data $rejoinerHelper */
     protected $rejoinerHelper;
 
     /**
