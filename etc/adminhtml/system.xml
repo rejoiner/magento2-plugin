@@ -12,9 +12,20 @@
             <resource>Magento_Checkout::checkout</resource>
             <group id="rejoiner_acr" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>eCommerce Email Marketing by Rejoiner</label>
-                <field id="enabled" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="heading_enable" translate="label" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Rejoiner</label>
+                    <frontend_model>Magento\Config\Block\System\Config\Form\Field\Heading</frontend_model>
+                </field>
+                <field id="enabled" translate="label" type="select" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="heading_account" translate="label" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Rejoiner Account Details</label>
+                    <frontend_model>Magento\Config\Block\System\Config\Form\Field\Heading</frontend_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
                 </field>
                 <field id="site_id" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Rejoiner Site ID</label>
@@ -44,6 +55,13 @@
                         <field id="enabled">1</field>
                     </depends>
                 </field>
+                <field id="heading_converted_customers" translate="label" sortOrder="21" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Send Converted Customers to Rejoiner List</label>
+                    <frontend_model>Magento\Config\Block\System\Config\Form\Field\Heading</frontend_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
                 <field id="passing_new_customers" translate="label" type="select" sortOrder="25" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Pass "new customers" to Rejoiner</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
@@ -66,16 +84,30 @@
                         <field id="enabled">1</field>
                     </depends>
                 </field>
-                <field id="track_numbers" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="heading_tracking" translate="label" sortOrder="31" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Tracking</label>
+                    <frontend_model>Magento\Config\Block\System\Config\Form\Field\Heading</frontend_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="track_numbers" translate="label" type="select" sortOrder="32" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Track Phone Numbers</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <depends>
                         <field id="enabled">1</field>
                     </depends>
                 </field>
-                <field id="track_price_with_tax" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="track_price_with_tax" translate="label" type="select" sortOrder="33" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Track Prices with Taxes</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="heading_checkout" translate="label" sortOrder="34" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Checkout Options</label>
+                    <frontend_model>Magento\Config\Block\System\Config\Form\Field\Heading</frontend_model>
                     <depends>
                         <field id="enabled">1</field>
                     </depends>
@@ -83,6 +115,13 @@
                 <field id="persist_forms" translate="label" type="select" sortOrder="35" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Persist Forms</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="heading_coupon" translate="label" sortOrder="36" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Coupon Settings</label>
+                    <frontend_model>Magento\Config\Block\System\Config\Form\Field\Heading</frontend_model>
                     <depends>
                         <field id="enabled">1</field>
                     </depends>
@@ -101,6 +140,13 @@
                         <field id="enabled">1</field>
                     </depends>
                     <source_model>Rejoiner\Acr\Model\System\Config\Source\Salesrule</source_model>
+                </field>
+                <field id="heading_data" translate="label" sortOrder="46" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Data Settings</label>
+                    <frontend_model>Magento\Config\Block\System\Config\Form\Field\Heading</frontend_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
                 </field>
                 <field id="thumbnail_size_width" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Thumbnail Width</label>
@@ -126,6 +172,13 @@
                     <label>Custom parameters</label>
                     <frontend_model>Rejoiner\Acr\Block\Adminhtml\Form\Field\Custom</frontend_model>
                     <backend_model>Rejoiner\Acr\Model\System\Config\Backend\Attributes</backend_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="heading_marketing" translate="label" sortOrder="69" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Accepts Marketing Settings</label>
+                    <frontend_model>Magento\Config\Block\System\Config\Form\Field\Heading</frontend_model>
                     <depends>
                         <field id="enabled">1</field>
                     </depends>
@@ -202,10 +255,18 @@
                         <field id="enabled">1</field>
                     </depends>
                 </field>
-                <field id="subscribe_checkbox_style" translate="label" type="textarea" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="subscribe_checkbox_style" translate="label comment" type="textarea" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Add Opt-In's Checkbox Custom Styling (optional)</label>
+                    <comment><![CDATA[Include CSS only like <i>border: 2px solid #efefef;</i>]]></comment>
                     <depends>
                         <field id="marketing_permissions">1</field>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="heading_debug" translate="label" sortOrder="99999998" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Debug Mode</label>
+                    <frontend_model>Magento\Config\Block\System\Config\Form\Field\Heading</frontend_model>
+                    <depends>
                         <field id="enabled">1</field>
                     </depends>
                 </field>
