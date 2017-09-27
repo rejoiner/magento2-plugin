@@ -10,24 +10,24 @@ use Magento\Framework\Controller\ResultFactory;
 
 class Index extends \Magento\Framework\App\Action\Action
 {
-    /** @var \Rejoiner\Acr\Helper\Data $rejoinerHelper */
-    private $rejoinerHelper;
-
     /** @var \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory */
     private $resultJsonFactory;
 
+    /** @var \Magento\Newsletter\Model\SubscriberFactory|SubscriberFactory $subscriberFactory */
+    private $subscriberFactory;
+
     /**
      * Index constructor.
-     * @param \Rejoiner\Acr\Helper\Data $rejoinerHelper
+     * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
      * @param \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory
      * @param \Magento\Framework\App\Action\Context $context
      */
     public function __construct(
-        \Rejoiner\Acr\Helper\Data $rejoinerHelper,
+        \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
         \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory,
         \Magento\Framework\App\Action\Context $context
     ) {
-        $this->rejoinerHelper = $rejoinerHelper;
+        $this->subscriberFactory = $subscriberFactory;
         $this->resultJsonFactory = $resultJsonFactory;
         parent::__construct($context);
     }
@@ -42,10 +42,10 @@ class Index extends \Magento\Framework\App\Action\Action
     {
         if ($this->getRequest()->isXmlHttpRequest()) {
             try {
-                $email        = $this->getRequest()->getParam('email');
-                $customerName = $this->getRequest()->getParam('customer_name', '');
-                if ($email) {
-                    $this->rejoinerHelper->subscribe($email, $customerName);
+                if ($email = $this->getRequest()->getParam('email')) {
+                    /** @var \Magento\Newsletter\Model\Subscriber $subscriber */
+                    $subscriber = $this->subscriberFactory->create();
+                    $subscriber->subscribe($email);
                 }
             } catch (\Exception $e) {}
 

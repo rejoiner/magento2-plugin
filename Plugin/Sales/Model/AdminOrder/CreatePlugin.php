@@ -7,18 +7,16 @@ namespace Rejoiner\Acr\Plugin\Sales\Model\AdminOrder;
 
 class CreatePlugin
 {
-    /**
-     * @var \Rejoiner\Acr\Helper\Data
-     */
-    private $rejoinerHelper;
+    /** @var \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory */
+    private $subscriberFactory;
 
     /**
      * CreatePlugin constructor.
-     * @param \Rejoiner\Acr\Helper\Data $rejoinerHelper
+     * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
      */
-    public function __construct(\Rejoiner\Acr\Helper\Data $rejoinerHelper)
+    public function __construct(\Magento\Newsletter\Model\SubscriberFactory $subscriberFactory)
     {
-        $this->rejoinerHelper = $rejoinerHelper;
+        $this->subscriberFactory = $subscriberFactory;
     }
 
     /**
@@ -30,9 +28,10 @@ class CreatePlugin
     {
         if ($subject->hasData('rejoiner_subscribe') && $subject->getData('rejoiner_subscribe')) {
             try {
-                $email        = $order->getCustomerEmail();
-                $customerName = $order->getBillingAddress()->getFirstname();
-                $this->rejoinerHelper->subscribe($email, $customerName);
+                $email = $order->getCustomerEmail();
+                /** @var \Magento\Newsletter\Model\Subscriber $subscriber */
+                $subscriber = $this->subscriberFactory->create();
+                $subscriber->subscribe($email);
             } catch (\Exception $e) {}
         }
 
