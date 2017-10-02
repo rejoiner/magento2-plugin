@@ -9,6 +9,7 @@ use \Magento\Store\Model\ScopeInterface;
 
 class Data extends \Magento\Framework\App\Helper\AbstractHelper
 {
+    const XML_PATH_REJOINER_ENABLED                         = 'checkout/rejoiner_acr/enabled';
     const XML_PATH_REJOINER_SITE_ID                        = 'checkout/rejoiner_acr/site_id';
     const XML_PATH_REJOINER_DOMAIN                         = 'checkout/rejoiner_acr/domain';
     const XML_PATH_REJOINER_TRACK_NUMBERS                  = 'checkout/rejoiner_acr/track_numbers';
@@ -193,6 +194,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
+     * @return bool
+     */
+    public function isEnabled()
+    {
+        return $this->scopeConfig->isSetFlag(self::XML_PATH_REJOINER_ENABLED);
+    }
+
+    /**
      * @return string
      */
     public function getDomain()
@@ -287,7 +296,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     public function getRejoinerMarketingPermissions()
     {
-        return $this->scopeConfig->isSetFlag(self::XML_PATH_REJOINER_MARKETING_PERMISSIONS);
+        return $this->isEnabled() && $this->scopeConfig->isSetFlag(self::XML_PATH_REJOINER_MARKETING_PERMISSIONS);
     }
 
     /**

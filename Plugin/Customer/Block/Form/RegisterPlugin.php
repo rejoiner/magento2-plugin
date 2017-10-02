@@ -26,7 +26,11 @@ class RegisterPlugin
      */
     public function afterIsNewsletterEnabled(\Magento\Customer\Block\Form\Register $subject, $result)
     {
-        return $result && $this->rejoinerHelper->getRejoinerMarketingPermissions() && $this->rejoinerHelper->getRejoinerSubscribeAccountRegistration();
+        if ($result && $this->rejoinerHelper->getRejoinerMarketingPermissions()) {
+            $result = $this->rejoinerHelper->getRejoinerSubscribeAccountRegistration();
+        }
+
+        return $result;
     }
 
     /**
@@ -36,7 +40,10 @@ class RegisterPlugin
      */
     public function afterGetFormData(\Magento\Customer\Block\Form\Register $subject, $result)
     {
-        $result->setData('is_subscribed', $this->rejoinerHelper->getRejoinerSubscribeCheckedDefault());
+        if ($this->rejoinerHelper->getRejoinerMarketingPermissions()) {
+            $result->setData('is_subscribed', $this->rejoinerHelper->getRejoinerSubscribeCheckedDefault());
+        }
+
         return $result;
     }
 }

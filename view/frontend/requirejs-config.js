@@ -7,5 +7,12 @@ var config = {
         '*': {
             RejoinerAcrTracking   : 'Rejoiner_Acr/js/tracking'
         }
+    },
+    config: {
+        mixins: {
+            'Magento_Checkout/js/action/set-shipping-information': {
+                'Rejoiner_Acr/js/checkout/action/set-shipping-information-mixin': true
+            }
+        }
     }
 };
