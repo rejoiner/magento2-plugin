@@ -8,13 +8,16 @@ define([
     return function (setShippingInformationAction) {
 
         return wrapper.wrap(setShippingInformationAction, function (originalAction) {
-            var shippingAddress = quote.shippingAddress();
-            if (shippingAddress['extension_attributes'] === undefined) {
-                shippingAddress['extension_attributes'] = {};
+            if (window.rejoinerMarketing !== undefined) {
+                var shippingAddress = quote.shippingAddress();
+                if (shippingAddress['extension_attributes'] === undefined) {
+                    shippingAddress['extension_attributes'] = {};
+                }
+
+                shippingAddress['extension_attributes']['rejoiner_subscribe'] = window.rejoinerMarketing.subscribe_guest_checkout;
+                // pass execution to original action ('Magento_Checkout/js/action/set-shipping-information')
             }
 
-            shippingAddress['extension_attributes']['rejoiner_subscribe'] = window.rejoinerMarketing.subscribe_guest_checkout;
-            // pass execution to original action ('Magento_Checkout/js/action/set-shipping-information')
             return originalAction();
         });
     };
