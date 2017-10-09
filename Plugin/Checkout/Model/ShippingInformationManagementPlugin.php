@@ -13,17 +13,23 @@ class ShippingInformationManagementPlugin
     /** @var \Magento\Checkout\Model\Session $session */
     private $session;
 
+    /** @var \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory */
+    private $subscriberFactory;
+
     /**
      * ShippingInformationManagementPlugin constructor.
      * @param \Rejoiner\Acr\Helper\Data $rejoinerHelper
      * @param \Magento\Checkout\Model\Session $session
+     * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
      */
     public function __construct(
         \Rejoiner\Acr\Helper\Data $rejoinerHelper,
-        \Magento\Checkout\Model\Session $session
+        \Magento\Checkout\Model\Session $session,
+        \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
     ) {
         $this->rejoinerHelper = $rejoinerHelper;
         $this->session = $session;
+        $this->subscriberFactory = $subscriberFactory;
     }
 
     /**
@@ -42,6 +48,11 @@ class ShippingInformationManagementPlugin
             $extensionAttributes = $addressInformation->getShippingAddress()->getExtensionAttributes();
             if ($extensionAttributes->getRejoinerSubscribe()) {
                 $this->session->setRejoinerSubscribe(true);
+                if ($email = $extensionAttributes->getRejoinerEmail()) {
+                    /** @var \Magento\Newsletter\Model\Subscriber $subscriber */
+                    $subscriber = $this->subscriberFactory->create();
+                    $subscriber->subscribe($email);
+                }
             }
         }
 
