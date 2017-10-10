@@ -22,7 +22,7 @@ define([
                 if (customer.isLoggedIn()) {
                     customerEmail = customer.customerData.email;
                 } else {
-                    customerEmail = checkoutData.getValidatedEmailValue;
+                    customerEmail = checkoutData.getValidatedEmailValue();
                 }
 
                 if (customerEmail) {
