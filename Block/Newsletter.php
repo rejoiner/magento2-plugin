@@ -155,7 +155,7 @@ class Newsletter extends \Magento\Framework\View\Element\Template
             'show_on_guest_checkout'   => (int) $this->showOnGuestCheckout(),
             'show_on_login_checkout'   => (int) $this->showOnLoginCheckout(),
             'checked_by_default'       => (int) $this->shouldBeCheckedByDefault(),
-            'subscribe_guest_checkout' => (int) $this->shouldBeCheckedByDefault()
+            'subscribe_guest_checkout' => (int) ($this->showOnGuestCheckout() && $this->shouldBeCheckedByDefault())
         ];
     }
 }

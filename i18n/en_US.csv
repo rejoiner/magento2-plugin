@@ -35,5 +35,5 @@
 "Add Opt-In's Checkbox Custom Styling (optional),"Add Opt-In's Checkbox Custom Styling (optional)"
 "Enable debug mode","Enable debug mode"
 "This will send the email addresses of all customers who opt-in to receive marketing from you to Rejoiner.","This will send the email addresses of all customers who opt-in to receive marketing from you to Rejoiner."
-"Selecting YES will subscribe customers by default. We recommend leaving the option of NO selected to let your customers decide.","Selecting YES will subscribe customers by default. We recommend leaving the option of NO selected to let your customers decide."
+"Selecting YES will make all subscribe checkboxes selected by default. We recommend leaving the option of NO selected, so checkboxes won't be selected by default and let your customer to decide to mark checkbox or not.","Selecting YES will make all subscribe checkboxes selected by default. We recommend leaving the option of NO selected, so checkboxes won't be selected by default and let your customer to decide to mark checkbox or not."
 "The copy you'd like to use for your opt-in.","The copy you'd like to use for your opt-in."

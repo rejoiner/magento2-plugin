@@ -234,7 +234,7 @@
                 <field id="subscribe_checkbox_default" translate="label comment" type="select" sortOrder="105" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Should Opt-In be Selected by Default?</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment>Selecting YES will subscribe customers by default. We recommend leaving the option of NO selected to let your customers decide.</comment>
+                    <comment>Selecting YES will make all subscribe checkboxes selected by default. We recommend leaving the option of NO selected, so checkboxes won't be selected by default and let your customer to decide to mark checkbox or not.</comment>
                     <depends>
                         <field id="marketing_permissions">1</field>
                         <field id="enabled">1</field>
