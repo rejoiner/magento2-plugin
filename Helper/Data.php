@@ -67,6 +67,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /** @var \Magento\SalesRule\Model\CouponFactory $couponFactory */
     private $couponFactory;
 
+    /** @var Serializer */
+    private $serializer;
+
     /**
      * Data constructor.
      * @param \Magento\SalesRule\Model\CouponFactory $couponFactory
@@ -76,6 +79,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param \Magento\Framework\Session\SessionManager $sessionManager
      * @param \Magento\Framework\HTTP\ZendClientFactory $httpClient
      * @param \Monolog\Logger $logger
+     * @param Serializer $serializer
      * @param \Magento\Framework\App\Helper\Context $context
      */
     public function __construct(
@@ -86,6 +90,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Framework\Session\SessionManager $sessionManager,
         \Magento\Framework\HTTP\ZendClientFactory $httpClient,
         \Monolog\Logger $logger,
+        Serializer $serializer,
         \Magento\Framework\App\Helper\Context $context
     ) {
         $this->couponFactory        = $couponFactory;
@@ -95,7 +100,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->sessionManager       = $sessionManager;
         $this->logger               = $logger;
         $this->httpClient           = $httpClient;
+
         parent::__construct($context);
+        $this->serializer = $serializer;
     }
 
     /**
@@ -109,6 +116,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     /**
      * @return string
+     * @throws \InvalidArgumentException
      */
     public function getRestoreUrl()
     {
@@ -116,7 +124,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         if ($items = $this->checkoutSession->getQuote()->getAllVisibleItems()) {
             /** @var \Magento\Quote\Model\Quote\Item $item */
             foreach ($items as $item) {
-                $options = unserialize($item->getOptionByCode('info_buyRequest')->getValue());
+                $options = $this->serializer->decode($item->getOptionByCode('info_buyRequest')->getValue());
                 $options['qty'] = $item->getQty();
                 $options['product'] = $item->getProductId();
                 $product[] = $options;
