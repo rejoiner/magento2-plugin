@@ -1,13 +1,14 @@
 {
-  "name": "rejoiner/module-acr",
+  "name": "pavlo/rejoiner-magento2",
   "description": "Rejoiner extension for Magento 2",
   "require": {
     "magento/module-checkout": ">=100.0.0",
     "magento/module-catalog": ">=100.0.0",
     "magento/module-customer": ">=100.0.0",
+    "magento/module-newsletter": ">=100.0.0"
   },
   "type": "magento2-module",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "license": [
     "OSL-3.0",
     "AFL-3.0"

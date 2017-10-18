@@ -1,0 +1,36 @@
+<?php
+/**
+ * Copyright © 2017 Rejoiner. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/* @var \Rejoiner\Acr\Block\Newsletter $block */
+?>
+<?php if ($block->isEnabled()): ?>
+    <script>
+        window.rejoinerMarketing = <?php /* @escapeNotVerified */ echo \Zend_Json::encode($block->getConfig()); ?>;
+
+        require([
+            'jquery'
+        ], function($) {
+            var $checkboxes = $('<?php echo $block->getCheckboxSelectors(); ?>'),
+                $labels = $checkboxes.siblings('label'),
+                label = '<?php echo $block->getLabel(); ?>',
+                cssClass = '<?php echo $block->getCssClass(); ?>';
+
+            if ($checkboxes.length) {
+                if (cssClass) {
+                    $checkboxes.addClass(cssClass);
+                }
+
+                <?php if ($block->isLabelChanged()): ?>
+                    if (label) {
+                        $labels.text(label);
+                    }
+
+                    $labels.show();
+                <?php endif; ?>
+            }
+        });
+    </script>
+<?php endif; ?>

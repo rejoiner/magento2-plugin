@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2016 Rejoiner. All rights reserved.
+ * Copyright © 2017 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Block;
@@ -20,7 +20,6 @@ class Product extends Base
      * @param \Magento\Framework\View\Element\Template\Context $context
      * @param array $data
      */
-
     public function __construct(
         \Rejoiner\Acr\Helper\Data $rejoinerHelper,
         \Magento\Framework\Json\Helper\Data $jsonHelper,
@@ -52,14 +51,12 @@ class Product extends Base
     {
         /** $product \Magento\Catalog\Model\Product */
         $product = $this->registry->registry('current_product');
-        $displayPriceWithTax = $this->rejoinerHelper->getTrackPriceWithTax();
         $imageWidth  = $this->rejoinerHelper->getImageWidth();
         $imageHeight = $this->rejoinerHelper->getImageHeight();
         $imageUrl = $this->imageHelper->init($product, 'category_page_grid')->resize($imageWidth, $imageHeight)->getUrl();
 
         /** @var \Magento\Catalog\Model\ResourceModel\Category\Collection $categoriesCollection */
         $categoriesCollection = $this->categoryCollectionFactory->create();
-
         $categoriesCollection
             ->addAttributeToSelect('name')
             ->addFieldToFilter('entity_id', ['in' => $product->getCategoryIds()])

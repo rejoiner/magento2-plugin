@@ -1,12 +1,13 @@
 <?php
 /**
- * Copyright © 2016 Rejoiner. All rights reserved.
+ * Copyright © 2017 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Block\Adminhtml\Form\Field;
 
 class Source extends \Magento\Framework\View\Element\Html\Select
 {
+    /** @var array $_metaSources */
     protected $_metaSources = [
         'utm_source'   =>  'Campaign Source',
         'utm_medium'   =>  'Campaign Medium',
@@ -25,6 +26,7 @@ class Source extends \Magento\Framework\View\Element\Html\Select
                 $this->addOption($groupId, addslashes($groupLabel));
             }
         }
+
         return parent::_toHtml();
     }
 

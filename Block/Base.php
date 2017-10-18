@@ -1,9 +1,11 @@
 <?php
 /**
- * Copyright © 2016 Rejoiner. All rights reserved.
+ * Copyright © 2017 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Block;
+
+use Rejoiner\Acr\Plugin\Framework\Model\Layout\Checkout\DepersonalizePlugin;
 
 class Base extends \Magento\Framework\View\Element\Template
 {
@@ -142,6 +144,6 @@ class Base extends \Magento\Framework\View\Element\Template
      */
     protected function getQuote()
     {
-        return $this->registry->registry(\Rejoiner\Acr\Model\Layout\Checkout\DepersonalizePlugin::REGISTRY_KEY);
+        return $this->registry->registry(DepersonalizePlugin::REGISTRY_KEY);
     }
 }

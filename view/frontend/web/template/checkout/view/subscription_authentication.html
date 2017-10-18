@@ -1,0 +1,12 @@
+<!--
+/**
+ * Copyright © 2017 Rejoiner. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<!-- ko if: showSubscriptionLogin -->
+    <div class="field choice newsletter">
+        <input data-bind="attr: {title: getLabel()}, checked: shouldBeChecked()" type="checkbox" name="rejoiner_subscription" value="1" id="rejoiner-subscription-authentification" class="checkbox" />
+        <label for="rejoiner-subscription-authentification" class="label"><span data-bind="text: getLabel()"></span></label>
+    </div>
+<!-- /ko -->

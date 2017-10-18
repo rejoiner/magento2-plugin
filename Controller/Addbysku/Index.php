@@ -1,15 +1,12 @@
 <?php
 /**
- * Copyright © 2016 Rejoiner. All rights reserved.
+ * Copyright © 2017 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Controller\Addbysku;
 
 class Index extends \Magento\Framework\App\Action\Action
 {
-    /** @var \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig */
-    protected $scopeConfig;
-
     /** @var \Magento\Checkout\Model\Session $checkoutSession */
     protected $checkoutSession;
 
@@ -36,7 +33,6 @@ class Index extends \Magento\Framework\App\Action\Action
 
     /**
      * Index constructor.
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      * @param \Magento\Checkout\Model\Session $checkoutSession
      * @param \Rejoiner\Acr\Helper\Data $rejoinerHelper
      * @param \Magento\Checkout\Model\CartFactory $cartFactory
@@ -48,7 +44,6 @@ class Index extends \Magento\Framework\App\Action\Action
      * @param \Magento\Framework\App\Action\Context $context
      */
     public function __construct(
-        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Magento\Checkout\Model\Session $checkoutSession,
         \Rejoiner\Acr\Helper\Data $rejoinerHelper,
         \Magento\Checkout\Model\CartFactory $cartFactory,
@@ -59,7 +54,6 @@ class Index extends \Magento\Framework\App\Action\Action
         \Magento\Framework\Escaper $escaper,
         \Magento\Framework\App\Action\Context $context
     ) {
-        $this->scopeConfig           = $scopeConfig;
         $this->checkoutSession       = $checkoutSession;
         $this->rejoinerHelper        = $rejoinerHelper;
         $this->cartFactory           = $cartFactory;
@@ -120,6 +114,7 @@ class Index extends \Magento\Framework\App\Action\Action
         if ($successMessage) {
             $this->messageManager->addSuccess($successMessage);
         }
+
         $url = $this->_url->getUrl('checkout/cart/', ['updateCart' => true]);
         $this->getResponse()->setRedirect($url);
     }
