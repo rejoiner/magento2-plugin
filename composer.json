@@ -1,5 +1,5 @@
 {
-  "name": "pavlo/rejoiner-magento2",
+  "name": "rejoiner/module-acr",
   "description": "Rejoiner extension for Magento 2",
   "require": {
     "magento/module-checkout": ">=100.0.0",
