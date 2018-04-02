@@ -6,6 +6,9 @@
 namespace Rejoiner\Acr\Block;
 
 use Rejoiner\Acr\Plugin\Framework\Model\Layout\Checkout\DepersonalizePlugin;
+use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
+use Magento\ConfigurableProduct\Block\Cart\Item\Renderer\Configurable as ConfigurableRenderer;
+use Magento\Catalog\Model\Config\Source\Product\Thumbnail as ThumbnailSource;
 
 class Base extends \Magento\Framework\View\Element\Template
 {
@@ -95,7 +98,10 @@ class Base extends \Magento\Framework\View\Element\Template
                 foreach ($quote->getAllVisibleItems() as $item) {
                     $product           = $item->getProduct();
                     $productCategories = $this->rejoinerHelper->getProductCategories($product, $categoriesArray);
-                    $imageUrl          = $this->imageHelper->init($product, 'category_page_grid')->resize($imageWidth, $imageHeight)->getUrl();
+                    $imageUrl          =
+                        $this->imageHelper
+                            ->init($this->getProductForThumbnail($item), 'category_page_grid')
+                            ->resize($imageWidth, $imageHeight)->getUrl();
 
                     if ($displayPriceWithTax) {
                         $productPrice = $item->getPriceInclTax();
@@ -106,12 +112,12 @@ class Base extends \Magento\Framework\View\Element\Template
                     }
 
                     $newItem = [
-                        'name'       => $item->getName(),
-                        'image_url'  => $imageUrl,
-                        'price'      => (string) $this->rejoinerHelper->convertPriceToCents($productPrice),
-                        'product_id' => (string) $item->getSku(),
-                        'item_qty'   => (string) $item->getQty(),
-                        'qty_price'  => (string) $this->rejoinerHelper->convertPriceToCents($rowTotal),
+                        'name'        => $item->getName(),
+                        'image_url'   => $imageUrl,
+                        'price'       => (string) $this->rejoinerHelper->convertPriceToCents($productPrice),
+                        'product_id'  => (string) $item->getSku(),
+                        'item_qty'    => (string) $item->getQty(),
+                        'qty_price'   => (string) $this->rejoinerHelper->convertPriceToCents($rowTotal),
                         'product_url' => (string) $product->getProductUrl(),
                         'category'    => $productCategories
                     ];
@@ -145,5 +151,51 @@ class Base extends \Magento\Framework\View\Element\Template
     protected function getQuote()
     {
         return $this->registry->registry(DepersonalizePlugin::REGISTRY_KEY);
+    }
+
+    /**
+     * @param \Magento\Quote\Model\Quote\Item $item
+     * @return \Magento\Catalog\Model\Product
+     */
+    private function getProductForThumbnail(\Magento\Quote\Model\Quote\Item $item)
+    {
+        $product = $item->getProduct();
+
+        if ($product->getTypeId() == Configurable::TYPE_CODE) {
+            $childProduct = $this->getChildProduct($item);
+
+            if (
+                $this->useParentThumbnail() ||
+                !($childProduct->getThumbnail() && $childProduct->getThumbnail() != 'no_selection')
+            ) {
+                return $product;
+            }
+
+            return $childProduct;
+        }
+
+        return $product;
+    }
+
+    /**
+     * @param \Magento\Quote\Model\Quote\Item $item
+     * @return \Magento\Catalog\Model\Product
+     */
+    private function getChildProduct(\Magento\Quote\Model\Quote\Item $item)
+    {
+        if ($option = $item->getOptionByCode('simple_product')) {
+            return $option->getProduct();
+        }
+
+        return $item->getProduct();
+    }
+
+    /**
+     * @return bool
+     */
+    private function useParentThumbnail()
+    {
+        $thumbnailSource = $this->_scopeConfig->getValue(ConfigurableRenderer::CONFIG_THUMBNAIL_SOURCE);
+        return $thumbnailSource == ThumbnailSource::OPTION_USE_PARENT_IMAGE;
     }
 }
