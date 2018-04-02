@@ -9,23 +9,11 @@ class TotalsPlugin
 {
     /**
      * @param \Magento\Sales\Block\Adminhtml\Order\Create\Totals $subject
-     * @param $label
-     * @param $onclick
-     * @param string $class
-     * @param null $buttonId
-     * @param array $dataAttr
-     * @return array
+     * @param string $html
+     * @return string
      */
-    public function beforeGetButtonHtml(
-        \Magento\Sales\Block\Adminhtml\Order\Create\Totals $subject,
-        $label,
-        $onclick,
-        $class = '',
-        $buttonId = null,
-        $dataAttr = []
-    ) {
-        echo $subject->getChildHtml('rejoiner_subscribe');
-
-        return [$label, $onclick, $class, $buttonId, $dataAttr];
+    public function afterGetButtonHtml(\Magento\Sales\Block\Adminhtml\Order\Create\Totals $subject, $html)
+    {
+        return $subject->getChildHtml('rejoiner_subscribe') . $html;
     }
 }
