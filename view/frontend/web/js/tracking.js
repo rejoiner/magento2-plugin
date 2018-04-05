@@ -22,9 +22,6 @@ define([
         _create: function() {
 
             window._rejoiner = this.getRejoinerObject();
-            if (this.options.integrationsAffirm) {
-                this.getAffirmPrice();
-            }
             this.connectRemoteScript();
 
         },
@@ -41,6 +38,8 @@ define([
             }
             if (this.options.cartData) {
                 _rejoiner.push(["setCartData", this.options.cartData]);
+
+                if (this.options.integrationsAffirm) this.getAffirmPrice();
             }
 
             if (this.options.cartItems) {
@@ -93,17 +92,16 @@ define([
                     pushAffirmItem(affirmPriceElement.innerHTML);
                 } else {
                     var affirmObserver = new MutationObserver(function () {
-                        affirmObserver.disconnect();
                         affirmPriceElement = getAffirmPriceElement(affirmElement);
                         if (affirmPriceElement) {
                             pushAffirmItem(affirmPriceElement.innerHTML);
+                            affirmObserver.disconnect();
                         }
                     });
                     affirmObserver.observe(affirmElement, { childList: true });
                 }
             }
         },
-
 
         connectRemoteScript: function() {
             var s = document.createElement('script');
