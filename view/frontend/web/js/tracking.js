@@ -15,12 +15,16 @@ define([
             removedItems: [],
             trackNumberEnabled: '',
             persistFormsEnabled: '',
+            integrationsAffirm: '',
             cartData: ''
         },
 
         _create: function() {
 
             window._rejoiner = this.getRejoinerObject();
+            if (this.options.integrationsAffirm) {
+                this.getAffirmPrice();
+            }
             this.connectRemoteScript();
 
         },
@@ -69,6 +73,35 @@ define([
                 }]);
             }
             return _rejoiner;
+        },
+
+        getAffirmPrice: function () {
+            var pushAffirmItem = function (price) {
+                _rejoiner.push(["setCartItem", {
+                    product_id: 'affirm_price',
+                    affirm_price: price,
+                }]);
+            };
+            var getAffirmPriceElement = function (affirmElement) {
+                return affirmElement.getElementsByClassName('affirm-ala-price')[0];
+            };
+            var affirmElement = document.getElementsByClassName('affirm-as-low-as')[0];
+
+            if (affirmElement) {
+                var affirmPriceElement = getAffirmPriceElement(affirmElement);
+                if (affirmPriceElement) {
+                    pushAffirmItem(affirmPriceElement.innerHTML);
+                } else {
+                    var affirmObserver = new MutationObserver(function () {
+                        affirmObserver.disconnect();
+                        affirmPriceElement = getAffirmPriceElement(affirmElement);
+                        if (affirmPriceElement) {
+                            pushAffirmItem(affirmPriceElement.innerHTML);
+                        }
+                    });
+                    affirmObserver.observe(affirmElement, { childList: true });
+                }
+            }
         },
 
 

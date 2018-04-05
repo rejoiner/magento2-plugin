@@ -36,6 +36,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_PATH_REJOINER_SUBSCRIBE_CHECKBOX_LABEL       = 'checkout/rejoiner_acr/subscribe_checkbox_label';
     const XML_PATH_REJOINER_SUBSCRIBE_CHECKBOX_SELECTOR    = 'checkout/rejoiner_acr/subscribe_checkbox_selector';
     const XML_PATH_REJOINER_SUBSCRIBE_CHECKBOX_STYLE       = 'checkout/rejoiner_acr/subscribe_checkbox_style';
+    const XML_PATH_REJOINER_INTEGRATIONS_AFFIRM            = 'checkout/rejoiner_acr/integrations_affirm';
 
     const STATUS_SUBSCRIBED                                = 1;
     const STATUS_UNSUBSCRIBED                              = 2;
@@ -241,6 +242,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function getTrackPriceWithTax()
     {
         return $this->scopeConfig->getValue(self::XML_PATH_REJOINER_TRACK_PRICE_WITH_TAX, ScopeInterface::SCOPE_STORE);
+    }
+
+    /**
+     * @return string
+     */
+    public function getIntegrationsAffirm()
+    {
+        return $this->scopeConfig->getValue(self::XML_PATH_REJOINER_INTEGRATIONS_AFFIRM, ScopeInterface::SCOPE_STORE);
     }
 
     /**
