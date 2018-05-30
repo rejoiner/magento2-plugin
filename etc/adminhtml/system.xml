@@ -43,7 +43,6 @@
                 </field>
                 <field id="api_secret" translate="label" type="text" sortOrder="13" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Rejoiner API secret</label>
-                    <validate>required-entry</validate>
                     <depends>
                         <field id="enabled">1</field>
                     </depends>

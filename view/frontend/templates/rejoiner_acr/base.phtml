@@ -14,11 +14,13 @@ foreach ($childBlockNames as $childBlockName) {
     <?php
     $domain = $block->escapeHtml($rejoinerHelper->getDomain());
     $siteId = $block->escapeHtml($rejoinerHelper->getRejoinerSiteId());
+    $rejoinerScriptUri = $block->escapeHtml($rejoinerHelper->getRejoinerScriptUri());;
     ?>
     <script type="text/x-magento-init">
         {
             "*": {
                 "RejoinerAcrTracking": {
+                    "rejoinerScriptUri"   : "<?php echo $rejoinerScriptUri; ?>",
                     "rejoinerSiteId"      : "<?php echo $siteId; ?>",
                     "rejoinerDomain"      : "<?php echo $domain; ?>"<?php echo (!empty($childBlocksHtml))? ',': ''?>
                     <?php echo implode(',', $childBlocksHtml); ?>
