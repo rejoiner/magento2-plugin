@@ -36,6 +36,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_PATH_REJOINER_SUBSCRIBE_CHECKBOX_LABEL       = 'checkout/rejoiner_acr/subscribe_checkbox_label';
     const XML_PATH_REJOINER_SUBSCRIBE_CHECKBOX_SELECTOR    = 'checkout/rejoiner_acr/subscribe_checkbox_selector';
     const XML_PATH_REJOINER_SUBSCRIBE_CHECKBOX_STYLE       = 'checkout/rejoiner_acr/subscribe_checkbox_style';
+    const XML_PATH_REJOINER_GOOGLE_ATTRIBUTES              = 'checkout/rejoiner_acr/google_attributes';
+    const XML_PATH_REJOINER_CUSTOM_ATTRIBUTES              = 'checkout/rejoiner_acr/custom_attributes';
     const XML_PATH_REJOINER_INTEGRATIONS_AFFIRM            = 'checkout/rejoiner_acr/integrations_affirm';
 
     const STATUS_SUBSCRIBED                                = 1;
@@ -148,7 +150,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function returnGoogleAttributes()
     {
         $result = [];
-        if ($googleAnalitics = $this->scopeConfig->getValue('checkout/rejoiner_acr/google_attributes', ScopeInterface::SCOPE_STORE)) {
+        $googleAttrXmlPath = self::XML_PATH_REJOINER_GOOGLE_ATTRIBUTES;
+        $googleAnalitics = $this->scopeConfig->getValue($googleAttrXmlPath, ScopeInterface::SCOPE_STORE);
+        if ($googleAnalitics) {
             foreach (unserialize($googleAnalitics) as $attr) {
                 if ($attr['attr_name'] && $attr['value']) {
                     $result[$attr['attr_name']] = $attr['value'];
@@ -165,7 +169,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function returnCustomAttributes()
     {
         $result = [];
-        if ($customAttr = $this->scopeConfig->getValue('checkout/rejoiner_acr/custom_attributes', ScopeInterface::SCOPE_STORE)) {
+        $customAttrXmlPath = self::XML_PATH_REJOINER_CUSTOM_ATTRIBUTES;
+        $customAttr = $this->scopeConfig->getValue($customAttrXmlPath, ScopeInterface::SCOPE_STORE);
+        if ($customAttr) {
             foreach (unserialize($customAttr) as $attr) {
                 if ($attr['attr_name'] && $attr['value']) {
                     $result[$attr['attr_name']] = $attr['value'];
