@@ -3,70 +3,101 @@
  * See COPYING.txt for license details.
  */
 define([
-    'jquery'
-], function($) {
+    'jquery',
+    'Magento_Customer/js/customer-data'
+
+], function($, customerData) {
     'use strict';
 
     $.widget('rejoiner.acrTracking', {
+        skipSubscription: false,
+
         options: {
             rejoinerSiteId: '',
             rejoinerDomain: '',
-            cartItems: [],
-            removedItems: [],
-            trackNumberEnabled: '',
-            persistFormsEnabled: '',
-            cartData: ''
+            outputConversionData: false
         },
 
         _create: function() {
+            var storageData = customerData.get('rejoiner-acr'),
+                that = this;
 
-            window._rejoiner = this.getRejoinerObject();
+            if (this.options.rejoinerSiteId && this.options.rejoinerDomain) {
+                window._rejoiner = that.getRejoinerObject();
+            }
+
+            storageData.subscribe(function () {
+                if (!that.skipSubscription) {
+                    window._rejoiner = that.getRejoinerObject(true);
+                }
+            });
+
             this.connectRemoteScript();
-
         },
 
-        getRejoinerObject: function () {
-            var _rejoiner = window._rejoiner || [];
-            _rejoiner.push(["setAccount", this.options.rejoinerSiteId]);
-            _rejoiner.push(["setDomain", this.options.rejoinerDomain]);
-            if (this.options.trackNumberEnabled) {
-                _rejoiner.push(["trackNumbers"]);
-            }
-            if (this.options.persistFormsEnabled) {
-                _rejoiner.push(["persistForms"]);
-            }
-            if (this.options.cartData) {
-                _rejoiner.push(["setCartData", this.options.cartData]);
+        getRejoinerObject: function (isAjaxUpdate) {
+            var isAjaxUpdate = isAjaxUpdate || false,
+                _rejoiner = window._rejoiner || [],
+                storageData = customerData.get('rejoiner-acr')();
+
+            if (this.options.trackCartDataOnThisPage == 1 || isAjaxUpdate) {
+                if (storageData.cartData) {
+                    _rejoiner.push(["setCartData", JSON.parse(storageData.cartData)]);
+                }
+                if (storageData.cartItems) {
+                    JSON.parse(storageData.cartItems).forEach(function (element) {
+                        _rejoiner.push(["setCartItem", element]);
+                    });
+                }
+
+                if (storageData.removedItems) {
+                    JSON.parse(storageData.removedItems).forEach(function (element) {
+                        _rejoiner.push(["removeCartItem", {product_id: element}]);
+                    });
+                    this.skipSubscription = true;
+                    delete storageData.removedItems;
+                    customerData.set('rejoiner-acr', storageData);
+                    this.skipSubscription = false;
+                }
             }
 
-            if (this.options.cartItems) {
-                this.options.cartItems.forEach(function(element) {
-                    _rejoiner.push(["setCartItem", element]);
-                });
-            }
+            if (!isAjaxUpdate) {
+                if (this.options.rejoinerSiteId) {
+                    _rejoiner.push(["setAccount", this.options.rejoinerSiteId]);
+                }
+                if (this.options.rejoinerDomain) {
+                    _rejoiner.push(["setDomain", this.options.rejoinerDomain]);
+                }
+                if (this.options.trackNumberEnabled) {
+                    _rejoiner.push(["trackNumbers"]);
+                }
+                if (this.options.persistFormsEnabled) {
+                    _rejoiner.push(["persistForms"]);
+                }
+                if (this.options.trackProductView) {
+                    _rejoiner.push(['trackProductView', this.options.trackProductView]);
+                }
 
-            if (this.options.trackProductView) {
-                _rejoiner.push(['trackProductView', this.options.trackProductView]);
-            }
+                if (storageData.customerEmail) {
+                    _rejoiner.push(['setCustomerEmail', storageData.customerEmail]);
+                }
 
-            if (this.options.customerEmail) {
-                _rejoiner.push(['setCustomerEmail', this.options.customerEmail]);
-            }
+                if (storageData.customerData) {
+                    _rejoiner.push(['setCustomerData', JSON.parse(storageData.customerData)]);
+                }
 
-            if (this.options.customerData) {
-                _rejoiner.push(['setCustomerData', this.options.customerData]);
-            }
+                if (this.options.outputConversionData && storageData.convertionCartData && storageData.convertionCartItems) {
+                    _rejoiner.push(["sendConversion", {
+                        cart_data: storageData.convertionCartData,
+                        cart_items: storageData.convertionCartItems
+                    }]);
 
-            if (this.options.removedItems) {
-                this.options.removedItems.forEach(function(element) {
-                    _rejoiner.push(["removeCartItem", {product_id: element}]);
-                });
-            }
-            if (this.options.convertionCartData && this.options.convertionCartItems) {
-                _rejoiner.push(["sendConversion", {
-                    cart_data: this.options.convertionCartData,
-                    cart_items: this.options.convertionCartItems
-                }]);
+                    this.skipSubscription = true;
+                    delete storageData.convertionCartData;
+                    delete storageData.convertionCartItems;
+                    customerData.set('rejoiner-acr', storageData);
+                    this.skipSubscription = false;
+                }
             }
             return _rejoiner;
         },

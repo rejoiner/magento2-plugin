@@ -8,9 +8,7 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
         <referenceContainer name="after.body.start">
-            <block class="Rejoiner\Acr\Block\Base" name="rejoiner_base" ifconfig="checkout/rejoiner_acr/enabled" template="Rejoiner_Acr::rejoiner_acr/base.phtml" after="-" cacheable="false">
-                <block class="Rejoiner\Acr\Block\Customer" name="rejoiner_customer" template="Rejoiner_Acr::rejoiner_acr/customer.phtml" cacheable="false" />
-            </block>
+            <block class="Rejoiner\Acr\Block\Base" name="rejoiner_base" ifconfig="checkout/rejoiner_acr/enabled" template="Rejoiner_Acr::rejoiner_acr/base.phtml" after="-" />
             <block class="Rejoiner\Acr\Block\Newsletter" name="rejoiner_newsletter_config_labels" template="Rejoiner_Acr::rejoiner_acr/newsletter/newsletter_config_labels.phtml" />
         </referenceContainer>
 

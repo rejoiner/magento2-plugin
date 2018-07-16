@@ -6,9 +6,5 @@
  */
 -->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
-    <body>
-        <referenceBlock name="rejoiner_base">
-            <block class="Rejoiner\Acr\Block\Conversion" name="rejoiner_conversion" template="Rejoiner_Acr::rejoiner_acr/conversion.phtml" after="-" cacheable="false" />
-        </referenceBlock>
-    </body>
+    <update handle="conversion"/>
 </page>

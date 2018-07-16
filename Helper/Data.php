@@ -70,6 +70,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /** @var Serializer */
     private $serializer;
 
+    /** @var \Magento\Framework\App\Request\Http $request */
+    private $request;
     /**
      * Data constructor.
      * @param \Magento\SalesRule\Model\CouponFactory $couponFactory
@@ -89,6 +91,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Checkout\Model\Session $checkoutSession,
         \Magento\Framework\Session\SessionManager $sessionManager,
         \Magento\Framework\HTTP\ZendClientFactory $httpClient,
+        \Magento\Framework\App\Request\Http $request,
         \Monolog\Logger $logger,
         Serializer $serializer,
         \Magento\Framework\App\Helper\Context $context
@@ -100,6 +103,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->sessionManager       = $sessionManager;
         $this->logger               = $logger;
         $this->httpClient           = $httpClient;
+        $this->request              = $request;
 
         parent::__construct($context);
         $this->serializer = $serializer;
@@ -402,19 +406,40 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return (bool) $this->scopeConfig->getValue(self::XML_PATH_REJOINER_DEBUG_ENABLED, ScopeInterface::SCOPE_STORE);
     }
 
+
+    /**
+     * If shopping cart information should be sent to Rejoiner service on current page
+     * @return int
+     */
+    public function getShoppingCartDataOnThisPage() {
+        return (int) in_array(
+            $this->getCurrentPageName(),
+            [
+                'checkout_cart_index',
+                'checkout_index_index',
+                'multishipping_checkout_login',
+                'multishipping_checkout_addresses'
+            ]
+        );
+    }
+
+    /**
+     * @return string
+     */
+    public function getCurrentPageName()
+    {
+        return $this->request->getFullActionName();
+    }
+
     /**
      * @return bool|mixed
      */
     public function checkRemovedItem()
     {
         $session = $this->sessionManager;
-        if ($session->hasData(self::REMOVED_CART_ITEM_SKU_VARIABLE)) {
-            $removedItems = $session->getData(self::REMOVED_CART_ITEM_SKU_VARIABLE);
-            $session->unsetData(self::REMOVED_CART_ITEM_SKU_VARIABLE);
-            return $removedItems;
-        }
-
-        return false;
+        $removedItems = $session->getData(self::REMOVED_CART_ITEM_SKU_VARIABLE);
+        $session->unsetData(self::REMOVED_CART_ITEM_SKU_VARIABLE);
+        return $removedItems;
     }
 
     /**

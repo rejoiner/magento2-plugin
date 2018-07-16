@@ -18,4 +18,13 @@
     <type name="Magento\Customer\Block\Newsletter">
         <plugin name="rejoiner_subscribe_customer_account_newsletter" type="Rejoiner\Acr\Plugin\Customer\Block\NewsletterPlugin" sortOrder="10" />
     </type>
+
+    <type name="Magento\Customer\CustomerData\SectionPoolInterface">
+        <arguments>
+            <argument name="sectionSourceMap" xsi:type="array">
+                <item name="rejoiner-acr" xsi:type="string">Rejoiner\Acr\CustomerData\Rejoiner</item>
+            </argument>
+        </arguments>
+    </type>
+
 </config>

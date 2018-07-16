@@ -5,11 +5,22 @@
  */
 namespace Rejoiner\Acr\Block;
 
-class Product extends Base
+class Product extends \Magento\Framework\View\Element\Template
 {
+
+    /** @var \Rejoiner\Acr\Helper\Data $rejoinerHelper */
+    protected $rejoinerHelper;
+
+    /** @var \Magento\Catalog\Helper\Image $imageHelper */
+    protected $imageHelper;
+
+    /** @var \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollectionFactory */
+    protected $categoryCollectionFactory;
+
+    /** @var \Magento\Catalog\Model\Product $product */
+    protected $product;
     /**
-     * Product constructor.
-     * @param \Magento\Framework\Registry $registry
+     * Base constructor.
      * @param \Rejoiner\Acr\Helper\Data $rejoinerHelper
      * @param \Magento\Framework\Json\Helper\Data $jsonHelper
      * @param \Magento\Catalog\Helper\Image $imageHelper
@@ -31,17 +42,11 @@ class Product extends Base
         \Magento\Framework\View\Element\Template\Context $context,
         array $data = []
     ) {
-        parent::__construct(
-            $rejoinerHelper,
-            $jsonHelper,
-            $imageHelper,
-            $checkoutSession,
-            $categoryCollectionFactory,
-            $localeResolver,
-            $registry,
-            $context,
-            $data
-        );
+        $this->rejoinerHelper            = $rejoinerHelper;
+        $this->product                   = $registry->registry('current_product');
+        $this->imageHelper               = $imageHelper;
+        $this->categoryCollectionFactory = $categoryCollectionFactory;
+        parent::__construct($context, $data);
     }
 
     /**
@@ -49,17 +54,17 @@ class Product extends Base
      */
     public function getCurrentProductInfo()
     {
-        /** $product \Magento\Catalog\Model\Product */
-        $product = $this->registry->registry('current_product');
+        /**  */
+
         $imageWidth  = $this->rejoinerHelper->getImageWidth();
         $imageHeight = $this->rejoinerHelper->getImageHeight();
-        $imageUrl = $this->imageHelper->init($product, 'category_page_grid')->resize($imageWidth, $imageHeight)->getUrl();
+        $imageUrl = $this->imageHelper->init($this->product, 'category_page_grid')->resize($imageWidth, $imageHeight)->getUrl();
 
         /** @var \Magento\Catalog\Model\ResourceModel\Category\Collection $categoriesCollection */
         $categoriesCollection = $this->categoryCollectionFactory->create();
         $categoriesCollection
             ->addAttributeToSelect('name')
-            ->addFieldToFilter('entity_id', ['in' => $product->getCategoryIds()])
+            ->addFieldToFilter('entity_id', ['in' => $this->product->getCategoryIds()])
             ->load();
 
         $categories = [];
@@ -69,14 +74,34 @@ class Product extends Base
         }
 
         $productData = [
-            'name'        => $product->getName(),
+            'name'        => $this->product->getName(),
             'image_url'   => $imageUrl,
-            'price'       => (string) $this->rejoinerHelper->convertPriceToCents($product->getPrice()),
-            'product_id'  => (string) $product->getSku(),
-            'product_url' => (string) $product->getProductUrl(),
+            'price'       => (string) $this->rejoinerHelper->convertPriceToCents($this->product->getPrice()),
+            'product_id'  => (string) $this->product->getSku(),
+            'product_url' => (string) $this->product->getProductUrl(),
             'category'    => $categories
         ];
 
         return $productData;
+    }
+
+    /**
+     * Get cache key informative items
+     *
+     * @return array
+     */
+    public function getCacheKeyInfo()
+    {
+
+        $s =34;
+
+        return [
+            'BLOCK_TPL',
+            $this->_storeManager->getStore()->getCode(),
+            $this->getTemplateFile(),
+            'base_url' => $this->getBaseUrl(),
+            'template' => $this->getTemplate(),
+            'product' => $this->product->getId()
+        ];
     }
 }
