@@ -76,7 +76,7 @@ class Conversion extends \Magento\Framework\App\Helper\AbstractHelper
      */
     public function getCartData()
     {
-        $result = '';
+        $result = [];
         $displayPriceWithTax = $this->rejoinerHelper->getTrackPriceWithTax();
         $order = $this->getOrder();
 
@@ -93,7 +93,7 @@ class Conversion extends \Magento\Framework\App\Helper\AbstractHelper
                 $result['promo'] = $this->rejoinerHelper->generateCouponCode();
             }
         }
-        return json_encode($result, JSON_UNESCAPED_SLASHES);
+        return $result;
     }
 
     /**

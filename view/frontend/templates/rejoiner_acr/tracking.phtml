@@ -1,7 +1,0 @@
-<?php /* @var \Rejoiner\Acr\Block\Snippets $block */ ?>
-<?php $rejoinerHelper = $block->getRejoinerHelper(); ?>
-    "trackNumberEnabled"  : "<?php echo $block->escapeHtml($rejoinerHelper->getTrackNumberEnabled()); ?>",
-    "persistFormsEnabled" : "<?php echo $block->escapeHtml($rejoinerHelper->getPersistFormsEnabled()); ?>",
-    "cartData"            : <?php /* @escapeNotVerified */ echo $block->getCartData(); ?>,
-    "cartItems"           : <?php /* @escapeNotVerified */ echo json_encode($block->getCartItems(), JSON_UNESCAPED_SLASHES); ?>,
-    "removedItems"        : <?php /* @escapeNotVerified */ echo json_encode($rejoinerHelper->checkRemovedItem(), JSON_UNESCAPED_SLASHES); ?>

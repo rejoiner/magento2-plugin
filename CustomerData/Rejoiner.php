@@ -53,7 +53,7 @@ class Rejoiner implements SectionSourceInterface
         }
 
         if ($this->conversion->shouldSaveConversionData()) {
-            $result['convertionCartData'] = json_encode($this->conversion->getCartData(), JSON_UNESCAPED_SLASHES);
+            $result['convertionCartData']  = json_encode($this->conversion->getCartData(), JSON_UNESCAPED_SLASHES);
             $result['convertionCartItems'] = json_encode($this->conversion->getCartItems(), JSON_UNESCAPED_SLASHES);
         } else {
             if ($this->trackingHelper->getCartData()) {

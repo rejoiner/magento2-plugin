@@ -21,9 +21,9 @@ foreach ($childBlockNames as $childBlockName) {
                 "RejoinerAcrTracking": {
                     "rejoinerSiteId"          : "<?= $siteId; ?>",
                     "rejoinerDomain"          : "<?= $domain; ?>",
-                    "trackNumberEnabled"      : "<?= $rejoinerHelper->getTrackNumberEnabled(); ?>",
-                    "persistFormsEnabled"     : "<?= $rejoinerHelper->getPersistFormsEnabled(); ?>",
-                    "trackCartDataOnThisPage" : "<?= $rejoinerHelper->getShoppingCartDataOnThisPage() ?>"<?php echo (!empty($childBlocksHtml))? ',': ''?>
+                    "trackNumberEnabled"      : <?= $rejoinerHelper->getTrackNumberEnabled(); ?>,
+                    "persistFormsEnabled"     : <?= $rejoinerHelper->getPersistFormsEnabled(); ?>,
+                    "trackCartDataOnThisPage" : <?= $rejoinerHelper->getShoppingCartDataOnThisPage() ?><?php echo (!empty($childBlocksHtml))? ',': ''?>
                     <?= implode(',', $childBlocksHtml); ?>
                 }
             }

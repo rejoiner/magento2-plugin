@@ -79,7 +79,7 @@ define([
                 }
 
                 if (storageData.customerEmail) {
-                    _rejoiner.push(['setCustomerEmail', storageData.customerEmail]);
+                    _rejoiner.push(['setCustomerEmail', JSON.parse(storageData.customerEmail)]);
                 }
 
                 if (storageData.customerData) {
