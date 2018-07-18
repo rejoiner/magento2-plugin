@@ -47,7 +47,7 @@ class Rejoiner implements SectionSourceInterface
     {
         $result = [];
 
-        if ($this->customerHelper->getCurrentCustomer()) {
+        if ($this->customerHelper->getCurrentCustomer()->getId()) {
             $result['customerData'] = json_encode($this->customerHelper->getCustomerInfo(), JSON_UNESCAPED_SLASHES);
             $result['customerEmail'] = json_encode($this->customerHelper->getCustomerEmail(), JSON_UNESCAPED_SLASHES);
         }

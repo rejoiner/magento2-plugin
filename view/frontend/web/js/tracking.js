@@ -87,9 +87,12 @@ define([
                 }
 
                 if (this.options.outputConversionData && storageData.convertionCartData && storageData.convertionCartItems) {
+
+                    var cart_data  = JSON.parse(storageData.convertionCartData),
+                        cart_items = JSON.parse(storageData.convertionCartItems);
                     _rejoiner.push(["sendConversion", {
-                        cart_data: storageData.convertionCartData,
-                        cart_items: storageData.convertionCartItems
+                        cart_data: cart_data,
+                        cart_items: cart_items
                     }]);
 
                     this.skipSubscription = true;

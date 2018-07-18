@@ -1,8 +1,6 @@
 <?php
 namespace Rejoiner\Acr\Helper;
 
-use Rejoiner\Acr\Plugin\Framework\Model\Layout\Customer\DepersonalizePlugin;
-
 class Customer extends \Magento\Framework\App\Helper\AbstractHelper
 {
     /** @var \Magento\Customer\Model\Customer $currentCustomer */
@@ -17,7 +15,9 @@ class Customer extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * Customer constructor.
      * @param Data $rejoinerHelper
+     * @param \Magento\Framework\Locale\Resolver $localeResolver
      * @param \Magento\Framework\Registry $registry
+     * @param \Magento\Customer\Model\Session $customerSession
      * @param \Magento\Framework\App\Helper\Context $context
      * @param array $data
      */
@@ -25,11 +25,12 @@ class Customer extends \Magento\Framework\App\Helper\AbstractHelper
         \Rejoiner\Acr\Helper\Data $rejoinerHelper,
         \Magento\Framework\Locale\Resolver $localeResolver,
         \Magento\Framework\Registry $registry,
+        \Magento\Customer\Model\Session $customerSession,
         \Magento\Framework\App\Helper\Context $context,
         array $data = []
     ) {
         $this->localeResolver  = $localeResolver;
-        $this->currentCustomer = $registry->registry(DepersonalizePlugin::REGISTRY_KEY);
+        $this->currentCustomer = $customerSession->getCustomer();
         parent::__construct($context);
     }
 

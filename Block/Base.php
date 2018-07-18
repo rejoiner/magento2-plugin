@@ -5,11 +5,6 @@
  */
 namespace Rejoiner\Acr\Block;
 
-use Rejoiner\Acr\Plugin\Framework\Model\Layout\Checkout\DepersonalizePlugin;
-use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
-use Magento\ConfigurableProduct\Block\Cart\Item\Renderer\Configurable as ConfigurableRenderer;
-use Magento\Catalog\Model\Config\Source\Product\Thumbnail as ThumbnailSource;
-
 class Base extends \Magento\Framework\View\Element\Template
 {
     /** @var \Rejoiner\Acr\Helper\Data $rejoinerHelper */

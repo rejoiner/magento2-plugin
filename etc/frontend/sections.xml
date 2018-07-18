@@ -27,4 +27,7 @@
     <action name="rest/*/V1/carts/*/payment-information">
         <section name="rejoiner-acr"/>
     </action>
+    <action name="rest/*/V1/guest-carts/*/payment-information">
+        <section name="rejoiner-acr"/>
+    </action>
 </config>

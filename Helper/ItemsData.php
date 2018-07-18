@@ -95,14 +95,14 @@ class ItemsData extends \Magento\Framework\App\Helper\AbstractHelper
                 $productPrice = $item->getPrice();
                 $rowTotal     = $item->getRowTotal();
             }
-
+            $qty = $item instanceof OrderItem ? $item->getQtyOrdered() : $item->getQty();
             $itemsData[] = [
                 'name'        => $item->getName(),
                 'image_url'   => $imageUrl,
-                'price'       => (string) $this->rejoinerHelper->convertPriceToCents($productPrice),
+                'price'       => (int) $this->rejoinerHelper->convertPriceToCents($productPrice),
                 'product_id'  => (string) $item->getSku(),
-                'item_qty'    => (string) $item->getQty(),
-                'qty_price'   => (string) $this->rejoinerHelper->convertPriceToCents($rowTotal),
+                'item_qty'    => (int) $qty,
+                'qty_price'   => (int) $this->rejoinerHelper->convertPriceToCents($rowTotal),
                 'product_url' => (string) $product->getProductUrl(),
                 'category'    => $productCategories
             ];
