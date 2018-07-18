@@ -15,6 +15,7 @@ define([
         options: {
             rejoinerSiteId: '',
             rejoinerDomain: '',
+            rejoinerScriptUri: '',
             outputConversionData: false
         },
 
@@ -110,7 +111,7 @@ define([
             var s = document.createElement('script');
             s.type = 'text/javascript';
             s.async = true;
-            s.src =  'https://cdn.rejoiner.com/js/v4/rejoiner.lib.js';
+            s.src =  this.options.rejoinerScriptUri;
             var x = document.getElementsByTagName('script')[0];
             x.parentNode.insertBefore(s, x);
         }

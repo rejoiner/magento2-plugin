@@ -14,6 +14,7 @@ foreach ($childBlockNames as $childBlockName) {
     <?php
     $domain = $block->escapeHtml($rejoinerHelper->getDomain());
     $siteId = $block->escapeHtml($rejoinerHelper->getRejoinerSiteId());
+    $rejoinerScriptUri = $block->escapeHtml($rejoinerHelper->getRejoinerScriptUri());;
     ?>
     <script type="text/x-magento-init">
         {
@@ -21,6 +22,7 @@ foreach ($childBlockNames as $childBlockName) {
                 "RejoinerAcrTracking": {
                     "rejoinerSiteId"          : "<?= $siteId; ?>",
                     "rejoinerDomain"          : "<?= $domain; ?>",
+                    "rejoinerScriptUri"       : "<?= $rejoinerScriptUri; ?>",
                     "trackNumberEnabled"      : <?= $rejoinerHelper->getTrackNumberEnabled(); ?>,
                     "persistFormsEnabled"     : <?= $rejoinerHelper->getPersistFormsEnabled(); ?>,
                     "trackCartDataOnThisPage" : <?= $rejoinerHelper->getShoppingCartDataOnThisPage() ?><?php echo (!empty($childBlocksHtml))? ',': ''?>

@@ -40,10 +40,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const STATUS_SUBSCRIBED                                = 1;
     const STATUS_UNSUBSCRIBED                              = 2;
 
-    const REJOINER_API_URL                      = 'https://app.rejoiner.com';
-    const REJOINER_API_REQUEST_PATH             = '/api/1.0/site/%s/lead/convert';
-    const REJOINER_API_ADD_TO_LIST_REQUEST_PATH = '/api/1.0/site/%s/contact_add';
-    const REJOINER_API_UNSUBSCRIBE_REQUEST_PATH = '/api/1.0/site/%s/lead/unsubscribe';
+    const REJOINER2_SITE_ID_LENGTH                         = 7;
+
+    const REJOINER_VERSION_1                               = 'v1';
+    const REJOINER_VERSION_2                               = 'v2';
+
     const REMOVED_CART_ITEM_SKU_VARIABLE        = 'rejoiner_sku';
 
     /** @var \Magento\Checkout\Model\Session $_checkoutSession */
@@ -107,6 +108,71 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         parent::__construct($context);
         $this->serializer = $serializer;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRejoinerApiUri()
+    {
+        switch ($this->getRejoinerVersion()) {
+            case self::REJOINER_VERSION_2:
+                return 'https://rj2.rejoiner.com';
+            default:
+                return 'https://app.rejoiner.com';
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function getRejoinerApiPath()
+    {
+        switch ($this->getRejoinerVersion()) {
+            case self::REJOINER_VERSION_2:
+                return '/api/v1/%s';
+            default:
+                return '/api/1.0/site/%s';
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function getRejoinerApiConvertPath()
+    {
+        switch ($this->getRejoinerVersion()) {
+            case self::REJOINER_VERSION_2:
+                return $this->getRejoinerApiPath() . '/customer/convert/';
+            default:
+                return $this->getRejoinerApiPath() . '/lead/convert';
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function getRejoinerApiAddToListPath($listId)
+    {
+        switch ($this->getRejoinerVersion()) {
+            case self::REJOINER_VERSION_2:
+                return $this->getRejoinerApiPath() . "/lists/$listId/contacts/";
+            default:
+                return $this->getRejoinerApiPath() . '/contact_add';
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function getRejoinerApiUnSubscribePath()
+    {
+        switch ($this->getRejoinerVersion()) {
+            case self::REJOINER_VERSION_2:
+                return $this->getRejoinerApiPath() . '/customer/unsubscribe/';
+            default:
+                return $this->getRejoinerApiPath() . '/lead/unsubscribe';
+        }
     }
 
     /**
@@ -234,6 +300,34 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @return int
      */
+    public function getRejoinerVersion()
+    {
+        $siteId = $this->getRejoinerSiteId();
+        $siteIdLength = strlen($siteId);
+
+        if ($siteIdLength == self::REJOINER2_SITE_ID_LENGTH) {
+            return self::REJOINER_VERSION_2;
+        }
+
+        return self::REJOINER_VERSION_1;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRejoinerScriptUri()
+    {
+        switch ($this->getRejoinerVersion()) {
+            case self::REJOINER_VERSION_2:
+                return 'https://cdn.rejoiner.com/js/v4/rj2.lib.js';
+            default:
+                return 'https://cdn.rejoiner.com/js/v4/rejoiner.lib.js';
+        }
+    }
+
+    /**
+     * @return string
+     */
     public function getTrackNumberEnabled()
     {
         return (int) $this->scopeConfig->getValue(self::XML_PATH_REJOINER_TRACK_NUMBERS, ScopeInterface::SCOPE_STORE);
@@ -292,7 +386,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     public function getRejoinerApiSecret()
     {
-        return $this->scopeConfig->getValue(self::XML_PATH_REJOINER_API_SECRET);
+        switch ($this->getRejoinerVersion()) {
+            case self::REJOINER_VERSION_2:
+                return true;
+            default:
+                return $this->scopeConfig->getValue(self::XML_PATH_REJOINER_API_SECRET);
+        }
     }
 
     /**
@@ -451,13 +550,16 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $customerEmail = $orderModel->getBillingAddress()->getEmail();
             $this->convert($customerEmail);
 
-            if ($this->scopeConfig->getValue(self::XML_PATH_REJOINER_PASS_NEW_CUSTOMERS) && $this->scopeConfig->getValue(self::XML_PATH_REJOINER_LIST_ID)) {
-                $listId = $this->scopeConfig->getValue(self::XML_PATH_REJOINER_LIST_ID);
+            $passNewCustomers = $this->scopeConfig->getValue(self::XML_PATH_REJOINER_PASS_NEW_CUSTOMERS);
+            $listId = $this->scopeConfig->getValue(self::XML_PATH_REJOINER_LIST_ID);
+
+            if ($passNewCustomers && $listId) {
                 $email = $orderModel->getCustomerEmail();
                 $customerName = $orderModel->getBillingAddress()->getFirstname();
                 $this->addToList($listId, $email, $customerName);
             }
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+        }
     }
 
     /**
@@ -478,7 +580,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     public function unSubscribe($email)
     {
-        $client = $this->prepareClient(self::REJOINER_API_UNSUBSCRIBE_REQUEST_PATH, ['email' => $email]);
+        $apiUnSubscribePath = $this->getRejoinerApiUnSubscribePath();
+        $client = $this->prepareClient($apiUnSubscribePath, ['email' => $email]);
         $this->sendRequest($client);
 
         return $this;
@@ -491,9 +594,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private function convert($email)
     {
         try {
-            $client = $this->prepareClient(self::REJOINER_API_REQUEST_PATH, ['email' => $email]);
+            $apiConvertPath = $this->getRejoinerApiConvertPath();
+            $client = $this->prepareClient($apiConvertPath, ['email' => $email]);
             $this->sendRequest($client);
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+        }
 
         return $this;
     }
@@ -516,7 +621,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             'first_name' => $customerName
         ];
 
-        $client = $this->prepareClient(self::REJOINER_API_ADD_TO_LIST_REQUEST_PATH, $data);
+        $apiAddToListPath = $this->getRejoinerApiAddToListPath($listId);
+        $client = $this->prepareClient($apiAddToListPath, $data);
         $this->sendRequest($client);
 
         return $this;
@@ -530,23 +636,37 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     private function prepareClient($path, array $data)
     {
-        $apiKey         = $this->scopeConfig->getValue(self::XML_PATH_REJOINER_API_KEY);
-        $siteId         = $this->scopeConfig->getValue(self::XML_PATH_REJOINER_API_SITE_ID);
-        $apiSecret      = utf8_encode($this->scopeConfig->getValue(self::XML_PATH_REJOINER_API_SECRET));
+        $apiKey          = $this->scopeConfig->getValue(self::XML_PATH_REJOINER_API_KEY);
+        $siteId          = $this->scopeConfig->getValue(self::XML_PATH_REJOINER_API_SITE_ID);
+        $rejoinerVersion = $this->getRejoinerVersion();
 
-        if (!$apiKey || !$siteId || !$apiSecret || empty($data)) {
+        if (!$apiKey || !$siteId || empty($data)) {
             $error = 'Missing API credentials';
             $this->log($error, true);
             throw new \Exception($error);
         }
 
-        $requestBody    = utf8_encode(json_encode($data));
-        $requestPath    = sprintf($path, $siteId);
-        $hmacData       = utf8_encode(implode("\n", [\Zend_Http_Client::POST, $requestPath, $requestBody]));
-        $codedApiSecret = base64_encode(hash_hmac('sha1', $hmacData, $apiSecret, true));
-        $authorization  = sprintf('Rejoiner %s:%s', $apiKey , $codedApiSecret);
+        $requestBody   = utf8_encode(json_encode($data));
+        $requestPath   = sprintf($path, $siteId);
+        $authorization = sprintf('Rejoiner %s', $apiKey);
+
+        if ($rejoinerVersion == self::REJOINER_VERSION_1) {
+            $apiSecret = utf8_encode($this->scopeConfig->getValue(self::XML_PATH_REJOINER_API_SECRET));
+
+            if (!$apiSecret) {
+                $error = 'Missing API secret';
+                $this->log($error, true);
+                throw new \Exception($error);
+            }
+
+            $hmacData       = utf8_encode(implode("\n", [\Zend_Http_Client::POST, $requestPath, $requestBody]));
+            $codedApiSecret = base64_encode(hash_hmac('sha1', $hmacData, $apiSecret, true));
+            $authorization  = sprintf('Rejoiner %s:%s', $apiKey, $codedApiSecret);
+        }
+
         /** @var \Magento\Framework\HTTP\ZendClient $client */
-        $client         = $this->httpClient->create(['uri' => self::REJOINER_API_URL . $requestPath]);
+        $rejoinerApiUri = $this->getRejoinerApiUri();
+        $client = $this->httpClient->create(['uri' => $rejoinerApiUri . $requestPath]);
         $client->setRawData($requestBody);
         $client->setHeaders(['Authorization' => $authorization, 'Content-type' => 'application/json;']);
 
