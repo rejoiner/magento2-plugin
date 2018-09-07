@@ -36,6 +36,9 @@
                                                                             <item name="component" xsi:type="string">Rejoiner_Acr/js/checkout/view/subscription</item>
                                                                             <item name="displayArea" xsi:type="string">rejoiner-merketing-subscription-login</item>
                                                                             <item name="template" xsi:type="string">Rejoiner_Acr/checkout/view/subscription</item>
+                                                                            <item name="config" xsi:type="array">
+                                                                                <item name="shouldObserveParentEmail" xsi:type="string">1</item>
+                                                                            </item>
                                                                         </item>
                                                                     </item>
                                                                 </item>

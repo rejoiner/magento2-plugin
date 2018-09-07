@@ -6,11 +6,16 @@ define([
     'jquery',
     'uiComponent',
     'ko',
-    'Magento_Customer/js/model/customer'
-], function ($, Component, ko, customer) {
+    'Magento_Customer/js/model/customer',
+    'uiRegistry'
+], function ($, Component, ko, customer, uiRegistry) {
     'use strict';
 
     return Component.extend({
+        defaults: {
+            shouldObserveParentEmail: 0
+        },
+
         showSubscriptionLogin: ko.observable(false),
         showSubscriptionGuest: ko.observable(false),
 
@@ -18,12 +23,24 @@ define([
             this._super();
 
             if (window.rejoinerMarketing) {
+
                 if (window.rejoinerMarketing.show_on_login_checkout) {
                     this.showSubscriptionLogin(true);
                 }
 
-                if (!customer.isLoggedIn() && window.rejoinerMarketing.show_on_guest_checkout) {
+                if (!customer.isLoggedIn() && window.rejoinerMarketing.show_on_guest_checkout && this.shouldObserveParentEmail) {
                     this.showSubscriptionGuest(true);
+
+                    // Prevent displaying 2 subscribe checkboxes
+                    if (window.rejoinerMarketing.show_on_login_checkout) {
+                        var email = uiRegistry.get((uiRegistry.get(this.parentName)).parentName),
+                            that = this;
+
+                        email.isPasswordVisible.subscribe(function (newValue) {
+                            that.toggleSubscribeGuestForm(newValue);
+                        });
+                        this.toggleSubscribeGuestForm(email.isPasswordVisible());
+                    }
                 }
             }
 
@@ -41,6 +58,17 @@ define([
         updateSubscribe: function(input, event) {
             window.rejoinerMarketing.subscribe_guest_checkout = $(event.target).is(':checked') ? 1 : 0;
             return true;
+        },
+
+        toggleSubscribeGuestForm: function(newValue) {
+            if (window.rejoinerMarketing.show_on_guest_checkout) {
+                   if (newValue) {
+                    this.showSubscriptionGuest(false);
+                } else {
+                    this.showSubscriptionGuest(true);
+                }
+            }
+
         }
     });
 });
