@@ -51,6 +51,11 @@ class Index extends \Magento\Framework\App\Action\Action
     }
 
     /**
+     * We assume if params in a querystring are array style (i.e. index[key]=value)
+     * then they should represent cart product data. Otherwise, simple string
+     * params should be persisted on redirect to the cart page to capture UTM
+     * params, rjnrid, etc.
+     *
      * @return \Magento\Framework\App\ResponseInterface
      */
     public function execute()
@@ -71,14 +76,24 @@ class Index extends \Magento\Framework\App\Action\Action
                     }
                 }
             }
+
             if (isset($params['coupon_code'])) {
-                $cartModel->getQuote()->setCouponCode($params['coupon_code'])->collectTotals();
+                $cartModel->getQuote()
+                    ->setCouponCode($params['coupon_code'])
+                    ->collectTotals();
             }
+
             $cartModel->save();
             $this->sessionFactory->create()->setCartWasUpdated(true);
         }
 
-        $url = $this->urlBuilder->getUrl('checkout/cart/', ['updateCart' => true]);
+        $url = $this->urlBuilder->getUrl(
+            'checkout/cart/',
+            [
+                'updateCart' => true,
+                '_query' => $params
+            ]
+        );
         $this->getResponse()->setRedirect($url);
         return $this->_response;
     }
