@@ -4,8 +4,9 @@
  * See COPYING.txt for license details.
  */
 -->
-<div class="field choice newsletter"  data-bind="fadeVisible: showSubscriptionGuest">
-    <input data-bind="attr: {title: getLabel()}, checked: shouldBeChecked(), click: updateSubscribe" type="checkbox" name="rejoiner_subscription" value="1" id="rejoiner-subscription-guest" class="checkbox" />
-    <label for="rejoiner-subscription-guest" class="label"><span data-bind="text: getLabel()"></span></label>
-</div>
-
+<!-- ko if: showSubscriptionGuest -->
+    <div class="field choice newsletter">
+        <input data-bind="attr: {title: getLabel()}, checked: shouldBeChecked(), click: updateSubscribe" type="checkbox" name="rejoiner_subscription" value="1" id="rejoiner-subscription-guest" class="checkbox" />
+        <label for="rejoiner-subscription-guest" class="label"><span data-bind="text: getLabel()"></span></label>
+    </div>
+<!-- /ko -->
