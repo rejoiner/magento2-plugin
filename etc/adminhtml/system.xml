@@ -140,14 +140,23 @@
                     </depends>
                     <source_model>Rejoiner\Acr\Model\System\Config\Source\Salesrule</source_model>
                 </field>
-                <field id="heading_data" translate="label" sortOrder="46" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="extra_codes" translate="label" sortOrder="47" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Additional Cart Coupons</label>
+                    <frontend_model>Rejoiner\Acr\Block\Adminhtml\Form\Field\Code</frontend_model>
+                    <backend_model>Rejoiner\Acr\Model\System\Config\Backend\Attributes</backend_model>
+                    <depends>
+                        <field id="coupon_code">1</field>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="heading_data" translate="label" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Data Settings</label>
                     <frontend_model>Magento\Config\Block\System\Config\Form\Field\Heading</frontend_model>
                     <depends>
                         <field id="enabled">1</field>
                     </depends>
                 </field>
-                <field id="thumbnail_size_width" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="thumbnail_size_width" translate="label" type="text" sortOrder="51" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Thumbnail Width</label>
                     <depends>
                         <field id="enabled">1</field>

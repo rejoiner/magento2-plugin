@@ -89,7 +89,17 @@ class Snippets extends \Magento\Framework\App\Helper\AbstractHelper
                 'return_url'        => (string) $this->rejoinerHelper->getRestoreUrl()
             ];
             if ($this->rejoinerHelper->getIsEnabledCouponCodeGeneration()) {
-                $result['promo'] = $this->rejoinerHelper->generateCouponCode();
+                $ruleId = $this->rejoinerHelper->getCouponCodeRuleId();
+                if ($ruleId) {
+                    $result['promo'] = $this->rejoinerHelper->generateCouponCode($ruleId);
+                }
+
+                $extraCodes = $this->rejoinerHelper->getExtraCodes();
+                if ($extraCodes) {
+                    foreach ($extraCodes as $param => $rule_id) {
+                        $result[$param] = $this->rejoinerHelper->generateCouponCode($rule_id, $param);
+                    }
+                }
             }
         }
 
