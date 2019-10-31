@@ -9,4 +9,7 @@
     <event name="sales_order_save_after">
         <observer name="rejoiner_acr_order_place" instance="Rejoiner\Acr\Observer\OrderSaveAfter" />
     </event>
+    <event name="controller_action_postdispatch_newsletter_manage_save">
+        <observer name="rejoiner_acr_subscriber_save" instance="Rejoiner\Acr\Observer\SubscriberSaveAfter" />
+    </event>
 </config>

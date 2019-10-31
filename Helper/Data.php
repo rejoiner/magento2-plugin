@@ -586,7 +586,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             if ($passNewCustomers && $listId) {
                 $email = $orderModel->getCustomerEmail();
                 $customerName = $orderModel->getBillingAddress()->getFirstname();
-                $this->addToList($listId, $email, $customerName);
+                $this->_addToList($listId, $email, $customerName);
             }
         } catch (\Exception $e) {
         }
@@ -599,7 +599,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     public function subscribe($email, $customerName = '')
     {
-        $this->addToList($this->getRejoinerMarketingListID(), $email, $customerName);
+        $this->_addToList($this->getRejoinerMarketingListID(), $email, $customerName);
 
         return $this;
     }
@@ -634,22 +634,30 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
-     * @param $listId
-     * @param $email
-     * @param string $customerName
+     * Add Customer to List function
+     *
+     * @param string $listId       List ID
+     * @param string $email        Customer Email
+     * @param string $customerName Customer First Name
+     *
      * @return $this
      */
-    private function addToList($listId, $email, $customerName = '')
+    private function _addToList($listId, $email, $customerName = '')
     {
-        if (!$listId) {
+        if (!$listId || !$email) {
             return $this;
         }
 
-        $data = [
-            'email'      => $email,
-            'list_id'    => $listId,
-            'first_name' => $customerName
-        ];
+        $data = ['email' => $email];
+
+        $rejoinerVersion = $this->getRejoinerVersion();
+        if ($rejoinerVersion == self::REJOINER_VERSION_1) {
+            $data['list_id'] = $listId;
+        }
+
+        if ($customerName) {
+            $data['first_name'] = $customerName;
+        }
 
         $apiAddToListPath = $this->getRejoinerApiAddToListPath($listId);
         $client = $this->prepareClient($apiAddToListPath, $data);
@@ -725,6 +733,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             case '400':
                 $error = $responseCode . ': required params were not specified and/or the body was malformed';
                 $this->log($error, true);
+                $this->log($response->getBody(), true);
                 throw new \Exception($error);
                 break;
             case '403':
