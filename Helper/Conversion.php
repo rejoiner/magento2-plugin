@@ -89,7 +89,9 @@ class Conversion extends \Magento\Framework\App\Helper\AbstractHelper
                 'return_url' => $this->_urlBuilder->getUrl('sales/order/view/', ['order_id' => $order->getIncrementId()])
             ];
 
-            if ($promo = $order->getCouponCode()) {
+            $promo = $order->getCouponCode();
+
+            if ($promo) {
                 $result['promo'] = $promo;
             }
         }
