@@ -90,7 +90,7 @@ class Conversion extends \Magento\Framework\App\Helper\AbstractHelper
             ];
 
             if ($promo = $order->getCouponCode()) {
-                $result['promo'] = $this->rejoinerHelper->generateCouponCode();
+                $result['promo'] = $promo;
             }
         }
         return $result;
