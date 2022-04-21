@@ -597,7 +597,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param string $customerName
      * @return $this
      */
-    public function subscribe($email, $customerName = '')
+    public function subscribe($email, $customerName = null)
     {
         $this->addToList($this->getRejoinerMarketingListID(), $email, $customerName);
 
@@ -639,7 +639,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param string $customerName
      * @return $this
      */
-    private function addToList($listId, $email, $customerName = '')
+    private function addToList($listId, $email, $customerName = null)
     {
         if (!$listId) {
             return $this;
@@ -647,9 +647,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         $data = [
             'email'      => $email,
-            'list_id'    => $listId,
-            'first_name' => $customerName
+            'list_id'    => $listId
         ];
+
+        if ($customerName) {
+            $data['first_name'] = $customerName;
+        }
 
         $apiAddToListPath = $this->getRejoinerApiAddToListPath($listId);
         $client = $this->prepareClient($apiAddToListPath, $data);
