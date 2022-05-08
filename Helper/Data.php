@@ -268,12 +268,20 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function generateCouponCode($rule_id, $param = 'promo')
     {
         $quote = $this->checkoutSession->getQuote();
-        $codes = unserialize($quote->getPromo());
-        $couponCode = isset($codes[$param]) ? $codes[$param] : '';
+        $quotePromo = $quote->getPromo();
+
+        if ($quotePromo) {
+            $codes = unserialize($quotePromo);
+            $couponCode = isset($codes[$param]) ? $codes[$param] : '';
+
+            if ($couponCode) {
+                return $couponCode;
+            }
+        }
 
         /** @var \Magento\SalesRule\Model\Rule $ruleItem */
         $ruleItem = $this->ruleFactory->create()->load($rule_id);
-        if ($ruleItem->getUseAutoGeneration() && !$couponCode) {
+        if ($ruleItem->getUseAutoGeneration()) {
             $couponCode = $this->codegeneratorFactory->create()->generateCode();
 
             /** @var \Magento\SalesRule\Model\Coupon $salesRuleModel */
