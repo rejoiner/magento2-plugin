@@ -56,7 +56,7 @@ class TrackOrderSuccessConversion
                 $orderModel->load($successOrder->getOrderId());
                 $responseCode = $this->_rejoinerHelper->sendInfoToRejoiner($orderModel);
                 $successOrder->setResponseCode($responseCode);
-                $successOrder->setSentAt(strftime('%Y-%m-%d %H:%M:%S', $this->_timezone->scopeTimeStamp()));
+                $successOrder->setSentAt(date('Y-m-d H:i:s', $this->_timezone->scopeTimeStamp()));
                 $successOrder->save();
             }
         }
