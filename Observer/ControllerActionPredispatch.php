@@ -42,7 +42,7 @@ class ControllerActionPredispatch implements \Magento\Framework\Event\ObserverIn
             $publicCookieMetadata = $this->_cookieMetadataFactory->createPublicCookieMetadata()
                 ->setPath('/');
 
-            $encodedCookie = $cookiesManager->getCookie('section_data_ids')
+            $encodedCookie = $cookiesManager->getCookie('section_data_ids');
             if ($encodedCookie) {
                 $sectionDataIds = json_decode($encodedCookie);
                 if ($sectionDataIds && isset($sectionDataIds->cart)) {
