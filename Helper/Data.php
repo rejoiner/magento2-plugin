@@ -731,6 +731,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         switch ($responseCode) {
             case '200':
+            case '201':
                 $this->log($responseCode . ': Everything is alright.');
                 break;
             case '400':
