@@ -38,13 +38,16 @@ class SubscriberPlugin
             try {
                 if ($subscriber->getStatus() == Subscriber::STATUS_SUBSCRIBED) {
                     $customerName = '';
+                    $customerLastName = '';
+
                     if ($customerId = $subscriber->getCustomerId()) {
                         /** @var \Magento\Customer\Model\Customer $customer */
                         $customer = $this->customerRegistry->retrieve($customerId);
-                        $customerName = $customer->getData('firstname') ? $customer->getData('firstname') : '';
+                        $customerName = $customer->getData('firstname') ?: '';
+                        $customerLastName = $customer->getData('lastname') ?: '';
                     }
 
-                    $this->rejoinerHelper->subscribe($subscriber->getEmail(), $customerName);
+                    $this->rejoinerHelper->subscribe($subscriber->getEmail(), $customerName, $customerLastName);
                     $subscriber->setData('added_to_rejoiner', RejoinerHelper::STATUS_SUBSCRIBED);
                 }
             } catch (\Exception $e) {

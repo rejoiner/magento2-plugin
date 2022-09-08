@@ -594,20 +594,25 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             if ($passNewCustomers && $listId) {
                 $email = $orderModel->getCustomerEmail();
                 $customerName = $orderModel->getBillingAddress()->getFirstname();
-                $this->addToList($listId, $email, $customerName);
+                $customerLastName = $orderModel->getBillingAddress()->getLastname();
+                $this->addToList($listId, $email, $customerName, $customerLastName);
             }
         } catch (\Exception $e) {
         }
     }
 
     /**
+     * Subscribe customer
+     *
      * @param string $email
-     * @param string $customerName
+     * @param string|null $customerName
+     * @param string|null $customerLastName
      * @return $this
+     * @throws \Exception
      */
-    public function subscribe($email, $customerName = null)
+    public function subscribe($email, $customerName = null, $customerLastName = null)
     {
-        $this->addToList($this->getRejoinerMarketingListID(), $email, $customerName);
+        $this->addToList($this->getRejoinerMarketingListID(), $email, $customerName, $customerLastName);
 
         return $this;
     }
@@ -642,12 +647,16 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
-     * @param $listId
-     * @param $email
-     * @param string $customerName
+     * Add customer to the list
+     *
+     * @param string $listId
+     * @param string $email
+     * @param string|null $customerName
+     * @param string|null $customerLastName
      * @return $this
+     * @throws \Exception
      */
-    private function addToList($listId, $email, $customerName = null)
+    private function addToList($listId, $email, $customerName = null, $customerLastName = null)
     {
         if (!$listId) {
             return $this;
@@ -660,6 +669,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         if ($customerName) {
             $data['first_name'] = $customerName;
+        }
+
+        if ($customerLastName) {
+            $data['last_name'] = $customerLastName;
         }
 
         $apiAddToListPath = $this->getRejoinerApiAddToListPath($listId);
