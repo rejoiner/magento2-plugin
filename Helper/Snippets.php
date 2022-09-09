@@ -1,6 +1,6 @@
 <?php
-/**
- * Copyright © 2018 Rejoiner. All rights reserved.
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Helper;
@@ -66,6 +66,8 @@ class Snippets extends \Magento\Framework\App\Helper\AbstractHelper
 
     /**
      * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function getCartItems()
     {
@@ -74,6 +76,8 @@ class Snippets extends \Magento\Framework\App\Helper\AbstractHelper
 
     /**
      * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function getCartData()
     {
@@ -82,19 +86,22 @@ class Snippets extends \Magento\Framework\App\Helper\AbstractHelper
         $quote = $this->getQuote();
 
         if ($quote->getAllVisibleItems()) {
-            $total = $displayPriceWithTax? $quote->getGrandTotal() : $quote->getSubtotal();
+            $total = $displayPriceWithTax ? $quote->getGrandTotal() : $quote->getSubtotal();
             $result = [
-                'total_items_count' => (string) intval($quote->getItemsQty()),
+                'total_items_count' => (string) (int) $quote->getItemsQty(),
                 'cart_value'        => (string) $this->rejoinerHelper->convertPriceToCents($total),
                 'return_url'        => (string) $this->rejoinerHelper->getRestoreUrl()
             ];
+
             if ($this->rejoinerHelper->getIsEnabledCouponCodeGeneration()) {
                 $ruleId = $this->rejoinerHelper->getCouponCodeRuleId();
+
                 if ($ruleId) {
                     $result['promo'] = $this->rejoinerHelper->generateCouponCode($ruleId);
                 }
 
                 $extraCodes = $this->rejoinerHelper->getExtraCodes();
+
                 if ($extraCodes) {
                     foreach ($extraCodes as $param => $rule_id) {
                         if ($param && $rule_id) {
@@ -110,6 +117,8 @@ class Snippets extends \Magento\Framework\App\Helper\AbstractHelper
 
     /**
      * @return \Magento\Quote\Model\Quote
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     protected function getQuote()
     {

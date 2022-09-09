@@ -1,6 +1,6 @@
 <?php
-/**
- * Copyright © 2017 Rejoiner. All rights reserved.
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Block\Adminhtml\Form\Field;
@@ -13,7 +13,7 @@ class Salesrule extends \Magento\Framework\View\Element\Html\Select
     private $_salesruleFactory;
 
     /**
-     * @param \Magento\SalesRule\Model\RuleFactory $ruleFactory
+     * @param \Rejoiner\Acr\Model\System\Config\Source\Salesrule $salesruleFactory
      * @param \Magento\Framework\View\Element\Context $context
      * @param array $data
      */
@@ -30,6 +30,7 @@ class Salesrule extends \Magento\Framework\View\Element\Html\Select
      * Render block HTML
      *
      * @return string
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function _toHtml()
     {

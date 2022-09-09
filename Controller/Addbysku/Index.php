@@ -1,6 +1,6 @@
 <?php
-/**
- * Copyright © 2017 Rejoiner. All rights reserved.
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Controller\Addbysku;
@@ -65,6 +65,11 @@ class Index extends \Magento\Framework\App\Action\Action
         parent::__construct($context);
     }
 
+    /**
+     * @inheritDoc
+     *
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
     public function execute()
     {
         $params = $this->getRequest()->getParams();
@@ -89,9 +94,11 @@ class Index extends \Magento\Framework\App\Action\Action
                 $stockItemResource->loadByProductId($stockItem, $productId, $websiteId);
                 $qty = $stockItem->getQty();
                 try {
-                    if (!$cart->getQuote()->hasProductId($productId) && is_numeric($product['qty']) && $qty > $product['qty']) {
+                    if (!$cart->getQuote()->hasProductId($productId)
+                        && is_numeric($product['qty']) && $qty > $product['qty']) {
                         $cart->addProduct($productBySKU, (int) $product['qty']);
-                        $successMessage .= __('%1 was added to your shopping cart.'.'</br>', $this->escaper->escapeHtml($productBySKU->getName()));
+                        $successMessage .= __('%1 was added to your shopping cart.' .
+                            '</br>', $this->escaper->escapeHtml($productBySKU->getName()));
                     }
                     unset($params[$key]);
                 } catch (\Exception $e) {
@@ -105,7 +112,7 @@ class Index extends \Magento\Framework\App\Action\Action
         try {
             $cart->getQuote()->save();
             $cart->save();
-        }  catch (\Exception $e) {
+        } catch (\Exception $e) {
             $this->rejoinerHelper->log($e->getMessage());
         }
 

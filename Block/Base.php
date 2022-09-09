@@ -1,6 +1,6 @@
 <?php
-/**
- * Copyright © 2017 Rejoiner. All rights reserved.
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Block;
@@ -10,13 +10,14 @@ class Base extends \Magento\Framework\View\Element\Template
     /** @var \Rejoiner\Acr\Helper\Data $rejoinerHelper */
     protected $rejoinerHelper;
 
-
     /** @var \Magento\Framework\App\Request\Http $request */
     protected $request;
 
     /**
      * Base constructor.
+     *
      * @param \Rejoiner\Acr\Helper\Data $rejoinerHelper
+     * @param \Magento\Framework\App\Request\Http $request
      * @param \Magento\Framework\View\Element\Template\Context $context
      * @param array $data
      */
@@ -32,6 +33,8 @@ class Base extends \Magento\Framework\View\Element\Template
     }
 
     /**
+     * Get Rejoiner helper
+     *
      * @return \Rejoiner\Acr\Helper\Data
      */
     public function getRejoinerHelper()
@@ -39,11 +42,11 @@ class Base extends \Magento\Framework\View\Element\Template
         return $this->rejoinerHelper;
     }
 
-
     /**
      * Get cache key informative items
      *
      * @return array
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function getCacheKeyInfo()
     {
@@ -56,5 +59,4 @@ class Base extends \Magento\Framework\View\Element\Template
             'page_type' => $this->rejoinerHelper->getCurrentPageName()
         ];
     }
-
 }

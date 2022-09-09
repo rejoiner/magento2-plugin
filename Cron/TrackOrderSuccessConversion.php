@@ -1,6 +1,6 @@
 <?php
-/**
- * Copyright © 2017 Rejoiner. All rights reserved.
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Cron;
@@ -39,7 +39,10 @@ class TrackOrderSuccessConversion
     }
 
     /**
+     * Track orders cron
+     *
      * @return $this
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function trackOrder()
     {

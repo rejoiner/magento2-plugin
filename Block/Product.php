@@ -1,6 +1,6 @@
 <?php
-/**
- * Copyright © 2017 Rejoiner. All rights reserved.
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Block;
@@ -50,7 +50,10 @@ class Product extends \Magento\Framework\View\Element\Template
     }
 
     /**
-     * @return string
+     * Get current product info
+     *
+     * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function getCurrentProductInfo()
     {
@@ -58,7 +61,10 @@ class Product extends \Magento\Framework\View\Element\Template
 
         $imageWidth  = $this->rejoinerHelper->getImageWidth();
         $imageHeight = $this->rejoinerHelper->getImageHeight();
-        $imageUrl = $this->imageHelper->init($this->product, 'category_page_grid')->resize($imageWidth, $imageHeight)->getUrl();
+        $imageUrl = $this->imageHelper
+            ->init($this->product, 'category_page_grid')
+            ->resize($imageWidth, $imageHeight)
+            ->getUrl();
 
         /** @var \Magento\Catalog\Model\ResourceModel\Category\Collection $categoriesCollection */
         $categoriesCollection = $this->categoryCollectionFactory->create();
@@ -73,7 +79,7 @@ class Product extends \Magento\Framework\View\Element\Template
             $categories[] = $category->getName();
         }
 
-        $productData = [
+        return [
             'name'        => $this->product->getName(),
             'image_url'   => $imageUrl,
             'price'       => (string) $this->rejoinerHelper->convertPriceToCents($this->product->getPrice()),
@@ -81,20 +87,16 @@ class Product extends \Magento\Framework\View\Element\Template
             'product_url' => (string) $this->product->getProductUrl(),
             'category'    => $categories
         ];
-
-        return $productData;
     }
 
     /**
      * Get cache key informative items
      *
      * @return array
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function getCacheKeyInfo()
     {
-
-        $s =34;
-
         return [
             'BLOCK_TPL',
             $this->_storeManager->getStore()->getCode(),

@@ -1,11 +1,11 @@
 <?php
-/**
- * Copyright © 2017 Rejoiner. All rights reserved.
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Helper;
 
-use \Magento\Store\Model\ScopeInterface;
+use Magento\Store\Model\ScopeInterface;
 
 class Data extends \Magento\Framework\App\Helper\AbstractHelper
 {
@@ -73,14 +73,17 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     /** @var \Magento\Framework\App\Request\Http $request */
     private $request;
+
     /**
      * Data constructor.
+     *
      * @param \Magento\SalesRule\Model\CouponFactory $couponFactory
      * @param \Magento\SalesRule\Model\Coupon\CodegeneratorFactory $codegeneratorFactory
      * @param \Magento\SalesRule\Model\RuleFactory $ruleFactory
      * @param \Magento\Checkout\Model\Session $checkoutSession
      * @param \Magento\Framework\Session\SessionManager $sessionManager
      * @param \Magento\Framework\HTTP\ZendClientFactory $httpClient
+     * @param \Magento\Framework\App\Request\Http $request
      * @param \Monolog\Logger $logger
      * @param Serializer $serializer
      * @param \Magento\Framework\App\Helper\Context $context
@@ -150,6 +153,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
+     * @param string $listId
      * @return string
      */
     public function getRejoinerApiAddToListPath($listId)
@@ -176,7 +180,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
-     * @param $price int
+     * @param int $price
      * @return float
      */
     public function convertPriceToCents($price)
@@ -186,7 +190,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     /**
      * @return string
-     * @throws \InvalidArgumentException
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function getRestoreUrl()
     {
@@ -217,7 +222,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function returnGoogleAttributes()
     {
         $result = [];
-        if ($googleAnalitics = $this->scopeConfig->getValue('checkout/rejoiner_acr/google_attributes', ScopeInterface::SCOPE_STORE)) {
+        if ($googleAnalitics = $this->scopeConfig->getValue(
+            'checkout/rejoiner_acr/google_attributes',
+            ScopeInterface::SCOPE_STORE
+        )) {
             foreach (unserialize($googleAnalitics) as $attr) {
                 if ($attr['attr_name'] && $attr['value']) {
                     $result[$attr['attr_name']] = $attr['value'];
@@ -234,7 +242,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function returnCustomAttributes()
     {
         $result = [];
-        if ($customAttr = $this->scopeConfig->getValue('checkout/rejoiner_acr/custom_attributes', ScopeInterface::SCOPE_STORE)) {
+        if ($customAttr = $this->scopeConfig->getValue(
+            'checkout/rejoiner_acr/custom_attributes',
+            ScopeInterface::SCOPE_STORE
+        )) {
             foreach (unserialize($customAttr) as $attr) {
                 if ($attr['attr_name'] && $attr['value']) {
                     $result[$attr['attr_name']] = $attr['value'];
@@ -251,7 +262,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function getExtraCodes()
     {
         $result = [];
-        if ($extraCodes = $this->scopeConfig->getValue('checkout/rejoiner_acr/extra_codes', ScopeInterface::SCOPE_STORE)) {
+        if ($extraCodes = $this->scopeConfig->getValue(
+            'checkout/rejoiner_acr/extra_codes',
+            ScopeInterface::SCOPE_STORE
+        )) {
             foreach (unserialize($extraCodes) as $extraCode) {
                 if ($extraCode['promo_param'] && $extraCode['promo_salesrule']) {
                     $result[$extraCode['promo_param']] = $extraCode['promo_salesrule'];
@@ -263,12 +277,17 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
+     * @param $rule_id
+     * @param string $param
      * @return string
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function generateCouponCode($rule_id, $param = 'promo')
     {
         $quote = $this->checkoutSession->getQuote();
         $quotePromo = $quote->getPromo();
+        $couponCode = '';
 
         if ($quotePromo) {
             $codes = unserialize($quotePromo);
@@ -316,7 +335,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $domain = trim($this->scopeConfig->getValue(self::XML_PATH_REJOINER_DOMAIN, ScopeInterface::SCOPE_STORE));
 
-        return ($domain[0] == '.') ? $domain : '.' . $domain;
+        return ($domain[0] === '.') ? $domain : '.' . $domain;
     }
 
     /**
@@ -335,7 +354,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $siteId = $this->getRejoinerSiteId();
         $siteIdLength = strlen($siteId);
 
-        if ($siteIdLength == self::REJOINER2_SITE_ID_LENGTH) {
+        if ($siteIdLength === self::REJOINER2_SITE_ID_LENGTH) {
             return self::REJOINER_VERSION_2;
         }
 
@@ -368,7 +387,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     public function getTrackPriceWithTax()
     {
-        return (int) $this->scopeConfig->getValue(self::XML_PATH_REJOINER_TRACK_PRICE_WITH_TAX, ScopeInterface::SCOPE_STORE);
+        return (int) $this->scopeConfig->getValue(
+            self::XML_PATH_REJOINER_TRACK_PRICE_WITH_TAX,
+            ScopeInterface::SCOPE_STORE
+        );
     }
 
     /**
@@ -543,12 +565,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return (bool) $this->scopeConfig->getValue(self::XML_PATH_REJOINER_DEBUG_ENABLED, ScopeInterface::SCOPE_STORE);
     }
 
-
     /**
      * If shopping cart information should be sent to Rejoiner service on current page
+     *
      * @return int
      */
-    public function getShoppingCartDataOnThisPage() {
+    public function getShoppingCartDataOnThisPage()
+    {
         return (int) in_array(
             $this->getCurrentPageName(),
             [
@@ -620,6 +643,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @param string $email
      * @return $this
+     * @throws \Exception
      */
     public function unSubscribe($email)
     {
@@ -704,7 +728,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $requestPath   = sprintf($path, $siteId);
         $authorization = sprintf('Rejoiner %s', $apiKey);
 
-        if ($rejoinerVersion == self::REJOINER_VERSION_1) {
+        if ($rejoinerVersion === self::REJOINER_VERSION_1) {
             $apiSecret = utf8_encode($this->scopeConfig->getValue(self::XML_PATH_REJOINER_API_SECRET));
 
             if (!$apiSecret) {
@@ -771,7 +795,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         return $responseCode;
     }
-
 
     /**
      * @param \Magento\Catalog\Model\Product $product

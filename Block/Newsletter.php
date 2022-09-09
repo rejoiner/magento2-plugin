@@ -1,6 +1,6 @@
 <?php
-/**
- * Copyright © 2017 Rejoiner. All rights reserved.
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Block;
@@ -53,6 +53,8 @@ class Newsletter extends \Magento\Framework\View\Element\Template
     }
 
     /**
+     * IsEnabled flag
+     *
      * @return bool
      */
     public function isEnabled()
@@ -61,19 +63,23 @@ class Newsletter extends \Magento\Framework\View\Element\Template
     }
 
     /**
+     * GetLabel
+     *
      * @return string
      */
     public function getLabel()
     {
         if (!$this->label) {
             $label = $this->rejoinerHelper->getRejoinerSubscribeCheckboxLabel();
-            $this->label = $label ? $label : __(self::DEFAULT_LABEL);
+            $this->label = $label ?: __(self::DEFAULT_LABEL);
         }
 
         return $this->label;
     }
 
     /**
+     * IsLabelChanged flag
+     *
      * @return bool
      */
     public function isLabelChanged()
@@ -82,6 +88,8 @@ class Newsletter extends \Magento\Framework\View\Element\Template
     }
 
     /**
+     * GetCssClass
+     *
      * @return string
      */
     public function getCssClass()
@@ -94,6 +102,8 @@ class Newsletter extends \Magento\Framework\View\Element\Template
     }
 
     /**
+     * GetStyles
+     *
      * @return string
      */
     public function getStyles()
@@ -106,6 +116,8 @@ class Newsletter extends \Magento\Framework\View\Element\Template
     }
 
     /**
+     * GetCheckboxSelectors
+     *
      * @return string
      */
     public function getCheckboxSelectors()
@@ -114,6 +126,8 @@ class Newsletter extends \Magento\Framework\View\Element\Template
     }
 
     /**
+     * HideInCustomerAccount flag
+     *
      * @return bool
      */
     public function hideInCustomerAccount()
@@ -122,6 +136,8 @@ class Newsletter extends \Magento\Framework\View\Element\Template
     }
 
     /**
+     * ShowOnLoginCheckout flag
+     *
      * @return bool
      */
     public function showOnLoginCheckout()
@@ -130,6 +146,8 @@ class Newsletter extends \Magento\Framework\View\Element\Template
     }
 
     /**
+     * ShowOnGuestCheckout flag
+     *
      * @return bool
      */
     public function showOnGuestCheckout()
@@ -138,6 +156,8 @@ class Newsletter extends \Magento\Framework\View\Element\Template
     }
 
     /**
+     * ShouldBeCheckedByDefault flag
+     *
      * @return bool
      */
     public function shouldBeCheckedByDefault()
@@ -146,12 +166,14 @@ class Newsletter extends \Magento\Framework\View\Element\Template
     }
 
     /**
+     * Get config array
+     *
      * @return array
      */
     public function getConfig()
     {
         return [
-            'label' => $this->getLabel() ? $this->getLabel() : self::DEFAULT_LABEL,
+            'label' => $this->getLabel() ?: self::DEFAULT_LABEL,
             'show_on_guest_checkout'   => (int) $this->showOnGuestCheckout(),
             'show_on_login_checkout'   => (int) $this->showOnLoginCheckout(),
             'checked_by_default'       => (int) $this->shouldBeCheckedByDefault(),

@@ -1,6 +1,6 @@
 <?php
-/**
- * Copyright © 2017 Rejoiner. All rights reserved.
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Observer;
@@ -33,7 +33,7 @@ class OrderSaveAfter implements \Magento\Framework\Event\ObserverInterface
     }
 
     /**
-     * @param \Magento\Framework\Event\Observer $observer
+     * @inheritDoc
      */
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
@@ -41,10 +41,13 @@ class OrderSaveAfter implements \Magento\Framework\Event\ObserverInterface
             try {
                 /** @var \Magento\Sales\Model\Order $order */
                 $order = $observer->getData('order');
+
                 /** @var \Magento\Newsletter\Model\Subscriber $subscriber */
                 $subscriber = $this->subscriberFactory->create();
                 $subscriber->subscribe($order->getCustomerEmail());
-            } catch (\Exception $e) {}
+            } catch (\Exception $e) {
+            }
+
             $this->session->unsRejoinerSubscribe();
         }
     }

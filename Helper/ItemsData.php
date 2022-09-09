@@ -1,4 +1,9 @@
 <?php
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
 namespace Rejoiner\Acr\Helper;
 
 use Magento\Quote\Model\Quote;
@@ -47,8 +52,11 @@ class ItemsData extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
+     * Get cart items
+     *
      * @param Quote|Order $quoteOrOrder
      * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function getCartItems($quoteOrOrder)
     {
@@ -112,19 +120,22 @@ class ItemsData extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
+     * Get product for thumbnail
+     *
      * @param OrderItem $item
      * @param null|Order $order
      * @return Product
      */
     private function getProductForThumbnail($item, $order = null)
     {
+        /** @var Product $product */
         $product = $item->getProduct();
 
-        if ($product->getTypeId() == Configurable::TYPE_CODE) {
+        if ($product->getTypeId() === Configurable::TYPE_CODE) {
             $childProduct = $this->getChildProduct($item, $order);
 
             if ($this->useParentThumbnail()
-                || !($childProduct->getThumbnail() && $childProduct->getThumbnail() != 'no_selection')
+                || !($childProduct->getThumbnail() && $childProduct->getThumbnail() !== 'no_selection')
             ) {
                 return $product;
             }
@@ -136,23 +147,33 @@ class ItemsData extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
+     * Get child product
+     *
      * @param QuoteItem|OrderItem $item
      * @param null|Order $order
      * @return Product
      */
     private function getChildProduct($item, $order = null)
     {
-        // it is faster to iterate over ordered items then to do some magic or load simple products accidentally on our own
+        /**
+         * it is faster to iterate over ordered items then to do some magic
+         * or load simple products accidentally on our own
+         */
         if ($order) {
             $parentItemId = $item->getId();
+
             /** @var OrderItem $orderItem */
             foreach ($order->getAllItems() as $orderItem) {
-                if ($orderItem->getParentItemId() == $parentItemId) {
+                if ($orderItem->getParentItemId() === $parentItemId) {
                     $product = $orderItem->getProduct();
                     break;
                 }
             }
-            // actually, this should not ever happen because configurable products is always present in cart with its' simple child
+
+            /**
+             * actually, this should not ever happen because configurable products
+             * is always present in cart with its' simple child
+             */
             if (!isset($product)) {
                 $product = $item->getProduct();
             }
@@ -167,11 +188,13 @@ class ItemsData extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
+     * UseParentThumbnail flag
+     *
      * @return bool
      */
     private function useParentThumbnail()
     {
         $thumbnailSource = $this->scopeConfig->getValue(ConfigurableRenderer::CONFIG_THUMBNAIL_SOURCE);
-        return $thumbnailSource == ThumbnailSource::OPTION_USE_PARENT_IMAGE;
+        return $thumbnailSource === ThumbnailSource::OPTION_USE_PARENT_IMAGE;
     }
 }

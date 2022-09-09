@@ -1,6 +1,6 @@
 <?php
-/**
- * Copyright © 2017 Rejoiner. All rights reserved.
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Observer;
@@ -20,7 +20,7 @@ class SalesQuoteRemoveItem implements \Magento\Framework\Event\ObserverInterface
     }
 
     /**
-     * @param \Magento\Framework\Event\Observer $observer
+     * @inheritDoc
      */
     public function execute(\Magento\Framework\Event\Observer $observer)
     {

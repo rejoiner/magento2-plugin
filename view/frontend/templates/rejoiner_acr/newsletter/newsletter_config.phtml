@@ -1,6 +1,6 @@
 <?php
-/**
- * Copyright © 2017 Rejoiner. All rights reserved.
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -8,15 +8,15 @@
 ?>
 <?php if ($block->isEnabled()): ?>
     <script>
-        window.rejoinerMarketing = <?php /* @escapeNotVerified */ echo \Zend_Json::encode($block->getConfig()); ?>;
+        window.rejoinerMarketing = <?= /* @escapeNotVerified */ \Zend_Json::encode($block->getConfig()); ?>;
 
         require([
             'jquery'
         ], function($) {
-            var $checkboxes = $('<?php echo $block->getCheckboxSelectors(); ?>'),
+            var $checkboxes = $('<?= $block->getCheckboxSelectors() ?>'),
                 $labels = $checkboxes.siblings('label'),
-                label = '<?php echo $block->getLabel(); ?>',
-                cssClass = '<?php echo $block->getCssClass(); ?>';
+                label = '<?= $block->getLabel() ?>',
+                cssClass = '<?= $block->getCssClass() ?>';
 
             if ($checkboxes.length) {
                 if (cssClass) {

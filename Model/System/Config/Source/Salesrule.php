@@ -1,6 +1,6 @@
 <?php
-/**
- * Copyright © 2017 Rejoiner. All rights reserved.
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Model\System\Config\Source;
@@ -22,7 +22,9 @@ class Salesrule implements \Magento\Framework\Option\ArrayInterface
     }
 
     /**
-     * @return array
+     * @inheritDoc
+     *
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function toOptionArray()
     {

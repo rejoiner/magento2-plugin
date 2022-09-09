@@ -1,6 +1,6 @@
 <?php
-/**
- * Copyright © 2015 Magento. All rights reserved.
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -16,7 +16,8 @@ use Magento\Framework\Setup\SchemaSetupInterface;
 class InstallSchema implements InstallSchemaInterface
 {
     /**
-     * {@inheritdoc}
+     * @inheritdoc
+     *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function install(SchemaSetupInterface $setup, ModuleContextInterface $context)
@@ -32,7 +33,7 @@ class InstallSchema implements InstallSchemaInterface
                 'comment'  => 'Promo'
             ]
         );
-        $installer->endSetup();
 
+        $installer->endSetup();
     }
 }

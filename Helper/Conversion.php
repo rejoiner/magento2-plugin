@@ -1,4 +1,9 @@
 <?php
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
 namespace Rejoiner\Acr\Helper;
 
 use Magento\Sales\Model\Order;
@@ -53,6 +58,8 @@ class Conversion extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
+     * ShouldSaveConversionData flag
+     *
      * @return int
      */
     public function shouldSaveConversionData()
@@ -72,7 +79,9 @@ class Conversion extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
-     * @return string
+     * Get Cart Data
+     *
+     * @return array
      */
     public function getCartData()
     {
@@ -81,12 +90,15 @@ class Conversion extends \Magento\Framework\App\Helper\AbstractHelper
         $order = $this->getOrder();
 
         if ($order->getId()) {
-            $total = $displayPriceWithTax? $order->getGrandTotal() : $order->getSubtotal();
+            $total = $displayPriceWithTax ? $order->getGrandTotal() : $order->getSubtotal();
             $result = [
                 'cart_value' => $this->rejoinerHelper->convertPriceToCents($total),
-                'cart_item_count' => intval($order->getTotalQtyOrdered()),
+                'cart_item_count' => (int) $order->getTotalQtyOrdered(),
                 'customer_order_number' => $order->getIncrementId(),
-                'return_url' => $this->_urlBuilder->getUrl('sales/order/view/', ['order_id' => $order->getIncrementId()])
+                'return_url' => $this->_urlBuilder->getUrl(
+                    'sales/order/view/',
+                    ['order_id' => $order->getIncrementId()]
+                )
             ];
 
             $promo = $order->getCouponCode();
@@ -95,10 +107,13 @@ class Conversion extends \Magento\Framework\App\Helper\AbstractHelper
                 $result['promo'] = $promo;
             }
         }
+
         return $result;
     }
 
     /**
+     * Get cart items
+     *
      * @return array
      */
     public function getCartItems()
@@ -107,6 +122,8 @@ class Conversion extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
+     * Get order
+     *
      * @return Order
      */
     private function getOrder()
