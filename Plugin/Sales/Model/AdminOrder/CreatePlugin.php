@@ -1,6 +1,6 @@
 <?php
-/**
- * Copyright © 2017 Rejoiner. All rights reserved.
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Plugin\Sales\Model\AdminOrder;
@@ -20,6 +20,8 @@ class CreatePlugin
     }
 
     /**
+     * Subscribe customer after order has been created
+     *
      * @param \Magento\Sales\Model\AdminOrder\Create $subject
      * @param \Magento\Sales\Model\Order $order
      * @return \Magento\Sales\Model\Order
@@ -32,7 +34,8 @@ class CreatePlugin
                 /** @var \Magento\Newsletter\Model\Subscriber $subscriber */
                 $subscriber = $this->subscriberFactory->create();
                 $subscriber->subscribe($email);
-            } catch (\Exception $e) {}
+            } catch (\Exception $e) {
+            }
         }
 
         return $order;

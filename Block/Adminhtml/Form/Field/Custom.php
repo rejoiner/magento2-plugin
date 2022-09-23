@@ -1,6 +1,6 @@
 <?php
-/**
- * Copyright © 2017 Rejoiner. All rights reserved.
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Block\Adminhtml\Form\Field;
@@ -9,6 +9,7 @@ class Custom extends \Magento\Config\Block\System\Config\Form\Field\FieldArray\A
 {
     /**
      * Prepare to render
+     *
      * @return void
      */
     protected function _prepareToRender()

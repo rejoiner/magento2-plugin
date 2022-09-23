@@ -1,6 +1,6 @@
 <?php
-/**
- * Copyright © 2017 Rejoiner. All rights reserved.
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Block\Adminhtml\Form\Field;
@@ -12,7 +12,9 @@ class Google extends \Magento\Config\Block\System\Config\Form\Field\FieldArray\A
 
     /**
      * Prepare to render
+     *
      * @return void
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     protected function _prepareToRender()
     {
@@ -34,7 +36,9 @@ class Google extends \Magento\Config\Block\System\Config\Form\Field\FieldArray\A
     }
 
     /**
-     * @param \Magento\Framework\DataObject $row
+     * @inheritDoc
+     *
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     protected function _prepareArrayRow(\Magento\Framework\DataObject $row)
     {
@@ -45,18 +49,19 @@ class Google extends \Magento\Config\Block\System\Config\Form\Field\FieldArray\A
                 = 'selected="selected"';
         }
         $row->setData('option_extra_attrs', $options);
-
-        return;
     }
 
     /**
+     * Get Source Renderer
+     *
      * @return \Rejoiner\Acr\Block\Adminhtml\Form\Field\Source
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     protected function getSourceRenderer()
     {
         if (!$this->sourceRenderer) {
             $this->sourceRenderer = $this->getLayout()->createBlock(
-                '\Rejoiner\Acr\Block\Adminhtml\Form\Field\Source',
+                \Rejoiner\Acr\Block\Adminhtml\Form\Field\Source::class,
                 'google_anal',
                 ['data' => ['is_render_to_js_template' => true]]
             );

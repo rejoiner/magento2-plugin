@@ -1,6 +1,6 @@
 <?php
-/**
- * Copyright © 2017 Rejoiner. All rights reserved.
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Model\System\Config\Backend;
@@ -18,12 +18,13 @@ class Attributes extends \Magento\Framework\App\Config\Value
         $value = $this->getValue();
         $value = is_array($value) ? $value : [];
         foreach ($value as $key => $data) {
-            if (!$data ) {
+            if (!$data) {
                 unset($value[$key]);
             }
         }
 
         $this->setValue(serialize($value));
+
         return $this;
     }
 
@@ -34,11 +35,14 @@ class Attributes extends \Magento\Framework\App\Config\Value
      */
     protected function _afterLoad()
     {
-        $value = $this->getValue();
-        $value = unserialize($value);
+        if ($value = $this->getValue()) {
+            $value = unserialize($value, ['allowed_classes' => false]);
+        }
+
         if (is_array($value)) {
             $this->setValue($value);
         }
+
         return $this;
     }
 }

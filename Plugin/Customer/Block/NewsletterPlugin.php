@@ -1,6 +1,6 @@
 <?php
-/**
- * Copyright © 2017 Rejoiner. All rights reserved.
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Plugin\Customer\Block;
@@ -20,8 +20,10 @@ class NewsletterPlugin
     }
 
     /**
+     * Update IsSubscribed flag
+     *
      * @param \Magento\Customer\Block\Newsletter $subject
-     * @param $result
+     * @param bool $result
      * @return bool
      */
     public function afterGetIsSubscribed(\Magento\Customer\Block\Newsletter $subject, $result)

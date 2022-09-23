@@ -1,6 +1,6 @@
 <?php
-/**
- * Copyright © 2017 Rejoiner. All rights reserved.
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Observer;
@@ -27,15 +27,20 @@ class ControllerActionPredispatch implements \Magento\Framework\Event\ObserverIn
     }
 
     /**
-     * @param \Magento\Framework\Event\Observer $observer
+     * @inheritDoc
+     *
+     * @throws \Magento\Framework\Exception\InputException
+     * @throws \Magento\Framework\Stdlib\Cookie\CookieSizeLimitReachedException
+     * @throws \Magento\Framework\Stdlib\Cookie\FailureToSendException
      */
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         /** @var \Magento\Framework\App\RequestInterface $request */
         $request = $observer->getData('request');
-        if ($request->getModuleName() == 'checkout'
-            && $request->getControllerName() == 'cart'
-            && $request->getActionName() == 'index'
+
+        if ($request->getModuleName() === 'checkout'
+            && $request->getControllerName() === 'cart'
+            && $request->getActionName() === 'index'
             && $request->getParam('updateCart')
         ) {
             $cookiesManager = $this->_cookieManager;
@@ -47,7 +52,11 @@ class ControllerActionPredispatch implements \Magento\Framework\Event\ObserverIn
                 $sectionDataIds = json_decode($encodedCookie);
                 if ($sectionDataIds && isset($sectionDataIds->cart)) {
                     $sectionDataIds->cart += 1000;
-                    $cookiesManager->setPublicCookie('section_data_ids', json_encode($sectionDataIds), $publicCookieMetadata);
+                    $cookiesManager->setPublicCookie(
+                        'section_data_ids',
+                        json_encode($sectionDataIds),
+                        $publicCookieMetadata
+                    );
                 }
             }
         }

@@ -1,6 +1,6 @@
 <?php
-/**
- * Copyright © 2017 Rejoiner. All rights reserved.
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -9,7 +9,7 @@
 <?php if ($block->isEnabled()): ?>
     <style type="text/css">
         <?php if ($styles = $block->getStyles()): ?>
-            <?php echo $block->getCheckboxSelectors(); ?> {<?php echo $styles; ?>}
+            <?= $block->getCheckboxSelectors() ?> {<?= $styles ?>}
         <?php endif; ?>
 
         <?php if ($block->isLabelChanged()): ?>

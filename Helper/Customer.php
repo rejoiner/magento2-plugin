@@ -1,4 +1,9 @@
 <?php
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
 namespace Rejoiner\Acr\Helper;
 
 class Customer extends \Magento\Framework\App\Helper\AbstractHelper
@@ -35,41 +40,43 @@ class Customer extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
-     * @return string
+     * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function getCustomerInfo()
     {
-        /** @var array $customerData */
-        $customerData = [
+        return [
             'age'    => $this->getCustomerAge(),
             'gender' => $this->getGender(),
             'en'     => substr($this->localeResolver->getLocale(), 0, 2),
             'name'   => $this->getCurrentCustomer()->getFirstname(),
 
         ];
-
-        return $customerData;
     }
 
     /**
      * @return int
+     * @throws \Exception
      */
     protected function getCustomerAge()
     {
         $age = 0;
         /** @var \Magento\Customer\Model\Customer $customer */
         $customer = $this->getCurrentCustomer();
+
         if ($dob = $customer->getDob()) {
             $birthdayDate = new \DateTime($dob);
             $now = new \DateTime();
             $interval = $now->diff($birthdayDate);
             $age = $interval->y;
         }
+
         return $age;
     }
 
     /**
      * @return string
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     protected function getGender()
     {
@@ -81,11 +88,11 @@ class Customer extends \Magento\Framework\App\Helper\AbstractHelper
             ->getSource()
             ->getOptionText($this->getCurrentCustomer()->getData('gender'));
 
-        return $genderText? $genderText : '';
+        return $genderText ?: '';
     }
 
     /**
-     * @return string
+     * @return array
      */
     public function getCustomerEmail()
     {

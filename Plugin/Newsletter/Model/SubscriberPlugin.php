@@ -1,6 +1,6 @@
 <?php
-/**
- * Copyright © 2017 Rejoiner. All rights reserved.
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Plugin\Newsletter\Model;
@@ -30,6 +30,8 @@ class SubscriberPlugin
     }
 
     /**
+     * Handle subscription process after newsletter subscribe/unsubscribe
+     *
      * @param Subscriber $subscriber
      */
     public function beforeSave(Subscriber $subscriber)
@@ -38,13 +40,16 @@ class SubscriberPlugin
             try {
                 if ($subscriber->getStatus() == Subscriber::STATUS_SUBSCRIBED) {
                     $customerName = '';
+                    $customerLastName = '';
+
                     if ($customerId = $subscriber->getCustomerId()) {
                         /** @var \Magento\Customer\Model\Customer $customer */
                         $customer = $this->customerRegistry->retrieve($customerId);
-                        $customerName = $customer->getData('firstname') ? $customer->getData('firstname') : '';
+                        $customerName = $customer->getData('firstname') ?: '';
+                        $customerLastName = $customer->getData('lastname') ?: '';
                     }
 
-                    $this->rejoinerHelper->subscribe($subscriber->getEmail(), $customerName);
+                    $this->rejoinerHelper->subscribe($subscriber->getEmail(), $customerName, $customerLastName);
                     $subscriber->setData('added_to_rejoiner', RejoinerHelper::STATUS_SUBSCRIBED);
                 }
             } catch (\Exception $e) {
@@ -54,6 +59,8 @@ class SubscriberPlugin
     }
 
     /**
+     * IsStatusChanged flag
+     *
      * @param Subscriber $subscriber
      * @return bool
      */

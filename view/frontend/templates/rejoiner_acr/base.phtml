@@ -1,5 +1,10 @@
-<?php /* @var \Rejoiner\Acr\Block\Base $block */ ?>
 <?php
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/* @var \Rejoiner\Acr\Block\Base $block */
 $rejoinerHelper = $block->getRejoinerHelper();
 // Need to render blocks one by one to implode them into the single JSON
 $childBlockNames = $block->getChildNames();
@@ -10,11 +15,11 @@ foreach ($childBlockNames as $childBlockName) {
     }
 }
 ?>
-<?php if ($rejoinerHelper->getRejoinerSiteId() && $rejoinerHelper->getDomain()) : ?>
+<?php if ($rejoinerHelper->getRejoinerSiteId() && $rejoinerHelper->getDomain()): ?>
     <?php
     $domain = $block->escapeHtml($rejoinerHelper->getDomain());
     $siteId = $block->escapeHtml($rejoinerHelper->getRejoinerSiteId());
-    $rejoinerScriptUri = $block->escapeHtml($rejoinerHelper->getRejoinerScriptUri());;
+    $rejoinerScriptUri = $block->escapeHtml($rejoinerHelper->getRejoinerScriptUri());
     ?>
     <script type="text/x-magento-init">
         {
@@ -25,7 +30,7 @@ foreach ($childBlockNames as $childBlockName) {
                     "rejoinerScriptUri"       : "<?= $rejoinerScriptUri; ?>",
                     "trackNumberEnabled"      : <?= $rejoinerHelper->getTrackNumberEnabled(); ?>,
                     "persistFormsEnabled"     : <?= $rejoinerHelper->getPersistFormsEnabled(); ?>,
-                    "trackCartDataOnThisPage" : <?= $rejoinerHelper->getShoppingCartDataOnThisPage() ?><?php echo (!empty($childBlocksHtml))? ',': ''?>
+                    "trackCartDataOnThisPage" : <?= $rejoinerHelper->getShoppingCartDataOnThisPage() ?><?= (!empty($childBlocksHtml))? ',' : ''?>
                     <?= implode(',', $childBlocksHtml); ?>
                 }
             }

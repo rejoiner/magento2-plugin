@@ -1,4 +1,8 @@
 <?php
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
+ * See COPYING.txt for license details.
+ */
 
 namespace Rejoiner\Acr\CustomerData;
 
@@ -23,10 +27,11 @@ class Rejoiner implements SectionSourceInterface
 
     /**
      * Rejoiner constructor.
+     *
      * @param \Rejoiner\Acr\Helper\Data $rejoinerHelper
      * @param \Rejoiner\Acr\Helper\Customer $customerHelper
      * @param \Rejoiner\Acr\Helper\Snippets $trackingHelper
-     * @param \Rejoiner\Acr\Helper\Conversion $
+     * @param \Rejoiner\Acr\Helper\Conversion $conversion
      */
     public function __construct(
         \Rejoiner\Acr\Helper\Data $rejoinerHelper,
@@ -41,7 +46,7 @@ class Rejoiner implements SectionSourceInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function getSectionData()
     {

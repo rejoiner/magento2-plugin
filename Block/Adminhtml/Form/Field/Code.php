@@ -1,14 +1,20 @@
 <?php
-/**
- * Copyright © 2019 Rejoiner. All rights reserved.
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Block\Adminhtml\Form\Field;
 
 class Code extends \Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray
 {
+    /**
+     * @var \Magento\Framework\View\Element\BlockInterface|null
+     */
     protected $_salesruleRenderer;
 
+    /**
+     * @inheritDoc
+     */
     protected function _prepareToRender()
     {
         $this->addColumn(
@@ -28,20 +34,27 @@ class Code extends \Magento\Config\Block\System\Config\Form\Field\FieldArray\Abs
         $this->_addButtonLabel = __('Add Code');
     }
 
+    /**
+     * Get Salesrule renderer
+     *
+     * @return \Magento\Framework\View\Element\BlockInterface
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     protected function _getSalesruleRenderer()
     {
         if (!$this->_salesruleRenderer) {
             $this->_salesruleRenderer = $this->getLayout()->createBlock(
-                '\Rejoiner\Acr\Block\Adminhtml\Form\Field\Salesrule',
+                \Rejoiner\Acr\Block\Adminhtml\Form\Field\Salesrule::class,
                 'promo_salesrule',
                 ['data' => ['is_render_to_js_template' => true]]
             );
-        } 
+        }
+
         return $this->_salesruleRenderer;
     }
 
     /**
-     * @param \Magento\Framework\DataObject $row
+     * @inheritDoc
      */
     protected function _prepareArrayRow(\Magento\Framework\DataObject $row)
     {
@@ -52,7 +65,5 @@ class Code extends \Magento\Config\Block\System\Config\Form\Field\FieldArray\Abs
             $options[$key] = 'selected="selected"';
         }
         $row->setData('option_extra_attrs', $options);
-
-        return;
     }
 }

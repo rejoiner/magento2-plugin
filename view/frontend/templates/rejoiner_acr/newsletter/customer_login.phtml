@@ -1,6 +1,6 @@
 <?php
-/**
- * Copyright © 2017 Rejoiner. All rights reserved.
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -12,13 +12,13 @@
         <input
                 type="checkbox"
                 name="is_subscribed"
-                title="<?php echo $block->getLabel(); ?>"
+                title="<?= $block->escapeHtmlAttr($block->getLabel()) ?>"
                 value="1"
                 id="is_subscribed"
                 class="checkbox"
-                <?php echo $block->shouldBeCheckedByDefault() ? 'checked="checked"' : ''; ?>
+                <?= $block->shouldBeCheckedByDefault() ? 'checked="checked"' : '' ?>
         />
-        <label for="is_subscribed" class="label"><span><?php echo $block->getLabel(); ?></span></label>
+        <label for="is_subscribed" class="label"><span><?= $block->escapeHtml($block->getLabel()) ?></span></label>
     </div>
     <?php endif; ?>
 <?php endif; ?>

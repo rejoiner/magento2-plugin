@@ -1,6 +1,6 @@
 <?php
-/**
- * Copyright © 2017 Rejoiner. All rights reserved.
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Observer;
@@ -45,12 +45,13 @@ class CustomerLoginObserver implements \Magento\Framework\Event\ObserverInterfac
     }
 
     /**
-     * @param \Magento\Framework\Event\Observer $observer
-     * @return void
+     * @inheritDoc
      */
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
-        if ($this->customerSession->isLoggedIn() && $this->rejoinerHelper->getRejoinerSubscribeLoginCheckout() && $this->isSubscribe()) {
+        if ($this->customerSession->isLoggedIn()
+            && $this->rejoinerHelper->getRejoinerSubscribeLoginCheckout()
+            && $this->isSubscribe()) {
             /** @var \Magento\Customer\Model\Customer $customer */
             $customer = $observer->getData('customer');
             /** @var \Magento\Newsletter\Model\Subscriber $subscriber */
@@ -60,18 +61,21 @@ class CustomerLoginObserver implements \Magento\Framework\Event\ObserverInterfac
     }
 
     /**
+     * IsSubscribe flag
+     *
      * @return bool
      */
     protected function isSubscribe()
     {
-        $subscribe = false;
         if ($this->request->getParam('is_subscribed', false)) {
             $subscribe = true;
         } else {
             try {
                 $credentials = $this->jsonHelper->jsonDecode($this->request->getContent());
                 $subscribe   = isset($credentials['rejoiner_subscription']) && $credentials['rejoiner_subscription'];
-            } catch (\Exception $e) {}
+            } catch (\Exception $e) {
+                $subscribe = false;
+            }
         }
 
         return $subscribe;

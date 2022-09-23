@@ -1,6 +1,6 @@
 <?php
-/**
- * Copyright © 2017 Rejoiner. All rights reserved.
+/*
+ * Copyright © 2022 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Observer;
@@ -39,21 +39,27 @@ class CheckoutOnepageControllerSuccessAction implements \Magento\Framework\Event
     }
 
     /**
-     * @param \Magento\Framework\Event\Observer $observer
+     * @inheritDoc
+     *
      * @return $this
+     * @throws \Exception
      */
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         $lastOrderId = $observer->getEvent()->getData('order_ids');
         /** @var \Magento\Sales\Model\Order $order */
         $order = $this->orderFactory->create()->load($lastOrderId[0]);
+
         if (!$order->getId()) {
             return $this;
         }
+
         if ($this->rejoinerHelper->getShouldBeProcessedByCron()) {
             /** @var \Rejoiner\Acr\Model\Acr $acrModel */
             $acrModel = $this->acrFactory->create();
-            $acrModel->setOrderId($order->getId())->setCreatedAt(date('Y-m-d H:i:s', $this->timezone->scopeTimeStamp()));
+            $acrModel->setOrderId($order->getId())->setCreatedAt(
+                date('Y-m-d H:i:s', $this->timezone->scopeTimeStamp())
+            );
             $acrModel->save();
         } else {
             $this->rejoinerHelper->sendInfoToRejoiner($order);
