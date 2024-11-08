@@ -1,20 +1,26 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright © 2017 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Block\Adminhtml\Form\Field;
 
-class Google extends \Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray
+use Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray;
+use Magento\Framework\DataObject;
+use Magento\Framework\Exception\LocalizedException;
+
+class Google extends AbstractFieldArray
 {
-    /** @var \Rejoiner\Acr\Block\Adminhtml\Form\Field\Source $sourceRenderer */
-    protected $sourceRenderer;
+    /** @var Source|null $sourceRenderer */
+    protected ?Source $sourceRenderer = null;
 
     /**
      * Prepare to render
      * @return void
+     * @throws LocalizedException
      */
-    protected function _prepareToRender()
+    protected function _prepareToRender(): void
     {
         $this->addColumn(
             'attr_name',
@@ -34,9 +40,10 @@ class Google extends \Magento\Config\Block\System\Config\Form\Field\FieldArray\A
     }
 
     /**
-     * @param \Magento\Framework\DataObject $row
+     * @param DataObject $row
+     * @throws LocalizedException
      */
-    protected function _prepareArrayRow(\Magento\Framework\DataObject $row)
+    protected function _prepareArrayRow(DataObject $row): void
     {
         $attrName = $row->getAttrName();
         $options = [];
@@ -45,18 +52,17 @@ class Google extends \Magento\Config\Block\System\Config\Form\Field\FieldArray\A
                 = 'selected="selected"';
         }
         $row->setData('option_extra_attrs', $options);
-
-        return;
     }
 
     /**
-     * @return \Rejoiner\Acr\Block\Adminhtml\Form\Field\Source
+     * @return Source|null
+     * @throws LocalizedException
      */
-    protected function getSourceRenderer()
+    protected function getSourceRenderer(): ?Source
     {
         if (!$this->sourceRenderer) {
             $this->sourceRenderer = $this->getLayout()->createBlock(
-                '\Rejoiner\Acr\Block\Adminhtml\Form\Field\Source',
+                Source::class,
                 'google_anal',
                 ['data' => ['is_render_to_js_template' => true]]
             );

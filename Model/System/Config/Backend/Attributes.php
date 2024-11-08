@@ -5,18 +5,21 @@
  */
 namespace Rejoiner\Acr\Model\System\Config\Backend;
 
-class Attributes extends \Magento\Framework\App\Config\Value
+use Magento\Framework\App\Config\Value;
+
+class Attributes extends Value
 {
     /**
      * Prepare data before save
      *
      * @return $this
      */
-    public function beforeSave()
+    public function beforeSave(): self
     {
         /** @var array $value */
         $value = $this->getValue();
         $value = is_array($value) ? $value : [];
+
         foreach ($value as $key => $data) {
             if (!$data ) {
                 unset($value[$key]);
@@ -24,6 +27,7 @@ class Attributes extends \Magento\Framework\App\Config\Value
         }
 
         $this->setValue(serialize($value));
+
         return $this;
     }
 
@@ -32,13 +36,15 @@ class Attributes extends \Magento\Framework\App\Config\Value
      *
      * @return $this
      */
-    protected function _afterLoad()
+    protected function _afterLoad(): self
     {
-        $value = $this->getValue();
+        $value = (string)$this->getValue();
         $value = unserialize($value);
+
         if (is_array($value)) {
             $this->setValue($value);
         }
+
         return $this;
     }
 }

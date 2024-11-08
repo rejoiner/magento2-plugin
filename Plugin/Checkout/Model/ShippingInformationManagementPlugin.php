@@ -5,53 +5,60 @@
  */
 namespace Rejoiner\Acr\Plugin\Checkout\Model;
 
+use Magento\Checkout\Api\Data\ShippingInformationInterface;
+use Magento\Checkout\Model\Session;
+use Magento\Checkout\Model\ShippingInformationManagement;
+use Magento\Newsletter\Model\SubscriptionManagerInterface;
+use Rejoiner\Acr\Helper\Data;
+
 class ShippingInformationManagementPlugin
 {
-    /** @var \Rejoiner\Acr\Helper\Data $rejoinerHelper */
+    /** @var Data $rejoinerHelper */
     private $rejoinerHelper;
 
-    /** @var \Magento\Checkout\Model\Session $session */
+    /** @var Session $session */
     private $session;
 
-    /** @var \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory */
-    private $subscriberFactory;
+    /** @var SubscriptionManagerInterface $subscriptionManager */
+    private $subscriptionManager;
+
 
     /**
      * ShippingInformationManagementPlugin constructor.
-     * @param \Rejoiner\Acr\Helper\Data $rejoinerHelper
-     * @param \Magento\Checkout\Model\Session $session
-     * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
+     * @param Data $rejoinerHelper
+     * @param Session $session
+     * @param SubscriptionManagerInterface $subscriptionManager
      */
     public function __construct(
-        \Rejoiner\Acr\Helper\Data $rejoinerHelper,
-        \Magento\Checkout\Model\Session $session,
-        \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
+        Data                         $rejoinerHelper,
+        Session                      $session,
+        SubscriptionManagerInterface $subscriptionManager
     ) {
         $this->rejoinerHelper = $rejoinerHelper;
         $this->session = $session;
-        $this->subscriberFactory = $subscriberFactory;
+        $this->subscriptionManager = $subscriptionManager;
     }
 
     /**
-     * @param \Magento\Checkout\Model\ShippingInformationManagement $shippingInformationManagement
+     * @param ShippingInformationManagement $shippingInformationManagement
      * @param $cartId
-     * @param \Magento\Checkout\Api\Data\ShippingInformationInterface $addressInformation
+     * @param ShippingInformationInterface $addressInformation
      * @return array
      */
     public function beforeSaveAddressInformation(
-        \Magento\Checkout\Model\ShippingInformationManagement $shippingInformationManagement,
+        ShippingInformationManagement $shippingInformationManagement,
         $cartId,
-        \Magento\Checkout\Api\Data\ShippingInformationInterface $addressInformation
+        ShippingInformationInterface $addressInformation
     ) {
         if ($this->rejoinerHelper->getRejoinerMarketingPermissions()) {
             /** @var \Magento\Quote\Api\Data\AddressExtension $extensionAttributes */
             $extensionAttributes = $addressInformation->getShippingAddress()->getExtensionAttributes();
+
             if ($extensionAttributes->getRejoinerSubscribe()) {
                 $this->session->setRejoinerSubscribe(true);
+
                 if ($email = $extensionAttributes->getRejoinerEmail()) {
-                    /** @var \Magento\Newsletter\Model\Subscriber $subscriber */
-                    $subscriber = $this->subscriberFactory->create();
-                    $subscriber->subscribe($email);
+                    $this->subscriptionManager->subscribe($email, $this->session->getQuote()->getStoreId());
                 }
             }
         }

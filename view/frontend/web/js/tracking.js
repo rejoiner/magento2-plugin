@@ -78,15 +78,6 @@ define([
                 if (this.options.trackProductView) {
                     _rejoiner.push(['trackProductView', this.options.trackProductView]);
                 }
-
-                if (storageData.customerEmail) {
-                    _rejoiner.push(['setCustomerEmail', JSON.parse(storageData.customerEmail)]);
-                }
-
-                if (storageData.customerData) {
-                    _rejoiner.push(['setCustomerData', JSON.parse(storageData.customerData)]);
-                }
-
                 if (this.options.outputConversionData && storageData.convertionCartData && storageData.convertionCartItems) {
 
                     var cart_data  = JSON.parse(storageData.convertionCartData),
@@ -103,9 +94,14 @@ define([
                     this.skipSubscription = false;
                 }
             }
+            if (storageData.customerEmail) {
+                _rejoiner.push(['setCustomerEmail', JSON.parse(storageData.customerEmail)]);
+            }
+            if (storageData.customerData) {
+                _rejoiner.push(['setCustomerData', JSON.parse(storageData.customerData)]);
+            }
             return _rejoiner;
         },
-
 
         connectRemoteScript: function() {
             var s = document.createElement('script');

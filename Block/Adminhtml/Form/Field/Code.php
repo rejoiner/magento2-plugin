@@ -1,15 +1,23 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright © 2019 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Block\Adminhtml\Form\Field;
 
-class Code extends \Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray
-{
-    protected $_salesruleRenderer;
+use Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray;
+use Magento\Framework\DataObject;
+use Magento\Framework\Exception\LocalizedException;
 
-    protected function _prepareToRender()
+class Code extends AbstractFieldArray
+{
+    protected ?Salesrule $_salesRuleRenderer = null;
+
+    /**
+     * @throws LocalizedException
+     */
+    protected function _prepareToRender(): void
     {
         $this->addColumn(
             'promo_param',
@@ -21,38 +29,43 @@ class Code extends \Magento\Config\Block\System\Config\Form\Field\FieldArray\Abs
             'promo_salesrule',
             [
               'label' => __('Sales Rule'),
-              'renderer' => $this->_getSalesruleRenderer(),
+              'renderer' => $this->_getSalesRuleRenderer(),
             ]
         );
         $this->_addAfter = false;
         $this->_addButtonLabel = __('Add Code');
     }
 
-    protected function _getSalesruleRenderer()
+    /**
+     * @throws LocalizedException
+     */
+    protected function _getSalesRuleRenderer(): ?Salesrule
     {
-        if (!$this->_salesruleRenderer) {
-            $this->_salesruleRenderer = $this->getLayout()->createBlock(
-                '\Rejoiner\Acr\Block\Adminhtml\Form\Field\Salesrule',
+        if (!$this->_salesRuleRenderer) {
+            $this->_salesRuleRenderer = $this->getLayout()->createBlock(
+                Salesrule::class,
                 'promo_salesrule',
                 ['data' => ['is_render_to_js_template' => true]]
             );
-        } 
-        return $this->_salesruleRenderer;
+        }
+
+        return $this->_salesRuleRenderer;
     }
 
     /**
-     * @param \Magento\Framework\DataObject $row
+     * @param DataObject $row
+     * @throws LocalizedException
      */
-    protected function _prepareArrayRow(\Magento\Framework\DataObject $row)
+    protected function _prepareArrayRow(DataObject $row): void
     {
-        $salesruleAttr = $row->getData('promo_salesrule');
+        $salesRuleAttr = $row->getData('promo_salesrule');
         $options = [];
-        if ($salesruleAttr) {
-            $key = 'option_' . $this->_getSalesruleRenderer()->calcOptionHash($salesruleAttr);
+
+        if ($salesRuleAttr) {
+            $key = 'option_' . $this->_getSalesruleRenderer()->calcOptionHash($salesRuleAttr);
             $options[$key] = 'selected="selected"';
         }
-        $row->setData('option_extra_attrs', $options);
 
-        return;
+        $row->setData('option_extra_attrs', $options);
     }
 }

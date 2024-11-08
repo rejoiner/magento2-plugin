@@ -1,40 +1,49 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright © 2017 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Block;
 
-class Base extends \Magento\Framework\View\Element\Template
+use Magento\Framework\App\Request\Http;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\View\Element\Template;
+use Magento\Framework\View\Element\Template\Context;
+use Rejoiner\Acr\Helper\Data;
+
+class Base extends Template
 {
-    /** @var \Rejoiner\Acr\Helper\Data $rejoinerHelper */
-    protected $rejoinerHelper;
+    /** @var Data $rejoinerHelper */
+    protected Data $rejoinerHelper;
 
 
-    /** @var \Magento\Framework\App\Request\Http $request */
-    protected $request;
+    /** @var Http $request */
+    protected Http $request;
 
     /**
      * Base constructor.
-     * @param \Rejoiner\Acr\Helper\Data $rejoinerHelper
-     * @param \Magento\Framework\View\Element\Template\Context $context
+     * @param Data $rejoinerHelper
+     * @param Http $request
+     * @param Context $context
      * @param array $data
      */
     public function __construct(
-        \Rejoiner\Acr\Helper\Data $rejoinerHelper,
-        \Magento\Framework\App\Request\Http $request,
-        \Magento\Framework\View\Element\Template\Context $context,
+        Data $rejoinerHelper,
+        Http $request,
+        Context $context,
         array $data = []
     ) {
         $this->rejoinerHelper = $rejoinerHelper;
         $this->request = $request;
+
         parent::__construct($context, $data);
     }
 
     /**
-     * @return \Rejoiner\Acr\Helper\Data
+     * @return Data
      */
-    public function getRejoinerHelper()
+    public function getRejoinerHelper(): Data
     {
         return $this->rejoinerHelper;
     }
@@ -44,8 +53,9 @@ class Base extends \Magento\Framework\View\Element\Template
      * Get cache key informative items
      *
      * @return array
+     * @throws NoSuchEntityException
      */
-    public function getCacheKeyInfo()
+    public function getCacheKeyInfo(): array
     {
         return [
             'BLOCK_TPL',

@@ -2,37 +2,39 @@
 
 namespace Rejoiner\Acr\CustomerData;
 
-use \Magento\Customer\CustomerData\SectionSourceInterface;
+use Magento\Customer\CustomerData\SectionSourceInterface;
+use Rejoiner\Acr\Helper\Conversion;
+use Rejoiner\Acr\Helper\Customer;
+use Rejoiner\Acr\Helper\Data;
+use Rejoiner\Acr\Helper\Snippets;
 
 class Rejoiner implements SectionSourceInterface
 {
 
-    /** @var \Rejoiner\Acr\Helper\Data $rejoinerHelper */
-    protected $rejoinerHelper;
+    /** @var Data $rejoinerHelper */
+    protected Data $rejoinerHelper;
 
-    /** @var \Rejoiner\Acr\Helper\Snippets $trackingHelper */
-    protected $trackingHelper;
+    /** @var Snippets $trackingHelper */
+    protected Snippets $trackingHelper;
 
-    /** @var \Rejoiner\Acr\Helper\Customer $customerHelper */
-    protected $customerHelper;
+    /** @var Customer $customerHelper */
+    protected Customer $customerHelper;
 
-    /**
-     * @var \Rejoiner\Acr\Helper\Conversion
-     */
-    private $conversion;
+    /** @var Conversion */
+    private Conversion $conversion;
 
     /**
      * Rejoiner constructor.
-     * @param \Rejoiner\Acr\Helper\Data $rejoinerHelper
-     * @param \Rejoiner\Acr\Helper\Customer $customerHelper
-     * @param \Rejoiner\Acr\Helper\Snippets $trackingHelper
-     * @param \Rejoiner\Acr\Helper\Conversion $
+     * @param Data $rejoinerHelper
+     * @param Customer $customerHelper
+     * @param Snippets $trackingHelper
+     * @param Conversion $conversion
      */
     public function __construct(
-        \Rejoiner\Acr\Helper\Data $rejoinerHelper,
-        \Rejoiner\Acr\Helper\Customer $customerHelper,
-        \Rejoiner\Acr\Helper\Snippets $trackingHelper,
-        \Rejoiner\Acr\Helper\Conversion $conversion
+        Data $rejoinerHelper,
+        Customer $customerHelper,
+        Snippets $trackingHelper,
+        Conversion $conversion
     ) {
         $this->rejoinerHelper = $rejoinerHelper;
         $this->trackingHelper = $trackingHelper;

@@ -1,70 +1,76 @@
 <?php
 namespace Rejoiner\Acr\Helper;
 
-class Customer extends \Magento\Framework\App\Helper\AbstractHelper
+use DateMalformedStringException;
+use DateTime;
+use Magento\Framework\Session\SessionManagerInterface;
+use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Framework\App\Helper\Context;
+use Magento\Framework\Locale\Resolver;
+use Magento\Framework\ObjectManagerInterface;
+
+class Customer extends AbstractHelper
 {
     /** @var \Magento\Customer\Model\Customer $currentCustomer */
-    protected $currentCustomer;
+    protected \Magento\Customer\Model\Customer $currentCustomer;
 
-    /** @var  \Magento\Framework\ObjectManagerInterface $objectManager */
-    protected $objectManager;
+    /** @var  ObjectManagerInterface $objectManager */
+    protected ObjectManagerInterface $objectManager;
 
-    /** @var \Magento\Framework\Locale\Resolver $localeResolver */
-    protected $localeResolver;
+    /** @var Resolver $localeResolver */
+    protected Resolver $localeResolver;
+
+    private \Magento\Customer\Model\ResourceModel\Customer $customerResource;
 
     /**
-     * Customer constructor.
-     * @param Data $rejoinerHelper
-     * @param \Magento\Framework\Locale\Resolver $localeResolver
-     * @param \Magento\Framework\Registry $registry
-     * @param \Magento\Customer\Model\Session $customerSession
-     * @param \Magento\Framework\App\Helper\Context $context
-     * @param array $data
+     * @param Resolver $localeResolver
+     * @param SessionManagerInterface $session
+     * @param \Magento\Customer\Model\ResourceModel\Customer $customerResource
+     * @param Context $context
      */
     public function __construct(
-        \Rejoiner\Acr\Helper\Data $rejoinerHelper,
-        \Magento\Framework\Locale\Resolver $localeResolver,
-        \Magento\Framework\Registry $registry,
-        \Magento\Customer\Model\Session $customerSession,
-        \Magento\Framework\App\Helper\Context $context,
-        array $data = []
+        Resolver $localeResolver,
+        SessionManagerInterface $session,
+        \Magento\Customer\Model\ResourceModel\Customer $customerResource,
+        Context $context
     ) {
         $this->localeResolver  = $localeResolver;
-        $this->currentCustomer = $customerSession->getCustomer();
+        $this->currentCustomer = $session->getCustomer();
+        $this->customerResource = $customerResource;
+
         parent::__construct($context);
     }
 
     /**
-     * @return string
+     * @return array
+     * @throws DateMalformedStringException
      */
-    public function getCustomerInfo()
+    public function getCustomerInfo(): array
     {
-        /** @var array $customerData */
-        $customerData = [
+        return [
             'age'    => $this->getCustomerAge(),
             'gender' => $this->getGender(),
             'en'     => substr($this->localeResolver->getLocale(), 0, 2),
-            'name'   => $this->getCurrentCustomer()->getFirstname(),
-
+            'name'   => $this->getCurrentCustomer()->getFirstname(). ' ' .$this->getCurrentCustomer()->getLastname()
         ];
-
-        return $customerData;
     }
 
     /**
      * @return int
+     * @throws DateMalformedStringException
      */
     protected function getCustomerAge()
     {
         $age = 0;
-        /** @var \Magento\Customer\Model\Customer $customer */
         $customer = $this->getCurrentCustomer();
+
         if ($dob = $customer->getDob()) {
-            $birthdayDate = new \DateTime($dob);
-            $now = new \DateTime();
+            $birthdayDate = new DateTime($dob);
+            $now = new DateTime();
             $interval = $now->diff($birthdayDate);
             $age = $interval->y;
         }
+
         return $age;
     }
 
@@ -73,21 +79,17 @@ class Customer extends \Magento\Framework\App\Helper\AbstractHelper
      */
     protected function getGender()
     {
-        /** @var \Magento\Customer\Model\ResourceModel\Customer $resource */
-        $resource = $this->getCurrentCustomer()
-            ->getResource();
-
-        $genderText = $resource->getAttribute('gender')
+        $genderText = $this->customerResource->getAttribute('gender')
             ->getSource()
             ->getOptionText($this->getCurrentCustomer()->getData('gender'));
 
-        return $genderText? $genderText : '';
+        return $genderText? : '';
     }
 
     /**
-     * @return string
+     * @return array
      */
-    public function getCustomerEmail()
+    public function getCustomerEmail(): array
     {
         return ['email' => $this->getCurrentCustomer()->getEmail()];
     }

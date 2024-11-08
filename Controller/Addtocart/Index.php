@@ -1,53 +1,80 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright © 2017 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Controller\Addtocart;
 
-class Index extends \Magento\Framework\App\Action\Action
+use Magento\Catalog\Api\ProductRepositoryInterface;
+use Magento\Catalog\Model\ProductFactory;
+use Magento\Checkout\Model\CartFactory;
+use Magento\Checkout\Model\SessionFactory;
+use Magento\Framework\App\Action\HttpGetActionInterface;
+use Magento\Framework\App\RequestInterface;
+use Magento\Framework\Controller\Result\Redirect;
+use Magento\Framework\Controller\Result\RedirectFactory;
+use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\UrlInterface;
+use Magento\Framework\View\Result\PageFactory;
+use Rejoiner\Acr\Helper\Data;
+
+class Index implements HttpGetActionInterface
 {
-    /** @var \Magento\Framework\View\Result\PageFactory $resultPageFactory */
-    protected $resultPageFactory;
+    /** @var PageFactory $resultPageFactory */
+    protected PageFactory $resultPageFactory;
 
-    /** @var \Rejoiner\Acr\Helper\Data $rejoinerHelper */
-    protected $rejoinerHelper;
+    /** @var Data $rejoinerHelper */
+    protected Data $rejoinerHelper;
 
-    /** @var \Magento\Checkout\Model\CartFactory $cartFactory */
-    protected $cartFactory;
+    /** @var CartFactory $cartFactory */
+    protected CartFactory $cartFactory;
 
-    /** @var \Magento\Catalog\Model\ProductFactory $productFactory */
-    protected $productFactory;
+    /** @var ProductFactory $productFactory */
+    protected ProductFactory $productFactory;
 
-    /** @var \Magento\Checkout\Model\SessionFactory $sessionFactory */
-    protected $sessionFactory;
+    /** @var SessionFactory $sessionFactory */
+    protected SessionFactory $sessionFactory;
 
-    /** @var \Magento\Framework\UrlInterface $urlBuilder */
-    protected $urlBuilder;
+    /** @var UrlInterface $urlBuilder */
+    protected UrlInterface $urlBuilder;
+
+    private RequestInterface $request;
+
+    private Redirect $resultRedirect;
+
+    private ProductRepositoryInterface $productRepository;
 
     /**
-     * @param \Rejoiner\Acr\Helper\Data $rejoinerHelper
-     * @param \Magento\Framework\App\Action\Context $context
-     * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
-     * @param \Magento\Checkout\Model\SessionFactory $sessionFactory
-     * @param \Magento\Checkout\Model\CartFactory $cartFactory
-     * @param \Magento\Catalog\Model\ProductFactory $productFactory
+     * @param Data $rejoinerHelper
+     * @param PageFactory $resultPageFactory
+     * @param SessionFactory $sessionFactory
+     * @param CartFactory $cartFactory
+     * @param ProductFactory $productFactory
+     * @param UrlInterface $urlBuilder
+     * @param RequestInterface $request
+     * @param RedirectFactory $resultRedirectFactory
      */
     public function __construct(
-        \Rejoiner\Acr\Helper\Data $rejoinerHelper,
-        \Magento\Framework\App\Action\Context $context,
-        \Magento\Framework\View\Result\PageFactory $resultPageFactory,
-        \Magento\Checkout\Model\SessionFactory $sessionFactory,
-        \Magento\Checkout\Model\CartFactory $cartFactory,
-        \Magento\Catalog\Model\ProductFactory $productFactory
+        Data $rejoinerHelper,
+        PageFactory $resultPageFactory,
+        SessionFactory $sessionFactory,
+        CartFactory $cartFactory,
+        ProductFactory $productFactory,
+        UrlInterface $urlBuilder,
+        RequestInterface $request,
+        RedirectFactory $resultRedirectFactory,
+        ProductRepositoryInterface $productRepository
     ) {
         $this->rejoinerHelper    = $rejoinerHelper;
         $this->resultPageFactory = $resultPageFactory;
         $this->cartFactory       = $cartFactory;
         $this->sessionFactory    = $sessionFactory;
         $this->productFactory    = $productFactory;
-        $this->urlBuilder        = $context->getUrl();
-        parent::__construct($context);
+        $this->urlBuilder        = $urlBuilder;
+        $this->request           = $request;
+        $this->resultRedirect    = $resultRedirectFactory->create();
+        $this->productRepository = $productRepository;
     }
 
     /**
@@ -56,19 +83,18 @@ class Index extends \Magento\Framework\App\Action\Action
      * params should be persisted on redirect to the cart page to capture UTM
      * params, rjnrid, etc.
      *
-     * @return \Magento\Framework\App\ResponseInterface
+     * @return ResultInterface
      */
-    public function execute()
+    public function execute(): ResultInterface
     {
-        if ($params = $this->getRequest()->getParams()) {
+        if ($params = $this->request->getParams()) {
             $cartModel = $this->cartFactory->create();
             $cartModel->truncate();
 
             foreach ($params as $key => $product) {
                 if ($product && is_array($product)) {
-                    $productModel = $this->productFactory->create();
-                    $productModel->load((int)$product['product']);
                     try {
+                        $productModel = $this->productRepository->getById($product['product']);
                         $cartModel->addProduct($productModel, $product);
                         unset($params[$key]);
                     } catch (\Exception $e) {
@@ -94,7 +120,9 @@ class Index extends \Magento\Framework\App\Action\Action
                 '_query' => $params
             ]
         );
-        $this->getResponse()->setRedirect($url);
-        return $this->_response;
+
+        $this->resultRedirect->setUrl($url);
+
+        return $this->resultRedirect;
     }
 }

@@ -5,6 +5,7 @@
  */
 namespace Rejoiner\Acr\Helper;
 
+use Magento\Sales\Model\Order;
 use \Magento\Store\Model\ScopeInterface;
 
 class Data extends \Magento\Framework\App\Helper\AbstractHelper
@@ -46,6 +47,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const REJOINER_VERSION_2                               = 'v2';
 
     const REMOVED_CART_ITEM_SKU_VARIABLE        = 'rejoiner_sku';
+
+    private const SUCCESS_RESPONSE_CODE = 0;
+
+    private const ERROR_RESPONSE_CODE = 1;
 
     /** @var \Magento\Checkout\Model\Session $_checkoutSession */
     private $checkoutSession;
@@ -268,20 +273,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function generateCouponCode($rule_id, $param = 'promo')
     {
         $quote = $this->checkoutSession->getQuote();
-        $quotePromo = $quote->getPromo();
-
-        if ($quotePromo) {
-            $codes = unserialize($quotePromo);
-            $couponCode = isset($codes[$param]) ? $codes[$param] : '';
-
-            if ($couponCode) {
-                return $couponCode;
-            }
-        }
+        $codes = unserialize($quote->getPromo());
+        $couponCode = isset($codes[$param]) ? $codes[$param] : '';
 
         /** @var \Magento\SalesRule\Model\Rule $ruleItem */
         $ruleItem = $this->ruleFactory->create()->load($rule_id);
-        if ($ruleItem->getUseAutoGeneration()) {
+        if ($ruleItem->getUseAutoGeneration() && !$couponCode) {
             $couponCode = $this->codegeneratorFactory->create()->generateCode();
 
             /** @var \Magento\SalesRule\Model\Coupon $salesRuleModel */
@@ -304,7 +301,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @return bool
      */
-    public function isEnabled()
+    public function isEnabled(): bool
     {
         return $this->scopeConfig->isSetFlag(self::XML_PATH_REJOINER_ENABLED);
     }
@@ -312,7 +309,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @return string
      */
-    public function getDomain()
+    public function getDomain(): string
     {
         $domain = trim($this->scopeConfig->getValue(self::XML_PATH_REJOINER_DOMAIN, ScopeInterface::SCOPE_STORE));
 
@@ -322,15 +319,15 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @return string
      */
-    public function getRejoinerSiteId()
+    public function getRejoinerSiteId(): string
     {
-        return $this->scopeConfig->getValue(self::XML_PATH_REJOINER_SITE_ID, ScopeInterface::SCOPE_STORE);
+        return (string) $this->scopeConfig->getValue(self::XML_PATH_REJOINER_SITE_ID, ScopeInterface::SCOPE_STORE);
     }
 
     /**
-     * @return int
+     * @return string
      */
-    public function getRejoinerVersion()
+    public function getRejoinerVersion(): string
     {
         $siteId = $this->getRejoinerSiteId();
         $siteIdLength = strlen($siteId);
@@ -345,7 +342,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @return string
      */
-    public function getRejoinerScriptUri()
+    public function getRejoinerScriptUri(): string
     {
         switch ($this->getRejoinerVersion()) {
             case self::REJOINER_VERSION_2:
@@ -356,9 +353,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
-     * @return string
+     * @return int
      */
-    public function getTrackNumberEnabled()
+    public function getTrackNumberEnabled(): int
     {
         return (int) $this->scopeConfig->getValue(self::XML_PATH_REJOINER_TRACK_NUMBERS, ScopeInterface::SCOPE_STORE);
     }
@@ -382,45 +379,45 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @return string
      */
-    public function getIsEnabledCouponCodeGeneration()
+    public function getIsEnabledCouponCodeGeneration(): string
     {
-        return $this->scopeConfig->getValue(self::XML_PATH_REJOINER_COUPON_GENERATION, ScopeInterface::SCOPE_STORE);
+        return (string) $this->scopeConfig->getValue(self::XML_PATH_REJOINER_COUPON_GENERATION, ScopeInterface::SCOPE_STORE);
     }
 
     /**
      * @return int
      */
-    public function getCouponCodeRuleId()
+    public function getCouponCodeRuleId(): int
     {
-        return $this->scopeConfig->getValue(self::XML_PATH_REJOINER_COUPON_RULE, ScopeInterface::SCOPE_STORE);
+        return (int) $this->scopeConfig->getValue(self::XML_PATH_REJOINER_COUPON_RULE, ScopeInterface::SCOPE_STORE);
     }
 
     /**
      * @return string
      */
-    public function getImageWidth()
+    public function getImageWidth(): string
     {
-        return $this->scopeConfig->getValue(self::XML_PATH_REJOINER_THUMBNAIL_WIDTH, ScopeInterface::SCOPE_STORE);
+        return (string) $this->scopeConfig->getValue(self::XML_PATH_REJOINER_THUMBNAIL_WIDTH, ScopeInterface::SCOPE_STORE);
     }
 
     /**
      * @return string
      */
-    public function getImageHeight()
+    public function getImageHeight(): string
     {
-        return $this->scopeConfig->getValue(self::XML_PATH_REJOINER_THUMBNAIL_HEIGHT);
+        return (string) $this->scopeConfig->getValue(self::XML_PATH_REJOINER_THUMBNAIL_HEIGHT);
     }
 
     /**
      * @return string
      */
-    public function getShouldBeProcessedByCron()
+    public function getShouldBeProcessedByCron(): string
     {
-        return $this->scopeConfig->getValue(self::XML_PATH_REJOINER_PROCESS_BY_CRON);
+        return (string) $this->scopeConfig->getValue(self::XML_PATH_REJOINER_PROCESS_BY_CRON);
     }
 
     /**
-     * @return string
+     * @return bool|string
      */
     public function getRejoinerApiSecret()
     {
@@ -428,22 +425,22 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             case self::REJOINER_VERSION_2:
                 return true;
             default:
-                return $this->scopeConfig->getValue(self::XML_PATH_REJOINER_API_SECRET);
+                return (string) $this->scopeConfig->getValue(self::XML_PATH_REJOINER_API_SECRET);
         }
     }
 
     /**
      * @return string
      */
-    public function getRejoinerApiKey()
+    public function getRejoinerApiKey(): string
     {
-        return $this->scopeConfig->getValue(self::XML_PATH_REJOINER_API_KEY);
+        return (string) $this->scopeConfig->getValue(self::XML_PATH_REJOINER_API_KEY);
     }
 
     /**
      * @return bool
      */
-    public function getRejoinerMarketingPermissions()
+    public function getRejoinerMarketingPermissions(): bool
     {
         return $this->isEnabled() && $this->scopeConfig->isSetFlag(self::XML_PATH_REJOINER_MARKETING_PERMISSIONS);
     }
@@ -451,15 +448,15 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @return string
      */
-    public function getRejoinerMarketingListID()
+    public function getRejoinerMarketingListID(): string
     {
-        return $this->scopeConfig->getValue(self::XML_PATH_REJOINER_MARKETING_LIST_ID);
+        return (string) $this->scopeConfig->getValue(self::XML_PATH_REJOINER_MARKETING_LIST_ID);
     }
 
     /**
      * @return bool
      */
-    public function getRejoinerSubscribeGuestCheckout()
+    public function getRejoinerSubscribeGuestCheckout(): bool
     {
         return $this->scopeConfig->isSetFlag(self::XML_PATH_REJOINER_SUBSCRIBE_GUEST_CHECKOUT);
     }
@@ -467,7 +464,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @return bool
      */
-    public function getRejoinerSubscribeAccountRegistration()
+    public function getRejoinerSubscribeAccountRegistration(): bool
     {
         return $this->scopeConfig->isSetFlag(self::XML_PATH_REJOINER_SUBSCRIBE_ACCOUNT_REGISTRATION);
     }
@@ -475,7 +472,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @return bool
      */
-    public function getRejoinerSubscribeLoginCheckout()
+    public function getRejoinerSubscribeLoginCheckout(): bool
     {
         return $this->scopeConfig->isSetFlag(self::XML_PATH_REJOINER_SUBSCRIBE_LOGIN_CHECKOUT);
     }
@@ -483,7 +480,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @return bool
      */
-    public function getRejoinerSubscribeCustomerAccount()
+    public function getRejoinerSubscribeCustomerAccount(): bool
     {
         return $this->scopeConfig->isSetFlag(self::XML_PATH_REJOINER_SUBSCRIBE_CUSTOMER_ACCOUNT);
     }
@@ -491,7 +488,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @return bool
      */
-    public function getRejoinerSubscribeCheckedDefault()
+    public function getRejoinerSubscribeCheckedDefault(): bool
     {
         return $this->scopeConfig->isSetFlag(self::XML_PATH_REJOINER_SUBSCRIBE_CHECKBOX_DEFAULT);
     }
@@ -499,9 +496,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @return string
      */
-    public function getRejoinerSubscribeCheckboxLabel()
+    public function getRejoinerSubscribeCheckboxLabel(): string
     {
-        return $this->scopeConfig->getValue(self::XML_PATH_REJOINER_SUBSCRIBE_CHECKBOX_LABEL);
+        return (string) $this->scopeConfig->getValue(self::XML_PATH_REJOINER_SUBSCRIBE_CHECKBOX_LABEL);
     }
 
     /**
@@ -509,7 +506,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     public function getRejoinerSubscribeCheckboxSelector()
     {
-        return $this->scopeConfig->getValue(self::XML_PATH_REJOINER_SUBSCRIBE_CHECKBOX_SELECTOR);
+        return (string) $this->scopeConfig->getValue(self::XML_PATH_REJOINER_SUBSCRIBE_CHECKBOX_SELECTOR);
     }
 
     /**
@@ -517,7 +514,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     public function getRejoinerSubscribeCheckboxStyle()
     {
-        return $this->scopeConfig->getValue(self::XML_PATH_REJOINER_SUBSCRIBE_CHECKBOX_STYLE);
+        return (string) $this->scopeConfig->getValue(self::XML_PATH_REJOINER_SUBSCRIBE_CHECKBOX_STYLE);
     }
 
     /**
@@ -580,9 +577,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
-     * @param \Magento\Sales\Model\Order $orderModel
+     * @param Order $orderModel
+     * @return int
      */
-    public function sendInfoToRejoiner(\Magento\Sales\Model\Order $orderModel)
+    public function sendInfoToRejoiner(Order $orderModel): int
     {
         try {
             $customerEmail = $orderModel->getBillingAddress()->getEmail();
@@ -596,8 +594,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 $customerName = $orderModel->getBillingAddress()->getFirstname();
                 $this->addToList($listId, $email, $customerName);
             }
+
+            return self::SUCCESS_RESPONSE_CODE;
         } catch (\Exception $e) {
         }
+
+        return self::ERROR_RESPONSE_CODE;
     }
 
     /**
@@ -700,7 +702,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 throw new \Exception($error);
             }
 
-            $hmacData       = utf8_encode(implode("\n", [\Zend_Http_Client::POST, $requestPath, $requestBody]));
+            $hmacData       = utf8_encode(implode("\n", [\Laminas\Http\Request::METHOD_POST, $requestPath, $requestBody]));
             $codedApiSecret = base64_encode(hash_hmac('sha1', $hmacData, $apiSecret, true));
             $authorization  = sprintf('Rejoiner %s:%s', $apiKey, $codedApiSecret);
         }
@@ -722,7 +724,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private function sendRequest(\Magento\Framework\HTTP\ZendClient $client)
     {
         try {
-            $response = $client->request(\Zend_Http_Client::POST);
+            $response = $client->request(\Laminas\Http\Request::METHOD_POST);
             $responseCode = $response->getStatus();
         } catch (\Exception $e) {
             $this->log($e->getMessage());

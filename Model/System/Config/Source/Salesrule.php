@@ -5,26 +5,31 @@
  */
 namespace Rejoiner\Acr\Model\System\Config\Source;
 
-class Salesrule implements \Magento\Framework\Option\ArrayInterface
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Option\ArrayInterface;
+use Magento\SalesRule\Model\RuleFactory;
+
+class Salesrule implements ArrayInterface
 {
     /**
-     * @var \Magento\SalesRule\Model\RuleFactory $ruleFactory
+     * @var RuleFactory $ruleFactory
      */
-    private $ruleFactory;
+    private RuleFactory $ruleFactory;
 
     /**
      * Salesrule constructor.
-     * @param \Magento\SalesRule\Model\RuleFactory $ruleFactory
+     * @param RuleFactory $ruleFactory
      */
-    public function __construct(\Magento\SalesRule\Model\RuleFactory $ruleFactory)
+    public function __construct(RuleFactory $ruleFactory)
     {
         $this->ruleFactory = $ruleFactory;
     }
 
     /**
      * @return array
+     * @throws LocalizedException
      */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         $options = [];
         $additional = [
@@ -33,16 +38,19 @@ class Salesrule implements \Magento\Framework\Option\ArrayInterface
         ];
 
         $collection = $this->ruleFactory->create()->getResourceCollection();
+
         foreach ($collection as $item) {
             if ($item->getUseAutoGeneration()) {
                 $data = [];
+
                 foreach ($additional as $code => $field) {
                     $data[$code] = $item->getData($field);
                 }
+
                 $options[] = $data;
             }
-
         }
+
         array_unshift($options, ['value'=>'', 'label'=> __('--Please Select--')]);
 
         return $options;

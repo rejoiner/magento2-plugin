@@ -1,9 +1,19 @@
-<?php /* @var \Rejoiner\Acr\Block\Base $block */ ?>
+<?php
+/**
+ * @var Base $block
+ * @var Escaper $escaper
+ */
+
+use Magento\Framework\Escaper;
+use Rejoiner\Acr\Block\Base;
+
+?>
 <?php
 $rejoinerHelper = $block->getRejoinerHelper();
 // Need to render blocks one by one to implode them into the single JSON
 $childBlockNames = $block->getChildNames();
 $childBlocksHtml = [];
+
 foreach ($childBlockNames as $childBlockName) {
     if ($html = $block->getChildHtml($childBlockName, false)) {
         $childBlocksHtml[] = $html;
@@ -12,21 +22,23 @@ foreach ($childBlockNames as $childBlockName) {
 ?>
 <?php if ($rejoinerHelper->getRejoinerSiteId() && $rejoinerHelper->getDomain()) : ?>
     <?php
-    $domain = $block->escapeHtml($rejoinerHelper->getDomain());
-    $siteId = $block->escapeHtml($rejoinerHelper->getRejoinerSiteId());
-    $rejoinerScriptUri = $block->escapeHtml($rejoinerHelper->getRejoinerScriptUri());;
+    $domain = $escaper->escapeHtml($rejoinerHelper->getDomain());
+    $siteId = $escaper->escapeHtml($rejoinerHelper->getRejoinerSiteId());
+    $rejoinerScriptUri = $escaper->escapeHtml($rejoinerHelper->getRejoinerScriptUri());
     ?>
     <script type="text/x-magento-init">
         {
             "*": {
                 "RejoinerAcrTracking": {
-                    "rejoinerSiteId"          : "<?= $siteId; ?>",
-                    "rejoinerDomain"          : "<?= $domain; ?>",
-                    "rejoinerScriptUri"       : "<?= $rejoinerScriptUri; ?>",
-                    "trackNumberEnabled"      : <?= $rejoinerHelper->getTrackNumberEnabled(); ?>,
-                    "persistFormsEnabled"     : <?= $rejoinerHelper->getPersistFormsEnabled(); ?>,
-                    "trackCartDataOnThisPage" : <?= $rejoinerHelper->getShoppingCartDataOnThisPage() ?><?php echo (!empty($childBlocksHtml))? ',': ''?>
-                    <?= implode(',', $childBlocksHtml); ?>
+                    "rejoinerSiteId"          : "<?= $siteId ?>",
+                    "rejoinerDomain"          : "<?= $domain ?>",
+                    "rejoinerScriptUri"       : "<?= $rejoinerScriptUri ?>",
+                    "trackNumberEnabled"      : <?= $escaper->escapeHtml($rejoinerHelper->getTrackNumberEnabled()) ?>,
+                    "persistFormsEnabled"     : <?= $escaper->escapeHtml($rejoinerHelper->getPersistFormsEnabled()) ?>,
+                    "trackCartDataOnThisPage" : <?=
+                        $escaper->escapeHtml($rejoinerHelper->getShoppingCartDataOnThisPage())
+                    ?><?php echo (!empty($childBlocksHtml))? ',': ''?>
+                    <?= /** @noEscape  */ implode(',', $childBlocksHtml) ?>
                 }
             }
         }

@@ -4,12 +4,19 @@
  * See COPYING.txt for license details.
  */
 
-/* @var \Rejoiner\Acr\Block\Newsletter $block */
+/**
+ * @var Newsletter $block
+ * @var Escaper $escaper
+ */
+
+use Magento\Framework\Escaper;
+use Rejoiner\Acr\Block\Newsletter;
+
 ?>
 <?php if ($block->isEnabled()): ?>
-    <style type="text/css">
+    <style>
         <?php if ($styles = $block->getStyles()): ?>
-            <?php echo $block->getCheckboxSelectors(); ?> {<?php echo $styles; ?>}
+            <?= $escaper->escapeHtml($block->getCheckboxSelectors()) ?> {<?= $escaper->escapeHtml($styles) ?>}
         <?php endif; ?>
 
         <?php if ($block->isLabelChanged()): ?>
@@ -19,6 +26,6 @@
 
         <?php if ($block->hideInCustomerAccount()): ?>
             .account .form-newsletter-manage { display: none !important; }
-    <?php endif; ?>
+        <?php endif; ?>
     </style>
 <?php endif; ?>

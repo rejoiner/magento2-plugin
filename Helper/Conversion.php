@@ -1,51 +1,56 @@
 <?php
 namespace Rejoiner\Acr\Helper;
 
+use Magento\Checkout\Model\Session;
+use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Framework\App\Helper\Context;
 use Magento\Sales\Model\Order;
+use Magento\Sales\Model\OrderFactory;
 
-class Conversion extends \Magento\Framework\App\Helper\AbstractHelper
+class Conversion extends AbstractHelper
 {
     /**
      * @var Data
      */
-    private $rejoinerHelper;
+    private Data $rejoinerHelper;
 
     /**
-     * @var \Magento\Checkout\Model\Session
+     * @var Session
      */
-    private $checkoutSession;
+    private Session $checkoutSession;
 
     /**
-     * @var \Magento\Sales\Model\OrderFactory
+     * @var OrderFactory
      */
-    private $orderFactory;
+    private OrderFactory $orderFactory;
 
     /**
-     * @var Order
+     * @var Order|null
      */
-    private $order;
+    private ?Order $order = null;
 
     /**
      * @var ItemsData
      */
-    private $itemsData;
+    private ItemsData $itemsData;
 
     /**
      * Conversion constructor.
      * @param Data $rejoinerHelper
-     * @param \Magento\Checkout\Model\Session $checkoutSession
-     * @param \Magento\Sales\Model\OrderFactory $orderFactory
+     * @param Session $checkoutSession
+     * @param OrderFactory $orderFactory
      * @param ItemsData $itemsData
-     * @param \Magento\Framework\App\Helper\Context $context
+     * @param Context $context
      */
     public function __construct(
-        \Rejoiner\Acr\Helper\Data $rejoinerHelper,
-        \Magento\Checkout\Model\Session $checkoutSession,
-        \Magento\Sales\Model\OrderFactory $orderFactory,
-        ItemsData $itemsData,
-        \Magento\Framework\App\Helper\Context $context
+        Data         $rejoinerHelper,
+        Session      $checkoutSession,
+        OrderFactory $orderFactory,
+        ItemsData    $itemsData,
+        Context      $context
     ) {
         parent::__construct($context);
+
         $this->rejoinerHelper = $rejoinerHelper;
         $this->checkoutSession = $checkoutSession;
         $this->orderFactory = $orderFactory;
@@ -53,28 +58,21 @@ class Conversion extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
-     * @return int
+     * @return bool
      */
-    public function shouldSaveConversionData()
+    public function shouldSaveConversionData(): bool
     {
         $order = $this->getOrder();
 
-        if ($order->getId()
+        return $order->getId()
             && null === $this->checkoutSession->getQuoteId()
-            && $order->getQuoteId() == $this->checkoutSession->getLastQuoteId()
-        ) {
-            $result = 1;
-        } else {
-            $result = 0;
-        }
-
-        return $result;
+            && $order->getQuoteId() == $this->checkoutSession->getLastQuoteId();
     }
 
     /**
-     * @return string
+     * @return array
      */
-    public function getCartData()
+    public function getCartData(): array
     {
         $result = [];
         $displayPriceWithTax = $this->rejoinerHelper->getTrackPriceWithTax();
@@ -95,13 +93,14 @@ class Conversion extends \Magento\Framework\App\Helper\AbstractHelper
                 $result['promo'] = $promo;
             }
         }
+
         return $result;
     }
 
     /**
      * @return array
      */
-    public function getCartItems()
+    public function getCartItems(): array
     {
         return $this->itemsData->getCartItems($this->getOrder());
     }
@@ -109,7 +108,7 @@ class Conversion extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @return Order
      */
-    private function getOrder()
+    private function getOrder(): Order
     {
         if ($this->order === null) {
             /** @var Order $order */

@@ -1,6 +1,15 @@
-<?php /* @var \Magento\Backend\Block\Template $block */ ?>
+<?php
+/**
+ * @var Template $block
+ * @var Escaper $escaper
+ */
+
+use Magento\Backend\Block\Template;
+use Magento\Framework\Escaper;
+
+?>
 
 <div class="rejoiner-subscribe-actions" style="margin-bottom: 25px; margin-top: -1rem; text-align: left;">
     <input type="checkbox" id="rejoiner_subscribe" name="order[rejoiner_subscribe]" value="1" class="admin__control-checkbox" checked="checked" />
-    <label for="rejoiner_subscribe" class="admin__field-label"><?php /* @escapeNotVerified */ echo __('Subscribe to Rejoiner') ?></label>
+    <label for="rejoiner_subscribe" class="admin__field-label"><?= $escaper->escapeHtml(__('Subscribe to Rejoiner')) ?></label>
 </div>

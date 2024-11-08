@@ -1,14 +1,17 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright © 2017 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Block\Adminhtml\Form\Field;
 
-class Source extends \Magento\Framework\View\Element\Html\Select
+use Magento\Framework\View\Element\Html\Select;
+
+class Source extends Select
 {
     /** @var array $_metaSources */
-    protected $_metaSources = [
+    protected array $_metaSources = [
         'utm_source'   =>  'Campaign Source',
         'utm_medium'   =>  'Campaign Medium',
         'utm_campaign' =>  'Campaign Name'
@@ -19,7 +22,7 @@ class Source extends \Magento\Framework\View\Element\Html\Select
      *
      * @return string
      */
-    public function _toHtml()
+    public function _toHtml(): string
     {
         if (!$this->getOptions()) {
             foreach ($this->_metaSources as $groupId => $groupLabel) {
@@ -36,7 +39,7 @@ class Source extends \Magento\Framework\View\Element\Html\Select
      * @param string $value
      * @return $this
      */
-    public function setInputName($value)
+    public function setInputName(string $value): self
     {
         return $this->setName($value);
     }

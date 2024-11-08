@@ -1,66 +1,75 @@
 <?php
+declare(strict_types=1);
 /**
- * Copyright © 2017 Rejoiner. All rights reserved.
+ * Copyright © 2024 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Cron;
 
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Sales\Model\OrderFactory;
+use Rejoiner\Acr\Helper\Data;
+use Rejoiner\Acr\Model\ResourceModel\Acr\CollectionFactory;
+use DateTime;
+
 class TrackOrderSuccessConversion
 {
-    /** @var \Rejoiner\Acr\Helper\Data $_rejoinerHelper */
-    protected $_rejoinerHelper;
+    /** @var Data $rejoinerHelper */
+    protected Data $rejoinerHelper;
 
-    /** @var \Rejoiner\Acr\Model\AcrFactory $_rejoinerFactory */
-    protected $_rejoinerFactory;
+    /** @var CollectionFactory $collectionFactory */
+    private CollectionFactory $collectionFactory;
 
-    /** @var \Magento\Sales\Model\OrderFactory $_orderFactory */
-    protected $_orderFactory;
+    /** @var OrderFactory $_orderFactory */
+    protected OrderFactory $orderFactory;
 
-    /** @var \Magento\Framework\Stdlib\DateTime\TimezoneInterface $_timezone */
-    protected $_timezone;
+    private OrderRepositoryInterface $orderRepository;
 
     /**
-     * TrackOrderSuccessConversion constructor.
-     * @param \Rejoiner\Acr\Model\AcrFactory $rejoinerFactory
-     * @param \Magento\Sales\Model\OrderFactory $orderFactory
-     * @param \Magento\Framework\Stdlib\DateTime\TimezoneInterface $timezone
-     * @param \Rejoiner\Acr\Helper\Data $rejoinerHelper
+     * @param CollectionFactory $collectionFactory
+     * @param OrderFactory $orderFactory
+     * @param Data $rejoinerHelper
+     * @param OrderRepositoryInterface $orderRepository
      */
     public function __construct(
-        \Rejoiner\Acr\Model\AcrFactory $rejoinerFactory,
-        \Magento\Sales\Model\OrderFactory $orderFactory,
-        \Magento\Framework\Stdlib\DateTime\TimezoneInterface $timezone,
-        \Rejoiner\Acr\Helper\Data $rejoinerHelper
+        CollectionFactory $collectionFactory,
+        OrderFactory $orderFactory,
+        Data $rejoinerHelper,
+        OrderRepositoryInterface $orderRepository
     ) {
-        $this->_rejoinerHelper  = $rejoinerHelper;
-        $this->_rejoinerFactory = $rejoinerFactory;
-        $this->_orderFactory     = $orderFactory;
-        $this->_timezone        = $timezone;
+        $this->rejoinerHelper    = $rejoinerHelper;
+        $this->collectionFactory = $collectionFactory;
+        $this->orderFactory      = $orderFactory;
+        $this->orderRepository   = $orderRepository;
     }
 
     /**
      * @return $this
+     * @throws LocalizedException
      */
-    public function trackOrder()
+    public function trackOrder(): self
     {
-        /** @var \Rejoiner\Acr\Model\ResourceModel\Acr\Collection $collection */
-        $collection = $this->_rejoinerFactory->create()->getResourceCollection();
+        $collection = $this->collectionFactory->create();
         $collection->addFieldToFilter('sent_at', ['null' => true]);
         if (!empty($collection->getSize())
-            && $this->_rejoinerHelper->getRejoinerApiKey()
-            && $this->_rejoinerHelper->getRejoinerApiSecret()
+            && $this->rejoinerHelper->getRejoinerApiKey()
+            && $this->rejoinerHelper->getRejoinerApiSecret()
         ) {
             foreach ($collection as $successOrder) {
-                /** @var \Magento\Sales\Model\Order $orderModel */
-                $orderModel = $this->_orderFactory->create();
-                $orderModel->load($successOrder->getOrderId());
-                $responseCode = $this->_rejoinerHelper->sendInfoToRejoiner($orderModel);
+                try {
+                    $orderModel = $this->orderRepository->get($successOrder->getId());
+                } catch (NoSuchEntityException $e) {
+                    $orderModel = $this->orderFactory->create();
+                }
+                $responseCode = $this->rejoinerHelper->sendInfoToRejoiner($orderModel);
                 $successOrder->setResponseCode($responseCode);
-                $successOrder->setSentAt(date('Y-m-d H:i:s', $this->_timezone->scopeTimeStamp()));
+                $dateTimeObj = new DateTime('now');
+                $successOrder->setSentAt($dateTimeObj->format('Y-m-d H:i:s'));
                 $successOrder->save();
             }
         }
-
         return $this;
     }
 }

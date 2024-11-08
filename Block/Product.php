@@ -1,66 +1,73 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright © 2017 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Block;
 
-class Product extends \Magento\Framework\View\Element\Template
+use Magento\Catalog\Helper\Image;
+use Magento\Catalog\Model\Category;
+use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Registry;
+use Magento\Framework\View\Element\Template;
+use Magento\Framework\View\Element\Template\Context;
+use Rejoiner\Acr\Helper\Data;
+
+class Product extends Template
 {
+    /** @var Data $rejoinerHelper */
+    protected Data $rejoinerHelper;
 
-    /** @var \Rejoiner\Acr\Helper\Data $rejoinerHelper */
-    protected $rejoinerHelper;
+    /** @var Image $imageHelper */
+    protected Image $imageHelper;
 
-    /** @var \Magento\Catalog\Helper\Image $imageHelper */
-    protected $imageHelper;
-
-    /** @var \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollectionFactory */
-    protected $categoryCollectionFactory;
+    /** @var CollectionFactory $categoryCollectionFactory */
+    protected CollectionFactory $categoryCollectionFactory;
 
     /** @var \Magento\Catalog\Model\Product $product */
-    protected $product;
+    protected \Magento\Catalog\Model\Product $product;
+
     /**
      * Base constructor.
-     * @param \Rejoiner\Acr\Helper\Data $rejoinerHelper
-     * @param \Magento\Framework\Json\Helper\Data $jsonHelper
-     * @param \Magento\Catalog\Helper\Image $imageHelper
-     * @param \Magento\Checkout\Model\Session $checkoutSession
-     * @param \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollectionFactory
-     * @param \Magento\Framework\Locale\Resolver $localeResolver
-     * @param \Magento\Framework\Registry $registry
-     * @param \Magento\Framework\View\Element\Template\Context $context
+     * @param Data $rejoinerHelper
+     * @param Image $imageHelper
+     * @param CollectionFactory $categoryCollectionFactory
+     * @param Registry $registry
+     * @param Context $context
      * @param array $data
      */
     public function __construct(
-        \Rejoiner\Acr\Helper\Data $rejoinerHelper,
-        \Magento\Framework\Json\Helper\Data $jsonHelper,
-        \Magento\Catalog\Helper\Image $imageHelper,
-        \Magento\Checkout\Model\Session $checkoutSession,
-        \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollectionFactory,
-        \Magento\Framework\Locale\Resolver $localeResolver,
-        \Magento\Framework\Registry $registry,
-        \Magento\Framework\View\Element\Template\Context $context,
+        Data $rejoinerHelper,
+        Image $imageHelper,
+        CollectionFactory $categoryCollectionFactory,
+        Registry $registry,
+        Context $context,
         array $data = []
     ) {
         $this->rejoinerHelper            = $rejoinerHelper;
         $this->product                   = $registry->registry('current_product');
         $this->imageHelper               = $imageHelper;
         $this->categoryCollectionFactory = $categoryCollectionFactory;
+
         parent::__construct($context, $data);
     }
 
     /**
-     * @return string
+     * @return array
+     * @throws LocalizedException
      */
-    public function getCurrentProductInfo()
+    public function getCurrentProductInfo(): array
     {
-        /**  */
-
         $imageWidth  = $this->rejoinerHelper->getImageWidth();
         $imageHeight = $this->rejoinerHelper->getImageHeight();
-        $imageUrl = $this->imageHelper->init($this->product, 'category_page_grid')->resize($imageWidth, $imageHeight)->getUrl();
+        $imageUrl = $this->imageHelper
+            ->init($this->product, 'category_page_grid')
+            ->resize($imageWidth, $imageHeight)
+            ->getUrl();
 
-        /** @var \Magento\Catalog\Model\ResourceModel\Category\Collection $categoriesCollection */
         $categoriesCollection = $this->categoryCollectionFactory->create();
         $categoriesCollection
             ->addAttributeToSelect('name')
@@ -68,12 +75,13 @@ class Product extends \Magento\Framework\View\Element\Template
             ->load();
 
         $categories = [];
-        /** @var \Magento\Catalog\Model\Category $category */
+
+        /** @var Category $category */
         foreach ($categoriesCollection as $category) {
             $categories[] = $category->getName();
         }
 
-        $productData = [
+        return [
             'name'        => $this->product->getName(),
             'image_url'   => $imageUrl,
             'price'       => (string) $this->rejoinerHelper->convertPriceToCents($this->product->getPrice()),
@@ -81,20 +89,16 @@ class Product extends \Magento\Framework\View\Element\Template
             'product_url' => (string) $this->product->getProductUrl(),
             'category'    => $categories
         ];
-
-        return $productData;
     }
 
     /**
      * Get cache key informative items
      *
      * @return array
+     * @throws NoSuchEntityException
      */
-    public function getCacheKeyInfo()
+    public function getCacheKeyInfo(): array
     {
-
-        $s =34;
-
         return [
             'BLOCK_TPL',
             $this->_storeManager->getStore()->getCode(),

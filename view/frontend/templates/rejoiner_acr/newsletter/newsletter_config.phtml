@@ -4,33 +4,55 @@
  * See COPYING.txt for license details.
  */
 
-/* @var \Rejoiner\Acr\Block\Newsletter $block */
+/**
+ * @var Newsletter $block
+ * @var Escaper $escaper
+ * @var SecureHtmlRenderer $secureRenderer
+ */
+
+use Magento\Framework\Escaper;
+use Magento\Framework\View\Helper\SecureHtmlRenderer;
+use Rejoiner\Acr\Block\Newsletter;
+
 ?>
 <?php if ($block->isEnabled()): ?>
-    <script>
-        window.rejoinerMarketing = <?php /* @escapeNotVerified */ echo \Zend_Json::encode($block->getConfig()); ?>;
+<?php
+$jsonConfig = /* @escapeNotVerified */ json_encode($block->getConfig());
+$checkboxSelector = $escaper->escapeHtml($block->getCheckboxSelectors());
+$label = $escaper->escapeHtmlAttr($block->getLabel());
+$cssClass = $escaper->escapeHtmlAttr($block->getCssClass());
+$labelChanged = '';
 
-        require([
-            'jquery'
-        ], function($) {
-            var $checkboxes = $('<?php echo $block->getCheckboxSelectors(); ?>'),
-                $labels = $checkboxes.siblings('label'),
-                label = '<?php echo $block->getLabel(); ?>',
-                cssClass = '<?php echo $block->getCssClass(); ?>';
+if ($block->isLabelChanged()) {
+    $labelChanged = <<<labelChanged
+    if (label) {
+        \$labels.text(label);
+    }
 
-            if ($checkboxes.length) {
-                if (cssClass) {
-                    $checkboxes.addClass(cssClass);
-                }
+    \$labels.show();
+labelChanged;
+}
 
-                <?php if ($block->isLabelChanged()): ?>
-                    if (label) {
-                        $labels.text(label);
-                    }
+$scriptString = <<<script
+    window.rejoinerMarketing = $jsonConfig;
 
-                    $labels.show();
-                <?php endif; ?>
+    require([
+        'jquery'
+    ], function($) {
+        var \$checkboxes = $('$checkboxSelector'),
+            \$labels = \$checkboxes.siblings('label'),
+            label = '$label',
+            cssClass = '$cssClass';
+
+        if (\$checkboxes.length) {
+            if (cssClass) {
+                \$checkboxes.addClass(cssClass);
             }
-        });
-    </script>
+
+            $labelChanged
+        }
+    });
+script;
+?>
+    <?= /* @noEscape */ $secureRenderer->renderTag('script', [], $scriptString, false) ?>
 <?php endif; ?>

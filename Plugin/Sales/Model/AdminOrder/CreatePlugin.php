@@ -5,33 +5,35 @@
  */
 namespace Rejoiner\Acr\Plugin\Sales\Model\AdminOrder;
 
+use Magento\Newsletter\Model\SubscriptionManager;
+use Magento\Sales\Model\AdminOrder\Create;
+use Magento\Sales\Model\Order;
+
 class CreatePlugin
 {
-    /** @var \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory */
-    private $subscriberFactory;
+    /** @var SubscriptionManager $subscriptionManager */
+    private SubscriptionManager $subscriptionManager;
 
     /**
      * CreatePlugin constructor.
-     * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
+     * @param SubscriptionManager $subscriptionManager
      */
-    public function __construct(\Magento\Newsletter\Model\SubscriberFactory $subscriberFactory)
+    public function __construct(SubscriptionManager $subscriptionManager)
     {
-        $this->subscriberFactory = $subscriberFactory;
+        $this->subscriptionManager = $subscriptionManager;
     }
 
     /**
-     * @param \Magento\Sales\Model\AdminOrder\Create $subject
-     * @param \Magento\Sales\Model\Order $order
-     * @return \Magento\Sales\Model\Order
+     * @param Create $subject
+     * @param Order $order
+     * @return Order
      */
-    public function afterCreateOrder(\Magento\Sales\Model\AdminOrder\Create $subject, \Magento\Sales\Model\Order $order)
+    public function afterCreateOrder(Create $subject, Order $order)
     {
         if ($subject->hasData('rejoiner_subscribe') && $subject->getData('rejoiner_subscribe')) {
             try {
                 $email = $order->getCustomerEmail();
-                /** @var \Magento\Newsletter\Model\Subscriber $subscriber */
-                $subscriber = $this->subscriberFactory->create();
-                $subscriber->subscribe($email);
+                $this->subscriptionManager->subscribe($email, $order->getStoreId());
             } catch (\Exception $e) {}
         }
 

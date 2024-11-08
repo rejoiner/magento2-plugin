@@ -1,2 +1,9 @@
-<?php /* @var \Rejoiner\Acr\Block\Product $block */?>
+<?php
+/**
+ * @var Product $block
+ */
+
+use Rejoiner\Acr\Block\Product;
+
+?>
 "trackProductView": <?php /* @escapeNotVerified */  echo json_encode($block->getCurrentProductInfo(), JSON_UNESCAPED_SLASHES); ?>

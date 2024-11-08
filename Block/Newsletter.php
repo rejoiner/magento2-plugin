@@ -1,61 +1,67 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright © 2017 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Block;
 
-class Newsletter extends \Magento\Framework\View\Element\Template
+use Magento\Framework\View\Element\Template;
+use Magento\Framework\View\Element\Template\Context;
+use Rejoiner\Acr\Helper\Data;
+
+class Newsletter extends Template
 {
-    const DEFAULT_LABEL = 'Sign Up for Newsletter';
+    private const DEFAULT_LABEL = 'Sign Up for Newsletter';
 
     /**
      * @var string
      */
-    protected $label;
+    protected string $label = '';
 
     /**
      * @var string
      */
-    protected $cssClass;
+    protected string $cssClass = '';
 
     /**
      * @var string
      */
-    protected $styles;
+    protected string $styles = '';
 
     /**
      * @var array
      */
-    protected $checkboxSelectors = [
+    protected array $checkboxSelectors = [
         'body .newsletter [name=is_subscribed]',
         'body .form-newsletter-manage #subscription'
     ];
 
     /**
-     * @var \Rejoiner\Acr\Helper\Data
+     * @var ?Data
      */
-    protected $rejoinerHelper;
+    protected ?Data $rejoinerHelper;
 
     /**
      * Newsletter constructor.
-     * @param \Rejoiner\Acr\Helper\Data $rejoinerHelper
-     * @param \Magento\Framework\View\Element\Template\Context $context
+     * @param Data $rejoinerHelper
+     * @param Context $context
      * @param array $data
      */
     public function __construct(
-        \Rejoiner\Acr\Helper\Data $rejoinerHelper,
-        \Magento\Framework\View\Element\Template\Context $context,
+        Data $rejoinerHelper,
+        Context $context,
         array $data = []
     ) {
         $this->rejoinerHelper = $rejoinerHelper;
+
         parent::__construct($context, $data);
     }
 
     /**
      * @return bool
      */
-    public function isEnabled()
+    public function isEnabled(): bool
     {
         return $this->rejoinerHelper->getRejoinerMarketingPermissions();
     }
@@ -63,11 +69,11 @@ class Newsletter extends \Magento\Framework\View\Element\Template
     /**
      * @return string
      */
-    public function getLabel()
+    public function getLabel(): string
     {
         if (!$this->label) {
             $label = $this->rejoinerHelper->getRejoinerSubscribeCheckboxLabel();
-            $this->label = $label ? $label : __(self::DEFAULT_LABEL);
+            $this->label = $label ? : __(self::DEFAULT_LABEL);
         }
 
         return $this->label;
@@ -76,7 +82,7 @@ class Newsletter extends \Magento\Framework\View\Element\Template
     /**
      * @return bool
      */
-    public function isLabelChanged()
+    public function isLabelChanged(): bool
     {
         return $this->getLabel() != self::DEFAULT_LABEL;
     }
@@ -84,7 +90,7 @@ class Newsletter extends \Magento\Framework\View\Element\Template
     /**
      * @return string
      */
-    public function getCssClass()
+    public function getCssClass(): string
     {
         if (!$this->cssClass) {
             $this->cssClass = $this->rejoinerHelper->getRejoinerSubscribeCheckboxSelector();
@@ -96,7 +102,7 @@ class Newsletter extends \Magento\Framework\View\Element\Template
     /**
      * @return string
      */
-    public function getStyles()
+    public function getStyles(): string
     {
         if (!$this->styles) {
             $this->styles = $this->rejoinerHelper->getRejoinerSubscribeCheckboxStyle();
@@ -108,7 +114,7 @@ class Newsletter extends \Magento\Framework\View\Element\Template
     /**
      * @return string
      */
-    public function getCheckboxSelectors()
+    public function getCheckboxSelectors(): string
     {
         return implode(',', $this->checkboxSelectors);
     }
@@ -116,7 +122,7 @@ class Newsletter extends \Magento\Framework\View\Element\Template
     /**
      * @return bool
      */
-    public function hideInCustomerAccount()
+    public function hideInCustomerAccount(): bool
     {
         return !$this->rejoinerHelper->getRejoinerSubscribeCustomerAccount();
     }
@@ -124,7 +130,7 @@ class Newsletter extends \Magento\Framework\View\Element\Template
     /**
      * @return bool
      */
-    public function showOnLoginCheckout()
+    public function showOnLoginCheckout(): bool
     {
         return $this->rejoinerHelper->getRejoinerSubscribeLoginCheckout();
     }
@@ -132,7 +138,7 @@ class Newsletter extends \Magento\Framework\View\Element\Template
     /**
      * @return bool
      */
-    public function showOnGuestCheckout()
+    public function showOnGuestCheckout(): bool
     {
         return $this->rejoinerHelper->getRejoinerSubscribeGuestCheckout();
     }
@@ -140,7 +146,7 @@ class Newsletter extends \Magento\Framework\View\Element\Template
     /**
      * @return bool
      */
-    public function shouldBeCheckedByDefault()
+    public function shouldBeCheckedByDefault(): bool
     {
         return $this->rejoinerHelper->getRejoinerSubscribeCheckedDefault();
     }
@@ -148,10 +154,10 @@ class Newsletter extends \Magento\Framework\View\Element\Template
     /**
      * @return array
      */
-    public function getConfig()
+    public function getConfig(): array
     {
         return [
-            'label' => $this->getLabel() ? $this->getLabel() : self::DEFAULT_LABEL,
+            'label' => $this->getLabel() ? : self::DEFAULT_LABEL,
             'show_on_guest_checkout'   => (int) $this->showOnGuestCheckout(),
             'show_on_login_checkout'   => (int) $this->showOnLoginCheckout(),
             'checked_by_default'       => (int) $this->shouldBeCheckedByDefault(),

@@ -22,4 +22,9 @@
         </arguments>
     </type>
 
+    <type name="Rejoiner\Acr\Helper\Customer">
+        <arguments>
+            <argument name="session" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
+        </arguments>
+    </type>
 </config>

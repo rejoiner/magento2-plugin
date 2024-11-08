@@ -5,43 +5,49 @@
  */
 namespace Rejoiner\Acr\Observer;
 
+use Magento\Customer\Model\Session;
+use Magento\Framework\App\RequestInterface;
+use Magento\Framework\Serialize\SerializerInterface;
+use Magento\Newsletter\Model\SubscriptionManager;
+use Rejoiner\Acr\Helper\Data;
+
 class CustomerLoginObserver implements \Magento\Framework\Event\ObserverInterface
 {
-    /** @var \Rejoiner\Acr\Helper\Data $rejoinerHelper */
-    private $rejoinerHelper;
+    /** @var Data $rejoinerHelper */
+    private Data $rejoinerHelper;
 
-    /** @var \Magento\Framework\App\RequestInterface $request */
-    private $request;
+    /** @var RequestInterface $request */
+    private RequestInterface $request;
 
-    /** @var \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory */
-    private $subscriberFactory;
+    /** @var SubscriptionManager $subscriptionManager */
+    private SubscriptionManager $subscriptionManager;
 
-    /** @var \Magento\Customer\Model\Session $customerSession */
-    private $customerSession;
+    /** @var Session $customerSession */
+    private Session $customerSession;
 
-    /** @var \Magento\Framework\Json\Helper\Data $jsonHelper */
-    private $jsonHelper;
+    /** @var SerializerInterface $serializer */
+    private SerializerInterface $serializer;
 
     /**
      * CustomerLoginObserver constructor.
-     * @param \Rejoiner\Acr\Helper\Data $rejoinerHelper
-     * @param \Magento\Framework\App\RequestInterface $request
-     * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
-     * @param \Magento\Customer\Model\Session $customerSession
-     * @param \Magento\Framework\Json\Helper\Data $jsonHelper
+     * @param Data $rejoinerHelper
+     * @param RequestInterface $request
+     * @param SubscriptionManager $subscriptionManager
+     * @param Session $customerSession
+     * @param SerializerInterface $serializer
      */
     public function __construct(
-        \Rejoiner\Acr\Helper\Data $rejoinerHelper,
-        \Magento\Framework\App\RequestInterface $request,
-        \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory,
-        \Magento\Customer\Model\Session $customerSession,
-        \Magento\Framework\Json\Helper\Data $jsonHelper
+        Data $rejoinerHelper,
+        RequestInterface $request,
+        SubscriptionManager $subscriptionManager,
+        Session $customerSession,
+        SerializerInterface $serializer
     ) {
         $this->rejoinerHelper = $rejoinerHelper;
         $this->request = $request;
-        $this->subscriberFactory = $subscriberFactory;
+        $this->subscriptionManager = $subscriptionManager;
         $this->customerSession = $customerSession;
-        $this->jsonHelper = $jsonHelper;
+        $this->serializer = $serializer;
     }
 
     /**
@@ -51,11 +57,8 @@ class CustomerLoginObserver implements \Magento\Framework\Event\ObserverInterfac
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         if ($this->customerSession->isLoggedIn() && $this->rejoinerHelper->getRejoinerSubscribeLoginCheckout() && $this->isSubscribe()) {
-            /** @var \Magento\Customer\Model\Customer $customer */
             $customer = $observer->getData('customer');
-            /** @var \Magento\Newsletter\Model\Subscriber $subscriber */
-            $subscriber = $this->subscriberFactory->create();
-            $subscriber->subscribe($customer->getEmail());
+            $this->subscriptionManager->subscribe($customer->getEmail(), $customer->getStoreId());
         }
     }
 
@@ -69,7 +72,7 @@ class CustomerLoginObserver implements \Magento\Framework\Event\ObserverInterfac
             $subscribe = true;
         } else {
             try {
-                $credentials = $this->jsonHelper->jsonDecode($this->request->getContent());
+                $credentials = $this->serializer->unserialize($this->request->getContent());
                 $subscribe   = isset($credentials['rejoiner_subscription']) && $credentials['rejoiner_subscription'];
             } catch (\Exception $e) {}
         }

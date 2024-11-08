@@ -1,58 +1,96 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright © 2017 Rejoiner. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Rejoiner\Acr\Controller\Addbysku;
 
-class Index extends \Magento\Framework\App\Action\Action
+use Exception;
+use Magento\Catalog\Model\Product;
+use Magento\Catalog\Model\ProductFactory;
+use Magento\CatalogInventory\Api\Data\StockItemInterfaceFactory;
+use Magento\CatalogInventory\Model\ResourceModel\Stock\ItemFactory;
+use Magento\Checkout\Model\CartFactory;
+use Magento\Checkout\Model\Session;
+use Magento\Framework\App\Action\HttpGetActionInterface;
+use Magento\Framework\App\RequestInterface;
+use Magento\Framework\Controller\Result\Redirect;
+use Magento\Framework\Controller\Result\RedirectFactory;
+use Magento\Framework\Escaper;
+use Magento\Framework\Message\ManagerInterface;
+use Magento\Framework\UrlInterface;
+use Magento\Quote\Api\CartRepositoryInterface;
+use Magento\Store\Model\StoreManagerInterface;
+use Rejoiner\Acr\Helper\Data;
+
+class Index implements HttpGetActionInterface //extends Action
 {
-    /** @var \Magento\Checkout\Model\Session $checkoutSession */
-    protected $checkoutSession;
+    /** @var Session $checkoutSession */
+    protected Session $checkoutSession;
 
-    /** @var \Rejoiner\Acr\Helper\Data $rejoinerHelper */
-    protected $rejoinerHelper;
+    /** @var Data $rejoinerHelper */
+    protected Data $rejoinerHelper;
 
-    /** @var \Magento\Checkout\Model\CartFactory $cartFactory */
-    protected $cartFactory;
+    /** @var CartFactory $cartFactory */
+    protected CartFactory $cartFactory;
 
-    /** @var \Magento\CatalogInventory\Api\Data\StockItemInterfaceFactory $stockItemApiFactory */
-    protected $stockItemApiFactory;
+    /** @var StockItemInterfaceFactory $stockItemApiFactory */
+    protected StockItemInterfaceFactory $stockItemApiFactory;
 
-    /** @var \Magento\CatalogInventory\Model\ResourceModel\Stock\ItemFactory $stockItemApiResourceFactory */
-    protected $stockItemApiResourceFactory;
+    /** @var ItemFactory $stockItemApiResourceFactory */
+    protected ItemFactory $stockItemApiResourceFactory;
 
-    /** @var \Magento\Store\Model\StoreManagerInterface $storeManager */
-    protected $storeManager;
+    /** @var StoreManagerInterface $storeManager */
+    protected StoreManagerInterface $storeManager;
 
-    /** @var \Magento\Catalog\Model\ProductFactory $productFactory */
-    protected $productFactory;
+    /** @var ProductFactory $productFactory */
+    protected ProductFactory $productFactory;
 
-    /** @var \Magento\Framework\Escaper $escaper */
-    protected $escaper;
+    /** @var Escaper $escaper */
+    protected Escaper $escaper;
+
+    /** @var RequestInterface $request */
+    private RequestInterface $request;
+
+    /** @var Redirect $resultRedirect */
+    private Redirect $resultRedirect;
+
+    /** @var UrlInterface $urlBuilder */
+    private UrlInterface $urlBuilder;
+
+    /** @var ManagerInterface $messageManager */
+    private ManagerInterface $messageManager;
+
+    private CartRepositoryInterface $cartRepository;
 
     /**
      * Index constructor.
-     * @param \Magento\Checkout\Model\Session $checkoutSession
-     * @param \Rejoiner\Acr\Helper\Data $rejoinerHelper
-     * @param \Magento\Checkout\Model\CartFactory $cartFactory
-     * @param \Magento\CatalogInventory\Model\ResourceModel\Stock\ItemFactory $stockItemApiResourceFactory
-     * @param \Magento\CatalogInventory\Api\Data\StockItemInterfaceFactory $stockItemApiFactory
-     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
-     * @param \Magento\Catalog\Model\ProductFactory $productFactory
-     * @param \Magento\Framework\Escaper $escaper
-     * @param \Magento\Framework\App\Action\Context $context
+     * @param Session $checkoutSession
+     * @param Data $rejoinerHelper
+     * @param CartFactory $cartFactory
+     * @param ItemFactory $stockItemApiResourceFactory
+     * @param StockItemInterfaceFactory $stockItemApiFactory
+     * @param StoreManagerInterface $storeManager
+     * @param ProductFactory $productFactory
+     * @param Escaper $escaper
+     * @param RequestInterface $request
+     * @param RedirectFactory $resultRedirectFactory
      */
     public function __construct(
-        \Magento\Checkout\Model\Session $checkoutSession,
-        \Rejoiner\Acr\Helper\Data $rejoinerHelper,
-        \Magento\Checkout\Model\CartFactory $cartFactory,
-        \Magento\CatalogInventory\Model\ResourceModel\Stock\ItemFactory $stockItemApiResourceFactory,
-        \Magento\CatalogInventory\Api\Data\StockItemInterfaceFactory $stockItemApiFactory,
-        \Magento\Store\Model\StoreManagerInterface $storeManager,
-        \Magento\Catalog\Model\ProductFactory $productFactory,
-        \Magento\Framework\Escaper $escaper,
-        \Magento\Framework\App\Action\Context $context
+        Session $checkoutSession,
+        Data $rejoinerHelper,
+        CartFactory $cartFactory,
+        ItemFactory $stockItemApiResourceFactory,
+        StockItemInterfaceFactory $stockItemApiFactory,
+        StoreManagerInterface $storeManager,
+        ProductFactory $productFactory,
+        Escaper $escaper,
+        RequestInterface $request,
+        RedirectFactory $resultRedirectFactory,
+        UrlInterface $urlBuilder,
+        ManagerInterface $messageManager,
+        CartRepositoryInterface $cartRepository
     ) {
         $this->checkoutSession       = $checkoutSession;
         $this->rejoinerHelper        = $rejoinerHelper;
@@ -62,13 +100,16 @@ class Index extends \Magento\Framework\App\Action\Action
         $this->storeManager          = $storeManager;
         $this->productFactory        = $productFactory;
         $this->escaper               = $escaper;
-        parent::__construct($context);
+        $this->request               = $request;
+        $this->resultRedirect        = $resultRedirectFactory->create();
+        $this->urlBuilder            = $urlBuilder;
+        $this->messageManager        = $messageManager;
+        $this->cartRepository        = $cartRepository;
     }
 
     public function execute()
     {
-        $params = $this->getRequest()->getParams();
-        /** @var \Magento\Checkout\Model\Cart $cart */
+        $params = $this->request->getParams();
         $cart = $this->cartFactory->create();
         $successMessage = '';
         $websiteId = $this->storeManager->getStore()->getWebsiteId();
@@ -78,44 +119,51 @@ class Index extends \Magento\Framework\App\Action\Action
                 $productModel = $this->productFactory->create();
                 // loadByAttribute() return false if the product was not found. There is no need to check the ID,
                 // but lets stay on the safe side for the future Magento releases
-                /** @var \Magento\Catalog\Model\Product $productBySKU */
+                /** @var Product $productBySKU */
                 $productBySKU = $productModel->loadByAttribute('sku', $product['sku']);
+
                 if (!$productBySKU || !$productId = $productBySKU->getId()) {
                     continue;
                 }
+
                 $stockItem = $this->stockItemApiFactory->create();
-                /** @var \Magento\CatalogInventory\Model\ResourceModel\Stock\Item $stockItemResource */
                 $stockItemResource = $this->stockItemApiResourceFactory->create();
                 $stockItemResource->loadByProductId($stockItem, $productId, $websiteId);
                 $qty = $stockItem->getQty();
+
                 try {
                     if (!$cart->getQuote()->hasProductId($productId) && is_numeric($product['qty']) && $qty > $product['qty']) {
                         $cart->addProduct($productBySKU, (int) $product['qty']);
                         $successMessage .= __('%1 was added to your shopping cart.'.'</br>', $this->escaper->escapeHtml($productBySKU->getName()));
                     }
+
                     unset($params[$key]);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $this->rejoinerHelper->log($e->getMessage());
                 }
             }
         }
+
         if (isset($params['coupon_code'])) {
             $cart->getQuote()->setCouponCode($params['coupon_code'])->collectTotals();
         }
+
         try {
-            $cart->getQuote()->save();
+            $this->cartRepository->save($cart->getQuote());
             $cart->save();
-        }  catch (\Exception $e) {
+        }  catch (Exception $e) {
             $this->rejoinerHelper->log($e->getMessage());
         }
 
         $this->checkoutSession->setCartWasUpdated(true);
 
         if ($successMessage) {
-            $this->messageManager->addSuccess($successMessage);
+            $this->messageManager->addSuccessMessage($successMessage);
         }
 
-        $url = $this->_url->getUrl('checkout/cart/', ['updateCart' => true]);
-        $this->getResponse()->setRedirect($url);
+        $url = $this->urlBuilder->getUrl('checkout/cart/', ['updateCart' => true]);
+        $this->resultRedirect->setUrl($url);
+
+        return $this->resultRedirect;
     }
 }

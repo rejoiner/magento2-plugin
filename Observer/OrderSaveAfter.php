@@ -5,46 +5,50 @@
  */
 namespace Rejoiner\Acr\Observer;
 
-class OrderSaveAfter implements \Magento\Framework\Event\ObserverInterface
+use Exception;
+use Magento\Checkout\Model\Session;
+use Magento\Framework\Event\Observer;
+use Magento\Framework\Event\ObserverInterface;
+use Magento\Newsletter\Model\SubscriptionManager;
+use Rejoiner\Acr\Helper\Data;
+
+class OrderSaveAfter implements ObserverInterface
 {
-    /** @var \Rejoiner\Acr\Helper\Data $rejoinerHelper */
-    private $rejoinerHelper;
+    /** @var Data $rejoinerHelper */
+    private Data $rejoinerHelper;
 
-    /** @var \Magento\Checkout\Model\Session $session */
-    private $session;
+    /** @var Session $session */
+    private Session $session;
 
-    /** @var \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory */
-    private $subscriberFactory;
+    /** @var SubscriptionManager $subscriptionManager */
+    private SubscriptionManager $subscriptionManager;
 
     /**
      * ShippingInformationManagementPlugin constructor.
-     * @param \Rejoiner\Acr\Helper\Data $rejoinerHelper
-     * @param \Magento\Checkout\Model\Session $session
-     * @param \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
+     * @param Data $rejoinerHelper
+     * @param Session $session
+     * @param SubscriptionManager $subscriptionManager
      */
     public function __construct(
-        \Rejoiner\Acr\Helper\Data $rejoinerHelper,
-        \Magento\Checkout\Model\Session $session,
-        \Magento\Newsletter\Model\SubscriberFactory $subscriberFactory
+        Data $rejoinerHelper,
+        Session $session,
+        SubscriptionManager $subscriptionManager
     ) {
         $this->rejoinerHelper = $rejoinerHelper;
         $this->session = $session;
-        $this->subscriberFactory = $subscriberFactory;
+        $this->subscriptionManager = $subscriptionManager;
     }
 
     /**
-     * @param \Magento\Framework\Event\Observer $observer
+     * @param Observer $observer
      */
-    public function execute(\Magento\Framework\Event\Observer $observer)
+    public function execute(Observer $observer)
     {
         if ($this->session->getData('rejoiner_subscribe')) {
             try {
-                /** @var \Magento\Sales\Model\Order $order */
                 $order = $observer->getData('order');
-                /** @var \Magento\Newsletter\Model\Subscriber $subscriber */
-                $subscriber = $this->subscriberFactory->create();
-                $subscriber->subscribe($order->getCustomerEmail());
-            } catch (\Exception $e) {}
+                $this->subscriptionManager->subscribe($order->getCustomerEmail(), $order->getStoreId());
+            } catch (Exception $e) {}
             $this->session->unsRejoinerSubscribe();
         }
     }
