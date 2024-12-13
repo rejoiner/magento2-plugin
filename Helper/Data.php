@@ -78,14 +78,15 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     /** @var \Magento\Framework\App\Request\Http $request */
     private $request;
+
     /**
-     * Data constructor.
      * @param \Magento\SalesRule\Model\CouponFactory $couponFactory
      * @param \Magento\SalesRule\Model\Coupon\CodegeneratorFactory $codegeneratorFactory
      * @param \Magento\SalesRule\Model\RuleFactory $ruleFactory
      * @param \Magento\Checkout\Model\Session $checkoutSession
      * @param \Magento\Framework\Session\SessionManager $sessionManager
-     * @param \Magento\Framework\HTTP\ZendClientFactory $httpClient
+     * @param \Laminas\Http\ClientFactory $httpClient
+     * @param \Magento\Framework\App\Request\Http $request
      * @param \Monolog\Logger $logger
      * @param Serializer $serializer
      * @param \Magento\Framework\App\Helper\Context $context
@@ -96,7 +97,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\SalesRule\Model\RuleFactory $ruleFactory,
         \Magento\Checkout\Model\Session $checkoutSession,
         \Magento\Framework\Session\SessionManager $sessionManager,
-        \Magento\Framework\HTTP\ZendClientFactory $httpClient,
+        \Laminas\Http\ClientFactory $httpClient,
         \Magento\Framework\App\Request\Http $request,
         \Monolog\Logger $logger,
         Serializer $serializer,
@@ -689,12 +690,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             throw new \Exception($error);
         }
 
-        $requestBody   = utf8_encode(json_encode($data));
+        $requestBody   = mb_convert_encoding(json_encode($data), 'UTF-8', 'ISO-8859-1');
         $requestPath   = sprintf($path, $siteId);
         $authorization = sprintf('Rejoiner %s', $apiKey);
 
         if ($rejoinerVersion == self::REJOINER_VERSION_1) {
-            $apiSecret = utf8_encode($this->scopeConfig->getValue(self::XML_PATH_REJOINER_API_SECRET));
+            $apiSecret = mb_convert_encoding($this->scopeConfig->getValue(self::XML_PATH_REJOINER_API_SECRET), 'UTF-8', 'ISO-8859-1');
 
             if (!$apiSecret) {
                 $error = 'Missing API secret';
@@ -702,30 +703,30 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 throw new \Exception($error);
             }
 
-            $hmacData       = utf8_encode(implode("\n", [\Laminas\Http\Request::METHOD_POST, $requestPath, $requestBody]));
+            $hmacData       = mb_convert_encoding(implode("\n", [\Laminas\Http\Request::METHOD_POST, $requestPath, $requestBody]), 'UTF-8', 'ISO-8859-1');
             $codedApiSecret = base64_encode(hash_hmac('sha1', $hmacData, $apiSecret, true));
             $authorization  = sprintf('Rejoiner %s:%s', $apiKey, $codedApiSecret);
         }
 
-        /** @var \Magento\Framework\HTTP\ZendClient $client */
+        /** @var \Laminas\Http\Client $client */
         $rejoinerApiUri = $this->getRejoinerApiUri();
         $client = $this->httpClient->create(['uri' => $rejoinerApiUri . $requestPath]);
-        $client->setRawData($requestBody);
+        $client->setRawBody($requestBody);
         $client->setHeaders(['Authorization' => $authorization, 'Content-type' => 'application/json;']);
 
         return $client;
     }
 
     /**
-     * @param \Magento\Framework\HTTP\ZendClient $client
+     * @param \Laminas\Http\Client $client
      * @return int
      * @throws \Exception
      */
-    private function sendRequest(\Magento\Framework\HTTP\ZendClient $client)
+    private function sendRequest(\Laminas\Http\Client $client)
     {
         try {
-            $response = $client->request(\Laminas\Http\Request::METHOD_POST);
-            $responseCode = $response->getStatus();
+            $response = $client->setMethod(\Laminas\Http\Request::METHOD_POST);
+            $responseCode = $response->send()->getStatusCode();
         } catch (\Exception $e) {
             $this->log($e->getMessage());
             $responseCode = 000;

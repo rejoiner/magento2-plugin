@@ -16,17 +16,6 @@ use DateTime;
 
 class TrackOrderSuccessConversion
 {
-    /** @var Data $rejoinerHelper */
-    protected Data $rejoinerHelper;
-
-    /** @var CollectionFactory $collectionFactory */
-    private CollectionFactory $collectionFactory;
-
-    /** @var OrderFactory $_orderFactory */
-    protected OrderFactory $orderFactory;
-
-    private OrderRepositoryInterface $orderRepository;
-
     /**
      * @param CollectionFactory $collectionFactory
      * @param OrderFactory $orderFactory
@@ -34,15 +23,11 @@ class TrackOrderSuccessConversion
      * @param OrderRepositoryInterface $orderRepository
      */
     public function __construct(
-        CollectionFactory $collectionFactory,
-        OrderFactory $orderFactory,
-        Data $rejoinerHelper,
-        OrderRepositoryInterface $orderRepository
+        private   CollectionFactory $collectionFactory,
+        protected OrderFactory $orderFactory,
+        protected Data $rejoinerHelper,
+        private   OrderRepositoryInterface $orderRepository
     ) {
-        $this->rejoinerHelper    = $rejoinerHelper;
-        $this->collectionFactory = $collectionFactory;
-        $this->orderFactory      = $orderFactory;
-        $this->orderRepository   = $orderRepository;
     }
 
     /**
