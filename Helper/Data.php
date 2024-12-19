@@ -739,6 +739,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             case '400':
                 $error = $responseCode . ': required params were not specified and/or the body was malformed';
                 $this->log($error, true);
+                $this->log($response->getBody(), true);
                 throw new \Exception($error);
                 break;
             case '403':
