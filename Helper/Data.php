@@ -725,8 +725,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private function sendRequest(\Laminas\Http\Client $client)
     {
         try {
-            $response = $client->setMethod(\Laminas\Http\Request::METHOD_POST);
-            $responseCode = $response->send()->getStatusCode();
+            $req = $client->setMethod(\Laminas\Http\Request::METHOD_POST);
+            $res = $req->send();
+            $responseCode = $res->getStatusCode();
         } catch (\Exception $e) {
             $this->log($e->getMessage());
             $responseCode = 000;
@@ -739,7 +740,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             case '400':
                 $error = $responseCode . ': required params were not specified and/or the body was malformed';
                 $this->log($error, true);
-                $this->log($response->getBody(), true);
+                $this->log($res->getBody(), true);
                 throw new \Exception($error);
                 break;
             case '403':
