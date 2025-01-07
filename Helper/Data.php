@@ -550,16 +550,15 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function sendInfoToRejoiner(Order $orderModel): int
     {
         try {
-            $customerEmail = $orderModel->getBillingAddress()->getEmail();
+            $customerEmail = $orderModel->getCustomerEmail();
             $this->convert($customerEmail);
 
             $passNewCustomers = $this->scopeConfig->getValue(self::XML_PATH_REJOINER_PASS_NEW_CUSTOMERS);
             $listId = $this->scopeConfig->getValue(self::XML_PATH_REJOINER_LIST_ID);
 
             if ($passNewCustomers && $listId) {
-                $email = $orderModel->getCustomerEmail();
-                $customerName = $orderModel->getBillingAddress()->getFirstname();
-                $this->addToList($listId, $email, $customerName);
+                $customerName = $orderModel->getCustomerFirstname();
+                $this->addToList($listId, $customerEmail, $customerName);
             }
 
             return self::SUCCESS_RESPONSE_CODE;
