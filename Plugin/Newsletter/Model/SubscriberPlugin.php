@@ -5,41 +5,34 @@
  */
 namespace Rejoiner\Acr\Plugin\Newsletter\Model;
 
+use Magento\Customer\Model\CustomerRegistry;
 use Rejoiner\Acr\Helper\Data as RejoinerHelper;
 use Magento\Newsletter\Model\Subscriber;
 
 class SubscriberPlugin
 {
-    /** @var RejoinerHelper $rejoinerHelper */
-    private $rejoinerHelper;
-
-    /** @var \Magento\Customer\Model\CustomerRegistry $customerRegistry */
-    private $customerRegistry;
 
     /**
      * SubscriberPlugin constructor.
      * @param RejoinerHelper $rejoinerHelper
-     * @param \Magento\Customer\Model\CustomerRegistry $customerRegistry
+     * @param CustomerRegistry $customerRegistry
      */
     public function __construct(
-        RejoinerHelper $rejoinerHelper,
-        \Magento\Customer\Model\CustomerRegistry $customerRegistry
+        private RejoinerHelper $rejoinerHelper,
+        private CustomerRegistry $customerRegistry
     ) {
-        $this->rejoinerHelper = $rejoinerHelper;
-        $this->customerRegistry = $customerRegistry;
     }
 
     /**
      * @param Subscriber $subscriber
      */
-    public function beforeSave(Subscriber $subscriber)
+    public function beforeSave(Subscriber $subscriber): void
     {
         if ($this->rejoinerHelper->getRejoinerMarketingPermissions() && $this->isStatusChanged($subscriber)) {
             try {
                 if ($subscriber->getStatus() == Subscriber::STATUS_SUBSCRIBED) {
                     $customerName = '';
                     if ($customerId = $subscriber->getCustomerId()) {
-                        /** @var \Magento\Customer\Model\Customer $customer */
                         $customer = $this->customerRegistry->retrieve($customerId);
                         $customerName = $customer->getData('firstname') ? $customer->getData('firstname') : '';
                     }
@@ -57,7 +50,7 @@ class SubscriberPlugin
      * @param Subscriber $subscriber
      * @return bool
      */
-    private function isStatusChanged(Subscriber $subscriber)
+    private function isStatusChanged(Subscriber $subscriber): bool
     {
         $changed = false;
         if ($subscriber->isStatusChanged()) {

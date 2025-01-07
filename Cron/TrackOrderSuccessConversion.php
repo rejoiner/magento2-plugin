@@ -45,14 +45,15 @@ class TrackOrderSuccessConversion
             foreach ($collection as $successOrder) {
                 try {
                     $orderModel = $this->orderRepository->get($successOrder->getId());
+                    $responseCode = $this->rejoinerHelper->sendInfoToRejoiner($orderModel);
+                    $successOrder->setResponseCode($responseCode);
+                    $dateTimeObj = new DateTime('now');
+                    $successOrder->setSentAt($dateTimeObj->format('Y-m-d H:i:s'));
+                    $successOrder->save();
                 } catch (NoSuchEntityException $e) {
-                    $orderModel = $this->orderFactory->create();
+                    $this->rejoinerHelper->log($e->getMessage());
+                    return $this;
                 }
-                $responseCode = $this->rejoinerHelper->sendInfoToRejoiner($orderModel);
-                $successOrder->setResponseCode($responseCode);
-                $dateTimeObj = new DateTime('now');
-                $successOrder->setSentAt($dateTimeObj->format('Y-m-d H:i:s'));
-                $successOrder->save();
             }
         }
         return $this;

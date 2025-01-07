@@ -5,46 +5,48 @@
  */
 namespace Rejoiner\Acr\Observer;
 
+use Magento\Framework\App\RequestInterface;
+use Magento\Framework\Event\Observer;
+use Magento\Framework\Exception\InputException;
+use Magento\Framework\Stdlib\Cookie\CookieMetadataFactory;
+use Magento\Framework\Stdlib\Cookie\CookieSizeLimitReachedException;
+use Magento\Framework\Stdlib\Cookie\FailureToSendException;
+use Magento\Framework\Stdlib\Cookie\PhpCookieManager;
+
 class ControllerActionPredispatch implements \Magento\Framework\Event\ObserverInterface
 {
-    /** @var \Magento\Framework\Stdlib\Cookie\CookieMetadataFactory $_cookieMetadataFactory */
-    private $_cookieMetadataFactory;
-
-    /** @var \Magento\Framework\Stdlib\Cookie\PhpCookieManager $_cookieManager */
-    private $_cookieManager;
-
     /**
-     * ControllerActionPredispatch constructor.
-     * @param \Magento\Framework\Stdlib\Cookie\CookieMetadataFactory $cookieMetadataFactory
-     * @param \Magento\Framework\Stdlib\Cookie\PhpCookieManager $cookieManager
+     * @param CookieMetadataFactory $cookieMetadataFactory
+     * @param PhpCookieManager $cookieManager
      */
     public function __construct(
-        \Magento\Framework\Stdlib\Cookie\CookieMetadataFactory $cookieMetadataFactory,
-        \Magento\Framework\Stdlib\Cookie\PhpCookieManager $cookieManager
+        private CookieMetadataFactory $cookieMetadataFactory,
+        private PhpCookieManager $cookieManager
     ) {
-        $this->_cookieMetadataFactory = $cookieMetadataFactory;
-        $this->_cookieManager         = $cookieManager;
     }
 
     /**
-     * @param \Magento\Framework\Event\Observer $observer
+     * @param Observer $observer
+     * @return void
+     * @throws InputException
+     * @throws CookieSizeLimitReachedException
+     * @throws FailureToSendException
      */
-    public function execute(\Magento\Framework\Event\Observer $observer)
+    public function execute(Observer $observer): void
     {
-        /** @var \Magento\Framework\App\RequestInterface $request */
+        /** @var RequestInterface $request */
         $request = $observer->getData('request');
         if ($request->getModuleName() == 'checkout'
             && $request->getControllerName() == 'cart'
             && $request->getActionName() == 'index'
             && $request->getParam('updateCart')
         ) {
-            $cookiesManager = $this->_cookieManager;
-            $publicCookieMetadata = $this->_cookieMetadataFactory->createPublicCookieMetadata()
+            $publicCookieMetadata = $this->cookieMetadataFactory->createPublicCookieMetadata()
                 ->setPath('/');
-            $sectionDataIds = json_decode($cookiesManager->getCookie('section_data_ids'));
+            $sectionDataIds = json_decode($this->cookieManager->getCookie('section_data_ids'));
             if ($sectionDataIds && isset($sectionDataIds->cart)) {
                 $sectionDataIds->cart += 1000;
-                $cookiesManager->setPublicCookie('section_data_ids', json_encode($sectionDataIds), $publicCookieMetadata);
+                $this->cookieManager->setPublicCookie('section_data_ids', json_encode($sectionDataIds), $publicCookieMetadata);
             }
         }
     }

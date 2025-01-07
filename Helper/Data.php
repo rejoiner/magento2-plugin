@@ -5,115 +5,91 @@
  */
 namespace Rejoiner\Acr\Helper;
 
+use Laminas\Http\Client;
+use Laminas\Http\ClientFactory;
+use Magento\Catalog\Model\Product;
+use Magento\Checkout\Model\Session;
+use Magento\Framework\App\Helper\Context;
+use Magento\Framework\App\Request\Http;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Session\SessionManager;
 use Magento\Sales\Model\Order;
+use Magento\SalesRule\Model\Coupon\CodegeneratorFactory;
+use Magento\SalesRule\Model\CouponFactory;
+use Magento\SalesRule\Model\RuleFactory;
 use \Magento\Store\Model\ScopeInterface;
+use Monolog\Logger;
 
 class Data extends \Magento\Framework\App\Helper\AbstractHelper
 {
-    const XML_PATH_REJOINER_ENABLED                         = 'checkout/rejoiner_acr/enabled';
-    const XML_PATH_REJOINER_SITE_ID                        = 'checkout/rejoiner_acr/site_id';
-    const XML_PATH_REJOINER_DOMAIN                         = 'checkout/rejoiner_acr/domain';
-    const XML_PATH_REJOINER_TRACK_NUMBERS                  = 'checkout/rejoiner_acr/track_numbers';
-    const XML_PATH_REJOINER_TRACK_PRICE_WITH_TAX           = 'checkout/rejoiner_acr/track_price_with_tax';
-    const XML_PATH_REJOINER_PERSIST_FORMS                  = 'checkout/rejoiner_acr/persist_forms';
-    const XML_PATH_REJOINER_DEBUG_ENABLED                  = 'checkout/rejoiner_acr/debug_enabled';
-    const XML_PATH_REJOINER_API_KEY                        = 'checkout/rejoiner_acr/api_key';
-    const XML_PATH_REJOINER_API_SECRET                     = 'checkout/rejoiner_acr/api_secret';
-    const XML_PATH_REJOINER_API_SITE_ID                    = 'checkout/rejoiner_acr/site_id';
-    const XML_PATH_REJOINER_PROCESS_BY_CRON                = 'checkout/rejoiner_acr/process_by_cron';
-    const XML_PATH_REJOINER_COUPON_GENERATION              = 'checkout/rejoiner_acr/coupon_code';
-    const XML_PATH_REJOINER_COUPON_RULE                    = 'checkout/rejoiner_acr/salesrule_model';
-    const XML_PATH_REJOINER_THUMBNAIL_WIDTH                = 'checkout/rejoiner_acr/thumbnail_size_width';
-    const XML_PATH_REJOINER_THUMBNAIL_HEIGHT               = 'checkout/rejoiner_acr/thumbnail_size_height';
-    const XML_PATH_REJOINER_PASS_NEW_CUSTOMERS             = 'checkout/rejoiner_acr/passing_new_customers';
-    const XML_PATH_REJOINER_LIST_ID                        = 'checkout/rejoiner_acr/list_id';
-    const XML_PATH_REJOINER_MARKETING_PERMISSIONS          = 'checkout/rejoiner_acr/marketing_permissions';
-    const XML_PATH_REJOINER_MARKETING_LIST_ID              = 'checkout/rejoiner_acr/marketing_list_id';
-    const XML_PATH_REJOINER_SUBSCRIBE_GUEST_CHECKOUT       = 'checkout/rejoiner_acr/subscribe_checkout_onepage_index';
-    const XML_PATH_REJOINER_SUBSCRIBE_ACCOUNT_REGISTRATION = 'checkout/rejoiner_acr/subscribe_customer_account_create';
-    const XML_PATH_REJOINER_SUBSCRIBE_LOGIN_CHECKOUT       = 'checkout/rejoiner_acr/subscribe_customer_account_login';
-    const XML_PATH_REJOINER_SUBSCRIBE_CUSTOMER_ACCOUNT     = 'checkout/rejoiner_acr/subscribe_newsletter_manage_index';
-    const XML_PATH_REJOINER_SUBSCRIBE_CHECKBOX_DEFAULT     = 'checkout/rejoiner_acr/subscribe_checkbox_default';
-    const XML_PATH_REJOINER_SUBSCRIBE_CHECKBOX_LABEL       = 'checkout/rejoiner_acr/subscribe_checkbox_label';
-    const XML_PATH_REJOINER_SUBSCRIBE_CHECKBOX_SELECTOR    = 'checkout/rejoiner_acr/subscribe_checkbox_selector';
-    const XML_PATH_REJOINER_SUBSCRIBE_CHECKBOX_STYLE       = 'checkout/rejoiner_acr/subscribe_checkbox_style';
+    private const XML_PATH_REJOINER_ENABLED                         = 'checkout/rejoiner_acr/enabled';
+    private const XML_PATH_REJOINER_SITE_ID                        = 'checkout/rejoiner_acr/site_id';
+    private const XML_PATH_REJOINER_DOMAIN                         = 'checkout/rejoiner_acr/domain';
+    private const XML_PATH_REJOINER_TRACK_NUMBERS                  = 'checkout/rejoiner_acr/track_numbers';
+    private const XML_PATH_REJOINER_TRACK_PRICE_WITH_TAX           = 'checkout/rejoiner_acr/track_price_with_tax';
+    private const XML_PATH_REJOINER_PERSIST_FORMS                  = 'checkout/rejoiner_acr/persist_forms';
+    private const XML_PATH_REJOINER_DEBUG_ENABLED                  = 'checkout/rejoiner_acr/debug_enabled';
+    private const XML_PATH_REJOINER_API_KEY                        = 'checkout/rejoiner_acr/api_key';
+    private const XML_PATH_REJOINER_API_SECRET                     = 'checkout/rejoiner_acr/api_secret';
+    private const XML_PATH_REJOINER_API_SITE_ID                    = 'checkout/rejoiner_acr/site_id';
+    private const XML_PATH_REJOINER_PROCESS_BY_CRON                = 'checkout/rejoiner_acr/process_by_cron';
+    private const XML_PATH_REJOINER_COUPON_GENERATION              = 'checkout/rejoiner_acr/coupon_code';
+    private const XML_PATH_REJOINER_COUPON_RULE                    = 'checkout/rejoiner_acr/salesrule_model';
+    private const XML_PATH_REJOINER_THUMBNAIL_WIDTH                = 'checkout/rejoiner_acr/thumbnail_size_width';
+    private const XML_PATH_REJOINER_THUMBNAIL_HEIGHT               = 'checkout/rejoiner_acr/thumbnail_size_height';
+    private const XML_PATH_REJOINER_PASS_NEW_CUSTOMERS             = 'checkout/rejoiner_acr/passing_new_customers';
+    private const XML_PATH_REJOINER_LIST_ID                        = 'checkout/rejoiner_acr/list_id';
+    private const XML_PATH_REJOINER_MARKETING_PERMISSIONS          = 'checkout/rejoiner_acr/marketing_permissions';
+    private const XML_PATH_REJOINER_MARKETING_LIST_ID              = 'checkout/rejoiner_acr/marketing_list_id';
+    private const XML_PATH_REJOINER_SUBSCRIBE_GUEST_CHECKOUT       = 'checkout/rejoiner_acr/subscribe_checkout_onepage_index';
+    private const XML_PATH_REJOINER_SUBSCRIBE_ACCOUNT_REGISTRATION = 'checkout/rejoiner_acr/subscribe_customer_account_create';
+    private const XML_PATH_REJOINER_SUBSCRIBE_LOGIN_CHECKOUT       = 'checkout/rejoiner_acr/subscribe_customer_account_login';
+    private const XML_PATH_REJOINER_SUBSCRIBE_CUSTOMER_ACCOUNT     = 'checkout/rejoiner_acr/subscribe_newsletter_manage_index';
+    private const XML_PATH_REJOINER_SUBSCRIBE_CHECKBOX_DEFAULT     = 'checkout/rejoiner_acr/subscribe_checkbox_default';
+    private const XML_PATH_REJOINER_SUBSCRIBE_CHECKBOX_LABEL       = 'checkout/rejoiner_acr/subscribe_checkbox_label';
+    private const XML_PATH_REJOINER_SUBSCRIBE_CHECKBOX_SELECTOR    = 'checkout/rejoiner_acr/subscribe_checkbox_selector';
+    private const XML_PATH_REJOINER_SUBSCRIBE_CHECKBOX_STYLE       = 'checkout/rejoiner_acr/subscribe_checkbox_style';
 
-    const STATUS_SUBSCRIBED                                = 1;
-    const STATUS_UNSUBSCRIBED                              = 2;
+    private const STATUS_SUBSCRIBED                                = 1;
+    private const STATUS_UNSUBSCRIBED                              = 2;
 
-    const REJOINER2_SITE_ID_LENGTH                         = 7;
+    private const REJOINER2_SITE_ID_LENGTH                         = 7;
 
-    const REJOINER_VERSION_1                               = 'v1';
-    const REJOINER_VERSION_2                               = 'v2';
+    private const REJOINER_VERSION_1                               = 'v1';
+    private const REJOINER_VERSION_2                               = 'v2';
 
-    const REMOVED_CART_ITEM_SKU_VARIABLE        = 'rejoiner_sku';
+    public const REMOVED_CART_ITEM_SKU_VARIABLE                   = 'rejoiner_sku';
 
     private const SUCCESS_RESPONSE_CODE = 0;
 
     private const ERROR_RESPONSE_CODE = 1;
 
-    /** @var \Magento\Checkout\Model\Session $_checkoutSession */
-    private $checkoutSession;
-
-    /** @var \Magento\Framework\Session\SessionManager $sessionManager*/
-    private $sessionManager;
-
-    /** @var \Magento\Framework\HTTP\ZendClientFactory $httpClient */
-    private $httpClient;
-
-    /** @var \Monolog\Logger $logger */
-    private $logger;
-
-    /** @var \Magento\SalesRule\Model\RuleFactory $ruleFactory */
-    private $ruleFactory;
-
-    /** @var \Magento\SalesRule\Model\Coupon\CodegeneratorFactory $codegeneratorFactory */
-    private $codegeneratorFactory;
-
-    /** @var \Magento\SalesRule\Model\CouponFactory $couponFactory */
-    private $couponFactory;
-
-    /** @var Serializer */
-    private $serializer;
-
-    /** @var \Magento\Framework\App\Request\Http $request */
-    private $request;
-
     /**
-     * @param \Magento\SalesRule\Model\CouponFactory $couponFactory
-     * @param \Magento\SalesRule\Model\Coupon\CodegeneratorFactory $codegeneratorFactory
-     * @param \Magento\SalesRule\Model\RuleFactory $ruleFactory
-     * @param \Magento\Checkout\Model\Session $checkoutSession
-     * @param \Magento\Framework\Session\SessionManager $sessionManager
-     * @param \Laminas\Http\ClientFactory $httpClient
-     * @param \Magento\Framework\App\Request\Http $request
-     * @param \Monolog\Logger $logger
+     * @param CouponFactory $couponFactory
+     * @param CodegeneratorFactory $codegeneratorFactory
+     * @param RuleFactory $ruleFactory
+     * @param Session $checkoutSession
+     * @param SessionManager $sessionManager
+     * @param ClientFactory $httpClient
+     * @param Http $request
+     * @param Logger $logger
      * @param Serializer $serializer
-     * @param \Magento\Framework\App\Helper\Context $context
+     * @param Context $context
      */
     public function __construct(
-        \Magento\SalesRule\Model\CouponFactory $couponFactory,
-        \Magento\SalesRule\Model\Coupon\CodegeneratorFactory $codegeneratorFactory,
-        \Magento\SalesRule\Model\RuleFactory $ruleFactory,
-        \Magento\Checkout\Model\Session $checkoutSession,
-        \Magento\Framework\Session\SessionManager $sessionManager,
-        \Laminas\Http\ClientFactory $httpClient,
-        \Magento\Framework\App\Request\Http $request,
-        \Monolog\Logger $logger,
-        Serializer $serializer,
-        \Magento\Framework\App\Helper\Context $context
+        private CouponFactory $couponFactory,
+        private CodegeneratorFactory $codegeneratorFactory,
+        private RuleFactory $ruleFactory,
+        private Session $checkoutSession,
+        private SessionManager $sessionManager,
+        private ClientFactory $httpClient,
+        private Http $request,
+        private Logger $logger,
+        private Serializer $serializer,
+        Context $context
     ) {
-        $this->couponFactory        = $couponFactory;
-        $this->codegeneratorFactory = $codegeneratorFactory;
-        $this->ruleFactory          = $ruleFactory;
-        $this->checkoutSession      = $checkoutSession;
-        $this->sessionManager       = $sessionManager;
-        $this->logger               = $logger;
-        $this->httpClient           = $httpClient;
-        $this->request              = $request;
-
         parent::__construct($context);
-        $this->serializer = $serializer;
     }
 
     /**
@@ -147,12 +123,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     public function getRejoinerApiConvertPath()
     {
-        switch ($this->getRejoinerVersion()) {
-            case self::REJOINER_VERSION_2:
-                return $this->getRejoinerApiPath() . '/customer/convert/';
-            default:
-                return $this->getRejoinerApiPath() . '/lead/convert';
-        }
+        return match ($this->getRejoinerVersion()) {
+            self::REJOINER_VERSION_2 => $this->getRejoinerApiPath() . '/customer/convert/',
+            default => $this->getRejoinerApiPath() . '/lead/convert',
+        };
     }
 
     /**
@@ -160,12 +134,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     public function getRejoinerApiAddToListPath($listId)
     {
-        switch ($this->getRejoinerVersion()) {
-            case self::REJOINER_VERSION_2:
-                return $this->getRejoinerApiPath() . "/lists/$listId/contacts/";
-            default:
-                return $this->getRejoinerApiPath() . '/contact_add';
-        }
+        return match ($this->getRejoinerVersion()) {
+            self::REJOINER_VERSION_2 => $this->getRejoinerApiPath() . "/lists/$listId/contacts/",
+            default => $this->getRejoinerApiPath() . '/contact_add',
+        };
     }
 
     /**
@@ -173,32 +145,30 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     public function getRejoinerApiUnSubscribePath()
     {
-        switch ($this->getRejoinerVersion()) {
-            case self::REJOINER_VERSION_2:
-                return $this->getRejoinerApiPath() . '/customer/unsubscribe/';
-            default:
-                return $this->getRejoinerApiPath() . '/lead/unsubscribe';
-        }
+        return match ($this->getRejoinerVersion()) {
+            self::REJOINER_VERSION_2 => $this->getRejoinerApiPath() . '/customer/unsubscribe/',
+            default => $this->getRejoinerApiPath() . '/lead/unsubscribe',
+        };
     }
 
     /**
      * @param $price int
      * @return float
      */
-    public function convertPriceToCents($price)
+    public function convertPriceToCents($price): float
     {
         return round($price*100);
     }
 
     /**
      * @return string
-     * @throws \InvalidArgumentException
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
-    public function getRestoreUrl()
+    public function getRestoreUrl(): string
     {
         $product = [];
         if ($items = $this->checkoutSession->getQuote()->getAllVisibleItems()) {
-            /** @var \Magento\Quote\Model\Quote\Item $item */
             foreach ($items as $item) {
                 $options = $this->serializer->decode($item->getOptionByCode('info_buyRequest')->getValue());
                 $options['qty'] = $item->getQty();
@@ -220,7 +190,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @return array
      */
-    public function returnGoogleAttributes()
+    public function returnGoogleAttributes(): array
     {
         $result = [];
         if ($googleAnalitics = $this->scopeConfig->getValue('checkout/rejoiner_acr/google_attributes', ScopeInterface::SCOPE_STORE)) {
@@ -237,7 +207,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @return array
      */
-    public function returnCustomAttributes()
+    public function returnCustomAttributes(): array
     {
         $result = [];
         if ($customAttr = $this->scopeConfig->getValue('checkout/rejoiner_acr/custom_attributes', ScopeInterface::SCOPE_STORE)) {
@@ -254,7 +224,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @return array
      */
-    public function getExtraCodes()
+    public function getExtraCodes(): array
     {
         $result = [];
         if ($extraCodes = $this->scopeConfig->getValue('checkout/rejoiner_acr/extra_codes', ScopeInterface::SCOPE_STORE)) {
@@ -269,20 +239,21 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
+     * @param $rule_id
+     * @param string $param
      * @return string
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
-    public function generateCouponCode($rule_id, $param = 'promo')
+    public function generateCouponCode($rule_id, string $param = 'promo'): string
     {
         $quote = $this->checkoutSession->getQuote();
         $codes = unserialize($quote->getPromo());
-        $couponCode = isset($codes[$param]) ? $codes[$param] : '';
+        $couponCode = $codes[$param] ?? '';
 
-        /** @var \Magento\SalesRule\Model\Rule $ruleItem */
         $ruleItem = $this->ruleFactory->create()->load($rule_id);
         if ($ruleItem->getUseAutoGeneration() && !$couponCode) {
             $couponCode = $this->codegeneratorFactory->create()->generateCode();
-
-            /** @var \Magento\SalesRule\Model\Coupon $salesRuleModel */
             $salesRuleModel = $this->couponFactory->create();
             $salesRuleModel->setRuleId($rule_id)
                 ->setCode($couponCode)
@@ -292,7 +263,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 ->save();
 
             $codes[$param] = $couponCode;
-
             $quote->setPromo(serialize($codes))->save();
         }
 
@@ -364,7 +334,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @return int
      */
-    public function getTrackPriceWithTax()
+    public function getTrackPriceWithTax(): int
     {
         return (int) $this->scopeConfig->getValue(self::XML_PATH_REJOINER_TRACK_PRICE_WITH_TAX, ScopeInterface::SCOPE_STORE);
     }
@@ -372,7 +342,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @return int
      */
-    public function getPersistFormsEnabled()
+    public function getPersistFormsEnabled(): int
     {
         return (int) $this->scopeConfig->getValue(self::XML_PATH_REJOINER_PERSIST_FORMS, ScopeInterface::SCOPE_STORE);
     }
@@ -420,14 +390,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @return bool|string
      */
-    public function getRejoinerApiSecret()
+    public function getRejoinerApiSecret(): bool|string
     {
-        switch ($this->getRejoinerVersion()) {
-            case self::REJOINER_VERSION_2:
-                return true;
-            default:
-                return (string) $this->scopeConfig->getValue(self::XML_PATH_REJOINER_API_SECRET);
-        }
+        return match ($this->getRejoinerVersion()) {
+            self::REJOINER_VERSION_2 => true,
+            default => (string)$this->scopeConfig->getValue(self::XML_PATH_REJOINER_API_SECRET),
+        };
     }
 
     /**
@@ -505,7 +473,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @return string
      */
-    public function getRejoinerSubscribeCheckboxSelector()
+    public function getRejoinerSubscribeCheckboxSelector(): string
     {
         return (string) $this->scopeConfig->getValue(self::XML_PATH_REJOINER_SUBSCRIBE_CHECKBOX_SELECTOR);
     }
@@ -513,7 +481,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @return string
      */
-    public function getRejoinerSubscribeCheckboxStyle()
+    public function getRejoinerSubscribeCheckboxStyle(): string
     {
         return (string) $this->scopeConfig->getValue(self::XML_PATH_REJOINER_SUBSCRIBE_CHECKBOX_STYLE);
     }
@@ -522,7 +490,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param string $message
      * @param bool $force
      */
-    public function log($message, $force = false)
+    public function log(string $message, bool $force = false): void
     {
         if ($this->isDebugEnabled() || $force) {
             if ($force) {
@@ -533,10 +501,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
     }
 
-    /**
-     * @return mixed
-     */
-    protected function isDebugEnabled()
+    protected function isDebugEnabled(): bool
     {
         return (bool) $this->scopeConfig->getValue(self::XML_PATH_REJOINER_DEBUG_ENABLED, ScopeInterface::SCOPE_STORE);
     }
@@ -546,7 +511,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * If shopping cart information should be sent to Rejoiner service on current page
      * @return int
      */
-    public function getShoppingCartDataOnThisPage() {
+    public function getShoppingCartDataOnThisPage(): int
+    {
         return (int) in_array(
             $this->getCurrentPageName(),
             [
@@ -561,7 +527,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @return string
      */
-    public function getCurrentPageName()
+    public function getCurrentPageName(): string
     {
         return $this->request->getFullActionName();
     }
@@ -569,7 +535,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @return bool|mixed
      */
-    public function checkRemovedItem()
+    public function checkRemovedItem(): mixed
     {
         $session = $this->sessionManager;
         $removedItems = $session->getData(self::REMOVED_CART_ITEM_SKU_VARIABLE);
@@ -598,6 +564,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
             return self::SUCCESS_RESPONSE_CODE;
         } catch (\Exception $e) {
+            $this->log($e->getMessage());
         }
 
         return self::ERROR_RESPONSE_CODE;
@@ -605,10 +572,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     /**
      * @param string $email
-     * @param string $customerName
+     * @param string|null $customerName
      * @return $this
      */
-    public function subscribe($email, $customerName = null)
+    public function subscribe(string $email, string $customerName = null): static
     {
         $this->addToList($this->getRejoinerMarketingListID(), $email, $customerName);
 
@@ -616,10 +583,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
-     * @param string $email
+     * @param $email
      * @return $this
+     * @throws \Exception
      */
-    public function unSubscribe($email)
+    public function unSubscribe($email): static
     {
         $apiUnSubscribePath = $this->getRejoinerApiUnSubscribePath();
         $client = $this->prepareClient($apiUnSubscribePath, ['email' => $email]);
@@ -630,30 +598,31 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     /**
      * @param string $email
-     * @return $this
+     * @return void
      */
-    private function convert($email)
+    private function convert(string $email): void
     {
         try {
             $apiConvertPath = $this->getRejoinerApiConvertPath();
             $client = $this->prepareClient($apiConvertPath, ['email' => $email]);
             $this->sendRequest($client);
         } catch (\Exception $e) {
+            $this->log($e->getMessage());
         }
 
-        return $this;
     }
 
     /**
      * @param $listId
      * @param $email
-     * @param string $customerName
-     * @return $this
+     * @param $customerName
+     * @return void
+     * @throws \Exception
      */
-    private function addToList($listId, $email, $customerName = null)
+    private function addToList($listId, $email, $customerName = null): void
     {
         if (!$listId) {
-            return $this;
+            return;
         }
 
         $data = [
@@ -669,16 +638,15 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $client = $this->prepareClient($apiAddToListPath, $data);
         $this->sendRequest($client);
 
-        return $this;
     }
 
     /**
      * @param $path
      * @param array $data
-     * @return \Magento\Framework\HTTP\ZendClient
+     * @return Client
      * @throws \Exception
      */
-    private function prepareClient($path, array $data)
+    private function prepareClient($path, array $data): Client
     {
         $apiKey          = $this->scopeConfig->getValue(self::XML_PATH_REJOINER_API_KEY);
         $siteId          = $this->scopeConfig->getValue(self::XML_PATH_REJOINER_API_SITE_ID);
@@ -708,7 +676,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $authorization  = sprintf('Rejoiner %s:%s', $apiKey, $codedApiSecret);
         }
 
-        /** @var \Laminas\Http\Client $client */
+        /** @var Client $client */
         $rejoinerApiUri = $this->getRejoinerApiUri();
         $client = $this->httpClient->create(['uri' => $rejoinerApiUri . $requestPath]);
         $client->setRawBody($requestBody);
@@ -718,11 +686,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
-     * @param \Laminas\Http\Client $client
+     * @param Client $client
      * @return int
      * @throws \Exception
      */
-    private function sendRequest(\Laminas\Http\Client $client)
+    private function sendRequest(Client $client): int
     {
         try {
             $req = $client->setMethod(\Laminas\Http\Request::METHOD_POST);
@@ -765,11 +733,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
 
     /**
-     * @param \Magento\Catalog\Model\Product $product
+     * @param Product $product
      * @param $categoriesArray
      * @return array
      */
-    public function getProductCategories(\Magento\Catalog\Model\Product $product, $categoriesArray)
+    public function getProductCategories(Product $product, $categoriesArray): array
     {
         $result = [];
         foreach ($product->getCategoryIds() as $catId) {

@@ -8,36 +8,27 @@ use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Locale\Resolver;
 use Magento\Framework\ObjectManagerInterface;
+use Magento\Customer\Model\Customer as CurrentCustomer ;
+use Magento\Customer\Model\ResourceModel\Customer as CustomerResource;
 
 class Customer extends AbstractHelper
 {
-    /** @var \Magento\Customer\Model\Customer $currentCustomer */
-    protected \Magento\Customer\Model\Customer $currentCustomer;
-
-    /** @var  ObjectManagerInterface $objectManager */
-    protected ObjectManagerInterface $objectManager;
-
-    /** @var Resolver $localeResolver */
-    protected Resolver $localeResolver;
-
-    private \Magento\Customer\Model\ResourceModel\Customer $customerResource;
+    /** @var CurrentCustomer $currentCustomer */
+    protected CurrentCustomer $currentCustomer;
 
     /**
      * @param Resolver $localeResolver
      * @param SessionManagerInterface $session
-     * @param \Magento\Customer\Model\ResourceModel\Customer $customerResource
+     * @param CustomerResource $customerResource
      * @param Context $context
      */
     public function __construct(
-        Resolver $localeResolver,
-        SessionManagerInterface $session,
-        \Magento\Customer\Model\ResourceModel\Customer $customerResource,
+        protected Resolver $localeResolver,
+        protected SessionManagerInterface $session,
+        private CustomerResource $customerResource,
         Context $context
     ) {
-        $this->localeResolver  = $localeResolver;
         $this->currentCustomer = $session->getCustomer();
-        $this->customerResource = $customerResource;
-
         parent::__construct($context);
     }
 
@@ -59,7 +50,7 @@ class Customer extends AbstractHelper
      * @return int
      * @throws DateMalformedStringException
      */
-    protected function getCustomerAge()
+    protected function getCustomerAge(): int
     {
         $age = 0;
         $customer = $this->getCurrentCustomer();
@@ -75,9 +66,10 @@ class Customer extends AbstractHelper
     }
 
     /**
-     * @return string
+     * @return bool|string
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
-    protected function getGender()
+    protected function getGender(): bool|string
     {
         $genderText = $this->customerResource->getAttribute('gender')
             ->getSource()
@@ -95,9 +87,9 @@ class Customer extends AbstractHelper
     }
 
     /**
-     * @return \Magento\Customer\Model\Customer
+     * @return CurrentCustomer
      */
-    public function getCurrentCustomer()
+    public function getCurrentCustomer(): CurrentCustomer
     {
         return $this->currentCustomer;
     }

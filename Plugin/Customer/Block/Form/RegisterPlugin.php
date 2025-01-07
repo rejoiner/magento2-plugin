@@ -5,26 +5,26 @@
  */
 namespace Rejoiner\Acr\Plugin\Customer\Block\Form;
 
+use Magento\Customer\Block\Form\Register;
+use Rejoiner\Acr\Helper\Data;
+
 class RegisterPlugin
 {
-    /** @var \Rejoiner\Acr\Helper\Data $rejoinerHelper */
-    protected $rejoinerHelper;
-
     /**
      * RegisterPlugin constructor.
-     * @param \Rejoiner\Acr\Helper\Data $rejoinerHelper
+     * @param Data $rejoinerHelper
      */
-    public function __construct(\Rejoiner\Acr\Helper\Data $rejoinerHelper)
-    {
-        $this->rejoinerHelper = $rejoinerHelper;
+    public function __construct(
+        protected Data $rejoinerHelper
+    ) {
     }
 
     /**
-     * @param \Magento\Customer\Block\Form\Register $subject
+     * @param Register $subject
      * @param bool $result
      * @return bool
      */
-    public function afterIsNewsletterEnabled(\Magento\Customer\Block\Form\Register $subject, $result)
+    public function afterIsNewsletterEnabled(Register $subject, bool $result): bool
     {
         if ($result && $this->rejoinerHelper->getRejoinerMarketingPermissions()) {
             $result = $this->rejoinerHelper->getRejoinerSubscribeAccountRegistration();
@@ -34,11 +34,11 @@ class RegisterPlugin
     }
 
     /**
-     * @param \Magento\Customer\Block\Form\Register $subject
+     * @param Register $subject
      * @param \Magento\Framework\DataObject $result
      * @return \Magento\Framework\DataObject
      */
-    public function afterGetFormData(\Magento\Customer\Block\Form\Register $subject, $result)
+    public function afterGetFormData(Register $subject, $result)
     {
         if ($this->rejoinerHelper->getRejoinerMarketingPermissions()) {
             $result->setData('is_subscribed', $this->rejoinerHelper->getRejoinerSubscribeCheckedDefault());

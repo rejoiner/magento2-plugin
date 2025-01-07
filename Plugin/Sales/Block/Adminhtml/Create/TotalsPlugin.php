@@ -5,14 +5,16 @@
  */
 namespace Rejoiner\Acr\Plugin\Sales\Block\Adminhtml\Create;
 
+use Magento\Sales\Block\Adminhtml\Order\Create\Totals;
+
 class TotalsPlugin
 {
     /**
-     * @param \Magento\Sales\Block\Adminhtml\Order\Create\Totals $subject
+     * @param Totals $subject
      * @param string $html
      * @return string
      */
-    public function afterGetButtonHtml(\Magento\Sales\Block\Adminhtml\Order\Create\Totals $subject, $html)
+    public function afterGetButtonHtml(Totals $subject, string $html): string
     {
         return $subject->getChildHtml('rejoiner_subscribe') . $html;
     }

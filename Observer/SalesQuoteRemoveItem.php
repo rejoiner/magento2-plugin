@@ -5,29 +5,32 @@
  */
 namespace Rejoiner\Acr\Observer;
 
+use Magento\Framework\Event\Observer;
+use Magento\Framework\Session\SessionManager;
+use Magento\Quote\Model\Quote\Item;
+use Rejoiner\Acr\Helper\Data;
+
 class SalesQuoteRemoveItem implements \Magento\Framework\Event\ObserverInterface
 {
-    /** @var \Magento\Framework\Session\SessionManager $_sessionManager */
-    private $_sessionManager;
-
     /**
      * SalesQuoteRemoveItem constructor.
-     * @param \Magento\Framework\Session\SessionManager $sessionManager
+     * @param SessionManager $sessionManager
      */
-    public function __construct(\Magento\Framework\Session\SessionManager $sessionManager)
-    {
-        $this->_sessionManager = $sessionManager;
+    public function __construct(
+        private SessionManager $sessionManager
+    ) {
     }
 
     /**
-     * @param \Magento\Framework\Event\Observer $observer
+     * @param Observer $observer
+     * @return void
      */
-    public function execute(\Magento\Framework\Event\Observer $observer)
+    public function execute(Observer $observer): void
     {
-        /** @var \Magento\Quote\Model\Quote\Item $quoteItem */
+        /** @var Item $quoteItem */
         if ($quoteItem = $observer->getData('quote_item')) {
             $removedItem[] = $quoteItem->getSku();
-            $this->_sessionManager->setData(\Rejoiner\Acr\Helper\Data::REMOVED_CART_ITEM_SKU_VARIABLE, $removedItem);
+            $this->sessionManager->setData(Data::REMOVED_CART_ITEM_SKU_VARIABLE, $removedItem);
         }
     }
 }

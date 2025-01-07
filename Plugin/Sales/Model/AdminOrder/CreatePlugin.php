@@ -11,16 +11,14 @@ use Magento\Sales\Model\Order;
 
 class CreatePlugin
 {
-    /** @var SubscriptionManager $subscriptionManager */
-    private SubscriptionManager $subscriptionManager;
 
     /**
      * CreatePlugin constructor.
      * @param SubscriptionManager $subscriptionManager
      */
-    public function __construct(SubscriptionManager $subscriptionManager)
-    {
-        $this->subscriptionManager = $subscriptionManager;
+    public function __construct(
+        private readonly SubscriptionManager $subscriptionManager
+    ) {
     }
 
     /**
@@ -28,7 +26,7 @@ class CreatePlugin
      * @param Order $order
      * @return Order
      */
-    public function afterCreateOrder(Create $subject, Order $order)
+    public function afterCreateOrder(Create $subject, Order $order): Order
     {
         if ($subject->hasData('rejoiner_subscribe') && $subject->getData('rejoiner_subscribe')) {
             try {

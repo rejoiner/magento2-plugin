@@ -10,29 +10,9 @@ use Magento\Sales\Model\OrderFactory;
 class Conversion extends AbstractHelper
 {
     /**
-     * @var Data
-     */
-    private Data $rejoinerHelper;
-
-    /**
-     * @var Session
-     */
-    private Session $checkoutSession;
-
-    /**
-     * @var OrderFactory
-     */
-    private OrderFactory $orderFactory;
-
-    /**
      * @var Order|null
      */
     private ?Order $order = null;
-
-    /**
-     * @var ItemsData
-     */
-    private ItemsData $itemsData;
 
     /**
      * Conversion constructor.
@@ -43,18 +23,13 @@ class Conversion extends AbstractHelper
      * @param Context $context
      */
     public function __construct(
-        Data         $rejoinerHelper,
-        Session      $checkoutSession,
-        OrderFactory $orderFactory,
-        ItemsData    $itemsData,
+        private Data         $rejoinerHelper,
+        private Session      $checkoutSession,
+        private OrderFactory $orderFactory,
+        private ItemsData    $itemsData,
         Context      $context
     ) {
         parent::__construct($context);
-
-        $this->rejoinerHelper = $rejoinerHelper;
-        $this->checkoutSession = $checkoutSession;
-        $this->orderFactory = $orderFactory;
-        $this->itemsData = $itemsData;
     }
 
     /**

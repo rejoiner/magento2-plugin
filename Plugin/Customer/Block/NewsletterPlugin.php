@@ -5,26 +5,26 @@
  */
 namespace Rejoiner\Acr\Plugin\Customer\Block;
 
+use Magento\Customer\Block\Newsletter;
+use Rejoiner\Acr\Helper\Data;
+
 class NewsletterPlugin
 {
-    /** @var \Rejoiner\Acr\Helper\Data $rejoinerHelper */
-    private $rejoinerHelper;
-
     /**
      * NewsletterPlugin constructor.
-     * @param \Rejoiner\Acr\Helper\Data $rejoinerHelper
+     * @param Data $rejoinerHelper
      */
-    public function __construct(\Rejoiner\Acr\Helper\Data $rejoinerHelper)
-    {
-        $this->rejoinerHelper = $rejoinerHelper;
+    public function __construct(
+        private readonly Data $rejoinerHelper
+    ) {
     }
 
     /**
-     * @param \Magento\Customer\Block\Newsletter $subject
+     * @param Newsletter $subject
      * @param $result
      * @return bool
      */
-    public function afterGetIsSubscribed(\Magento\Customer\Block\Newsletter $subject, $result)
+    public function afterGetIsSubscribed(Newsletter $subject, $result): bool
     {
         if ($this->rejoinerHelper->getRejoinerMarketingPermissions()) {
             $result = false;

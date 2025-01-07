@@ -11,18 +11,14 @@ use Magento\SalesRule\Model\RuleFactory;
 
 class Salesrule implements ArrayInterface
 {
-    /**
-     * @var RuleFactory $ruleFactory
-     */
-    private RuleFactory $ruleFactory;
 
     /**
      * Salesrule constructor.
      * @param RuleFactory $ruleFactory
      */
-    public function __construct(RuleFactory $ruleFactory)
-    {
-        $this->ruleFactory = $ruleFactory;
+    public function __construct(
+        private RuleFactory $ruleFactory
+    ) {
     }
 
     /**
@@ -42,11 +38,9 @@ class Salesrule implements ArrayInterface
         foreach ($collection as $item) {
             if ($item->getUseAutoGeneration()) {
                 $data = [];
-
                 foreach ($additional as $code => $field) {
                     $data[$code] = $item->getData($field);
                 }
-
                 $options[] = $data;
             }
         }
