@@ -51,8 +51,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private const XML_PATH_REJOINER_SUBSCRIBE_CHECKBOX_SELECTOR    = 'checkout/rejoiner_acr/subscribe_checkbox_selector';
     private const XML_PATH_REJOINER_SUBSCRIBE_CHECKBOX_STYLE       = 'checkout/rejoiner_acr/subscribe_checkbox_style';
 
-    private const STATUS_SUBSCRIBED                                = 1;
-    private const STATUS_UNSUBSCRIBED                              = 2;
+    public const STATUS_SUBSCRIBED                                = 1;
+    public const STATUS_UNSUBSCRIBED                              = 2;
 
     private const REJOINER2_SITE_ID_LENGTH                         = 7;
 

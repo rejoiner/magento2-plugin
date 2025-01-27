@@ -28,7 +28,7 @@ class Product extends Template
     protected CollectionFactory $categoryCollectionFactory;
 
     /** @var \Magento\Catalog\Model\Product $product */
-    protected \Magento\Catalog\Model\Product $product;
+    protected $product;
 
     /**
      * Base constructor.
@@ -51,7 +51,6 @@ class Product extends Template
         $this->product                   = $registry->registry('current_product');
         $this->imageHelper               = $imageHelper;
         $this->categoryCollectionFactory = $categoryCollectionFactory;
-
         parent::__construct($context, $data);
     }
 

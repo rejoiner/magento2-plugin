@@ -37,7 +37,7 @@ class TrackOrderSuccessConversion
     public function trackOrder(): self
     {
         $collection = $this->collectionFactory->create();
-        $collection->addFieldToFilter('sent_at', ['null' => true]);
+//        $collection->addFieldToFilter('sent_at', ['null' => true]);
         if (!empty($collection->getSize())
             && $this->rejoinerHelper->getRejoinerApiKey()
             && $this->rejoinerHelper->getRejoinerApiSecret()
